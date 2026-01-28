@@ -9,7 +9,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f3f4f6;
+  background-color: #ffffff;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
@@ -370,6 +370,15 @@ html {
     left: 1rem !important;
     right: 1rem !important;
   }
+}
+
+/* SmartChat AI – enyhébb neon kék glow, modernebb */
+@keyframes smartchat-glow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.01); }
+}
+.smartchat-neon-glow {
+  animation: smartchat-glow 4s ease-in-out infinite;
 }
 
 /* High contrast mode support */

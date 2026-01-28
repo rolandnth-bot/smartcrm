@@ -66,7 +66,16 @@ const useAuthStore = create((set, get) => ({
       }
     }
     
-    // Firebase Auth fallback
+    // Firebase Auth fallback (ha auth null pl. helyi dev, elfogadunk bármit és mock user)
+    if (!auth && import.meta.env.DEV) {
+      set({
+        user: { uid: 'dev-mock', email: email || 'dev@local', displayName: (email || 'dev').split('@')[0] },
+        isAuthenticated: true,
+        isLoading: false,
+        error: null
+      });
+      return { success: true, user: get().user };
+    }
     try {
       set({ error: null, isLoading: true });
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -323,11 +332,22 @@ const useAuthStore = create((set, get) => ({
   initAuth: () => {
     if (api.isConfigured()) {
       // Backend API esetén csak egyszer ellenőrizzük
-      get().checkAuth();
-      return () => {}; // Nincs unsubscribe szükséges
+      const done = () => {};
+      get().checkAuth().then(done).catch(() => get().setUser(null));
+      // DEV: ha a backend nem elérhető (pl. Cursor/localhost), 2.5 mp után mutassuk a login oldalt
+      if (import.meta.env.DEV) {
+        setTimeout(() => {
+          if (get().isLoading) get().setUser(null);
+        }, 2500);
+      }
+      return () => {};
     }
-    
-    // Firebase auth state listener
+
+    // Firebase auth state listener (ha auth null, pl. Firebase init sikertelen helyben)
+    if (!auth) {
+      get().setUser(null);
+      return () => {};
+    }
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         get().setUser(user);
@@ -339,7 +359,7 @@ const useAuthStore = create((set, get) => ({
           if (storedUser) {
             try {
               const userData = JSON.parse(storedUser);
-              get().setUser({ 
+              get().setUser({
                 uid: 'mock-user-id',
                 email: userData.email,
                 displayName: userData.email?.split('@')[0]
@@ -355,6 +375,18 @@ const useAuthStore = create((set, get) => ({
         }
       }
     });
+
+    // DEV (Cursor/localhost): ha a Firebase nem válaszol, 2.5 mp után mutassuk a login oldalt
+    if (import.meta.env.DEV) {
+      const t = setTimeout(() => {
+        if (get().isLoading) get().setUser(null);
+      }, 2500);
+      const origUnsubscribe = unsubscribe;
+      return () => {
+        clearTimeout(t);
+        origUnsubscribe();
+      };
+    }
 
     return unsubscribe;
   }

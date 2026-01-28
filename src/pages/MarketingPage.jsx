@@ -3,7 +3,7 @@ import useMarketingStore, {
   campaignChannels,
   campaignStatuses
 } from '../stores/marketingStore';
-import useLeadsStore, { leadSources } from '../stores/leadsStore';
+import useLeadsStore, { leadSources, leadStatuses } from '../stores/leadsStore';
 import useToastStore from '../stores/toastStore';
 import { usePermissions } from '../contexts/PermissionContext';
 import { validateForm } from '../utils/validation';
@@ -16,6 +16,7 @@ import { exportToCSV, exportToExcel, printToPDF } from '../utils/exportUtils';
 import { Plus, Edit2, Trash2 } from '../components/common/Icons';
 import { filterBy, sortBy } from '../utils/arrayUtils';
 import ContentCalendar from '../components/marketing/ContentCalendar';
+import { excelFillToLeadColor } from '../utils/excelRowColorUtils';
 
 // Státusz színek (komponensen kívül, hogy ne jöjjön létre minden render során)
 const statusColors = {
@@ -23,6 +24,28 @@ const statusColors = {
   active: 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300',
   paused: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300',
   completed: 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300'
+};
+
+// Lead státusz színek – Új érdeklődő sárga; Később amber; Nem aktuális szürke
+const leadStatusColors = {
+  uj_erdeklodo: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300',
+  new: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300',
+  kapcsolatfelvetel: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300',
+  contacted: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300',
+  felmeres_tervezve: 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300',
+  felmeres_megtortent: 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300',
+  ajanlat_kuldve: 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-300',
+  targyalas: 'bg-cyan-100 dark:bg-cyan-900 text-cyan-800 dark:text-cyan-300',
+  szerzodes_kuldve: 'bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-300',
+  alairva: 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300',
+  aktiv_partner: 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300',
+  elutasitva: 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-300',
+  lost: 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-300',
+  kesobb: 'bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-300',
+  nem_aktualis: 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300',
+  offer: 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-300',
+  negotiation: 'bg-cyan-100 dark:bg-cyan-900 text-cyan-800 dark:text-cyan-300',
+  won: 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300'
 };
 
 const MarketingPage = () => {
@@ -41,13 +64,28 @@ const MarketingPage = () => {
     getStats
   } = useMarketingStore();
 
-  const { leads } = useLeadsStore();
+  const { 
+    leads, 
+    filter,
+    searchQuery,
+    showLeadImport,
+    setFilter,
+    setSearchQuery,
+    setShowLeadImport,
+    getFilteredLeads,
+    getLeadsByStatus,
+    importLeadsFromJSON,
+    importLeadsFromCSV,
+    importLeadsFromExcel,
+    fetchFromApi: fetchLeads
+  } = useLeadsStore();
   const { canEdit: canEditMarketing } = usePermissions();
 
   useEffect(() => {
     document.title = 'Marketing - SmartCRM';
     fetchFromApi();
-  }, [fetchFromApi]);
+    fetchLeads();
+  }, [fetchFromApi, fetchLeads]);
 
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [fieldErrors, setFieldErrors] = useState({});
@@ -70,21 +108,28 @@ const MarketingPage = () => {
   const statusLabels = useMemo(() => Object.fromEntries(campaignStatuses.map((s) => [s.key, s.label])), []);
   const channelLabels = useMemo(() => Object.fromEntries(campaignChannels.map((c) => [c.key, c.label])), []);
 
-  // Leadek forrás szerint (marketing statisztika)
-  const leadsBySource = useMemo(() => leadSources.map((src) => ({
-    ...src,
-    count: leads.filter((l) => (l.source || '').toLowerCase() === src.key).length
-  })), [leads]);
+  // Leadek forrás szerint (marketing statisztika) - JAVÍTVA: biztosítjuk hogy a leads tömb betöltődik
+  const leadsBySource = useMemo(() => {
+    if (!leads || leads.length === 0) return [];
+    return leadSources.map((src) => ({
+      ...src,
+      count: leads.filter((l) => {
+        const leadSource = (l.source || '').toLowerCase().trim();
+        const sourceKey = src.key.toLowerCase().trim();
+        return leadSource === sourceKey;
+      }).length
+    }));
+  }, [leads]);
 
   // Szűrt és rendezett leadek forrás szerint (csak azok, amelyeknek van leadje)
-  const filteredLeadsBySource = useMemo(() => 
-    sortBy(
+  const filteredLeadsBySource = useMemo(() => {
+    if (!leadsBySource || leadsBySource.length === 0) return [];
+    return sortBy(
       leadsBySource.filter((s) => s.count > 0),
       (s) => s.count,
       'desc'
-    ),
-    [leadsBySource]
-  );
+    );
+  }, [leadsBySource]);
 
   const openNew = useCallback(() => {
     setForm({
@@ -229,6 +274,152 @@ const MarketingPage = () => {
   const handlePrintPDF = useCallback(() => {
     printToPDF('SmartCRM – Marketing');
   }, []);
+
+  // Leadkészlet funkciók
+  const filteredLeads = useMemo(() => getFilteredLeads(), [getFilteredLeads, filter, searchQuery, leads]);
+
+  const handleFilterAll = useCallback(() => {
+    setFilter('all');
+  }, [setFilter]);
+
+  const handleFilterByStatus = useCallback((statusKey) => {
+    setFilter(statusKey);
+  }, [setFilter]);
+
+  const handleOpenLeadImport = useCallback(() => {
+    setShowLeadImport(true);
+  }, [setShowLeadImport]);
+
+  const handleCloseLeadImport = useCallback(() => {
+    setShowLeadImport(false);
+  }, [setShowLeadImport]);
+
+  const handleFileImport = useCallback(async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Excel fájl kezelése – ExcelJS-sel sor háttérszín (fill) olvasása
+    if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls') || file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || file.type === 'application/vnd.ms-excel') {
+      try {
+        const ExcelJS = (await import('exceljs')).default;
+        const buffer = await new Promise((resolve, reject) => {
+          const r = new FileReader();
+          r.onload = () => resolve(r.result);
+          r.onerror = () => reject(new Error('Fájl olvasása sikertelen'));
+          r.readAsArrayBuffer(file);
+        });
+        const wb = new ExcelJS.Workbook();
+        await wb.xlsx.load(buffer);
+        const ws = wb.worksheets[0] || wb.getWorksheet(1);
+        if (!ws) {
+          useToastStore.getState().error('Excel fájl üres vagy nem tartalmaz munkalapot.');
+          return;
+        }
+        const headerRow = ws.getRow(1);
+        const headers = [];
+        let col = 1;
+        while (col <= 200) {
+          const v = headerRow.getCell(col).value;
+          if (v == null || v === '') break;
+          headers.push(String(v).trim());
+          col++;
+        }
+        const colCount = headers.length;
+        if (colCount === 0) {
+          useToastStore.getState().error('Excel fájl üres vagy csak fejlécet tartalmaz.');
+          return;
+        }
+        headers.push('szín');
+        const jsonData = [headers];
+        ws.eachRow((row, rowNumber) => {
+          if (rowNumber === 1) return;
+          const values = [];
+          for (let c = 1; c <= colCount; c++) {
+            const cell = row.getCell(c);
+            let v = cell.value;
+            if (v instanceof Date) v = v.toISOString().split('T')[0];
+            else if (v != null) v = String(v).trim();
+            else v = '';
+            values.push(v);
+          }
+          const fill = row.getCell(1).style?.fill;
+          const szin = excelFillToLeadColor(fill);
+          values.push(szin ?? '');
+          jsonData.push(values);
+        });
+        const result = importLeadsFromExcel(jsonData);
+        if (result.success) {
+          const msg = result.skipped > 0
+            ? `Sikeres import: ${result.count} lead hozzáadva, ${result.skipped} kihagyva (egyezés)`
+            : `Sikeres import: ${result.count} lead hozzáadva`;
+          useToastStore.getState().success(msg);
+        } else {
+          useToastStore.getState().error(`Hiba az import során: ${result.error}`);
+        }
+        setShowLeadImport(false);
+      } catch (error) {
+        useToastStore.getState().error(`Hiba az Excel fájl feldolgozása során: ${error.message}`);
+      }
+      return;
+    }
+
+    // CSV és JSON fájl kezelése
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target.result;
+      if (file.type === 'application/json' || file.name.endsWith('.json')) {
+        const result = importLeadsFromJSON(content);
+        if (result.success) {
+          const msg = result.skipped > 0 
+            ? `Sikeres import: ${result.count} lead hozzáadva, ${result.skipped} kihagyva (egyezés)`
+            : `Sikeres import: ${result.count} lead hozzáadva`;
+          useToastStore.getState().success(msg);
+        } else {
+          useToastStore.getState().error(`Hiba az import során: ${result.error}`);
+        }
+      } else if (file.name.endsWith('.csv')) {
+        const result = importLeadsFromCSV(content);
+        if (result.success) {
+          const msg = result.skipped > 0 
+            ? `Sikeres import: ${result.count} lead hozzáadva, ${result.skipped} kihagyva (egyezés)`
+            : `Sikeres import: ${result.count} lead hozzáadva`;
+          useToastStore.getState().success(msg);
+        } else {
+          useToastStore.getState().error(`Hiba az import során: ${result.error}`);
+        }
+      }
+      setShowLeadImport(false);
+    };
+    reader.readAsText(file);
+  }, [importLeadsFromJSON, importLeadsFromCSV, importLeadsFromExcel, setShowLeadImport]);
+
+  const downloadCSVTemplate = useCallback(() => {
+    const sampleCSV = 'name,email,phone,source,notes\nTeszt Elek,teszt@example.com,+36201234567,Weboldal,Érdeklődés 2 szobás lakásról';
+    const blob = new Blob([sampleCSV], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'lead_sablon.csv';
+    a.click();
+  }, []);
+
+  const leadExportColumns = useMemo(() => [
+    { key: 'name', label: 'Név' },
+    { key: 'email', label: 'Email' },
+    { key: 'phone', label: 'Telefon' },
+    { key: 'source', label: 'Forrás' },
+    { key: 'status', label: 'Státusz' },
+    { key: 'notes', label: 'Megjegyzés' },
+    { key: 'createdAt', label: 'Létrehozva' }
+  ], []);
+
+  const handleExportLeadsCSV = useCallback(() => {
+    exportToCSV(filteredLeads, leadExportColumns, `leadek_marketing_${new Date().toISOString().split('T')[0]}.csv`);
+  }, [filteredLeads, leadExportColumns]);
+
+  const handleExportLeadsExcel = useCallback(() => {
+    exportToExcel(filteredLeads, leadExportColumns, `leadek_marketing_${new Date().toISOString().split('T')[0]}.xlsx`);
+  }, [filteredLeads, leadExportColumns]);
 
   const marketingChannels = useMemo(() => [
     { id: 'website', name: 'Weboldal', status: 'active' },
@@ -385,25 +576,185 @@ const MarketingPage = () => {
         {/* Marketing statisztikák – Leadek forrás szerint */}
         <Card>
           <h3 className="font-bold text-blue-800 dark:text-blue-300 mb-3">Leadek forrás szerint</h3>
-          {filteredLeadsBySource.length > 0 ? (
-            <div className="space-y-2">
-              {filteredLeadsBySource.map((s) => (
-                  <div
-                    key={s.key}
-                    className="flex justify-between items-center p-2 bg-white dark:bg-gray-800 rounded border dark:border-gray-700"
-                  >
-                    <span className="dark:text-gray-200">{s.label}</span>
-                    <span className="font-bold text-blue-600 dark:text-blue-400">{s.count}</span>
-                  </div>
-                ))}
-            </div>
+          {leads && leads.length > 0 ? (
+            filteredLeadsBySource.length > 0 ? (
+              <div className="space-y-2">
+                {filteredLeadsBySource.map((s) => (
+                    <div
+                      key={s.key}
+                      className="flex justify-between items-center p-2 bg-white dark:bg-gray-800 rounded border dark:border-gray-700"
+                    >
+                      <span className="dark:text-gray-200">{s.label}</span>
+                      <span className="font-bold text-blue-600 dark:text-blue-400">{s.count}</span>
+                    </div>
+                  ))}
+              </div>
+            ) : (
+              <div className="text-center py-6 text-gray-400 dark:text-gray-500 text-sm">
+                Nincs lead a forrásokhoz rendelve. <br />
+                <span className="text-xs dark:text-gray-400">Összes lead: {leads.length}</span>
+              </div>
+            )
           ) : (
             <div className="text-center py-6 text-gray-400 dark:text-gray-500 text-sm">
-              Nincs még lead forrás adat. <br />
-              <span className="text-xs dark:text-gray-400">A Leadek oldalon a források automatikusan megjelennek.</span>
+              Nincs még lead adat. <br />
+              <span className="text-xs dark:text-gray-400">Használd az Importot vagy a Leadkészlet szekciót az új lead hozzáadásához.</span>
             </div>
           )}
         </Card>
+
+        {/* Leadkészlet – ugyanaz mint a Leadek és Értékesítés oldalon */}
+        <div className="md:col-span-2">
+          <Card>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-bold text-gray-800 dark:text-gray-200">Leadkészlet</h3>
+              <div className="no-print flex gap-2">
+                <Button onClick={handleOpenLeadImport} variant="primary">
+                  <Plus /> Import
+                </Button>
+                <Button onClick={handleExportLeadsCSV} variant="outline">
+                  CSV export
+                </Button>
+                <Button onClick={handleExportLeadsExcel} variant="outline">
+                  Excel export
+                </Button>
+              </div>
+            </div>
+
+            {/* Bal: Sales Pipeline (fele méret, balra) | Jobb: Lead lista – ugyanaz a táblázat, Excel színek */}
+            <div className="flex flex-row gap-6 items-start mt-4">
+              {/* Bal: Pipeline – fele méretű csempék, balra igazítva (mint Leadek oldal) */}
+              <div className="flex-shrink-0 w-[280px]">
+                <div className="bg-orange-50 dark:bg-orange-900 p-4 rounded-lg border border-orange-200 dark:border-orange-700">
+                  <h3 className="font-bold text-orange-800 dark:text-orange-300 mb-2 text-sm">Sales Pipeline</h3>
+                  <div className="mb-2">
+                    <label htmlFor="marketing-lead-search" className="sr-only">Keresés lead-ek között</label>
+                    <input
+                      id="marketing-lead-search"
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Keresés név, email, telefon vagy megjegyzés alapján..."
+                      className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                      aria-label="Keresés lead-ek között"
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 gap-1.5 max-w-[260px]">
+                    <button
+                      type="button"
+                      onClick={handleFilterAll}
+                      className={`flex flex-col items-center justify-center p-1.5 rounded-md aspect-square w-full transition-all focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-1 dark:focus:ring-offset-orange-900 ${
+                        filter === 'all'
+                          ? 'bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white ring-2 ring-orange-500 ring-offset-1 dark:ring-offset-orange-900 shadow-md'
+                          : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:shadow'
+                      }`}
+                      aria-pressed={filter === 'all'}
+                      aria-label={`Összes lead (${leads.length}) – kattintás a szűréshez`}
+                    >
+                      <span className="text-[9px] font-medium leading-tight text-center line-clamp-2 mb-0.5">Összes</span>
+                      <span className="text-xs font-bold">{leads.length}</span>
+                    </button>
+                    {leadStatuses.map((status) => {
+                      const count = getLeadsByStatus(status.key).length;
+                      const isActive = filter === status.key;
+                      const colorClass = leadStatusColors[status.key] || 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
+                      return (
+                        <button
+                          key={status.key}
+                          type="button"
+                          onClick={() => handleFilterByStatus(status.key)}
+                          className={`flex flex-col items-center justify-center p-1.5 rounded-md aspect-square w-full transition-all focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-1 dark:focus:ring-offset-orange-900 ${colorClass} ${
+                            isActive ? 'ring-2 ring-orange-500 ring-offset-1 dark:ring-offset-orange-900 shadow-md' : 'hover:shadow'
+                          }`}
+                          aria-pressed={isActive}
+                          aria-label={`${status.label} (${count}) – kattintás a szűréshez`}
+                        >
+                          <span className="text-[9px] font-medium leading-tight text-center line-clamp-2 mb-0.5">
+                            {status.label}
+                          </span>
+                          <span className="text-xs font-bold">{count}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+              {/* Jobb: Lead lista – ugyanaz a táblázat, Excel szín sync */}
+              <div className="flex-1 min-w-0 overflow-y-auto max-h-[calc(100vh-20rem)]" id="marketing-leads-list-column">
+                {filteredLeads.length > 0 ? (
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center mb-3">
+                      <h3 className="font-bold text-gray-800 dark:text-gray-200">Leadek ({filteredLeads.length})</h3>
+                    </div>
+                    {filteredLeads.map((lead) => {
+                      let cardBgClass = 'bg-gray-50 dark:bg-gray-800';
+                      let cardBorderClass = 'border-gray-300 dark:border-gray-700';
+                      let cardTextClass = '';
+                      if (lead.leadColor === 'green') {
+                        cardBgClass = 'bg-green-50 dark:bg-green-900';
+                        cardBorderClass = 'border-green-400 dark:border-green-600 border-2';
+                        cardTextClass = 'text-green-900 dark:text-green-100';
+                      } else if (lead.leadColor === 'orange') {
+                        cardBgClass = 'bg-amber-50 dark:bg-amber-900';
+                        cardBorderClass = 'border-amber-400 dark:border-amber-600 border-2';
+                        cardTextClass = 'text-amber-900 dark:text-amber-100';
+                      } else if (lead.leadColor === 'gray') {
+                        cardBgClass = 'bg-gray-100 dark:bg-gray-700';
+                        cardBorderClass = 'border-gray-400 dark:border-gray-500 border-2';
+                        cardTextClass = 'text-gray-800 dark:text-gray-200';
+                      } else if (lead.leadColor === 'black') {
+                        cardBgClass = 'bg-gray-900 dark:bg-black';
+                        cardBorderClass = 'border-gray-700 dark:border-gray-500 border-2';
+                        cardTextClass = 'text-white dark:text-gray-200';
+                      } else if (lead.leadColor === 'red') {
+                        cardBgClass = 'bg-red-50 dark:bg-red-900';
+                        cardBorderClass = 'border-red-400 dark:border-red-600 border-2';
+                        cardTextClass = 'text-red-900 dark:text-red-100';
+                      }
+                      const nameCls = lead.leadColor === 'black' ? 'text-white' : lead.leadColor === 'green' ? 'text-green-900 dark:text-green-100' : lead.leadColor === 'orange' ? 'text-amber-900 dark:text-amber-100' : lead.leadColor === 'gray' ? 'text-gray-800 dark:text-gray-200' : lead.leadColor === 'red' ? 'text-red-900 dark:text-red-100' : 'dark:text-gray-200';
+                      const detailCls = lead.leadColor === 'black' ? 'text-gray-200' : lead.leadColor === 'green' ? 'text-green-800 dark:text-green-200' : lead.leadColor === 'orange' ? 'text-amber-800 dark:text-amber-200' : lead.leadColor === 'gray' ? 'text-gray-700 dark:text-gray-300' : lead.leadColor === 'red' ? 'text-red-800 dark:text-red-200' : 'text-gray-500 dark:text-gray-400';
+                      const badgeCls = lead.leadColor === 'green' ? 'bg-green-200 dark:bg-green-700 text-green-900 dark:text-green-100' : lead.leadColor === 'orange' ? 'bg-amber-200 dark:bg-amber-700 text-amber-900 dark:text-amber-100' : lead.leadColor === 'gray' ? 'bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100' : lead.leadColor === 'red' ? 'bg-red-200 dark:bg-red-700 text-red-900 dark:text-red-100' : 'bg-gray-700 dark:bg-gray-800 text-white';
+                      const badgeLabel = lead.leadColor === 'green' ? '🟢 Meleg lead' : lead.leadColor === 'orange' ? '🟠 Később' : lead.leadColor === 'gray' ? '⬜ Nem aktuális' : lead.leadColor === 'red' ? '🔴 Nem vette fel' : '⚫ Elveszett';
+                      return (
+                        <div
+                          key={lead.id}
+                          className={`p-3 ${cardBgClass} rounded-lg ${cardBorderClass} flex gap-2 items-start transition-all duration-200 hover:shadow-lg ${cardTextClass}`}
+                        >
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className={`font-bold ${nameCls}`}>{lead.name}</span>
+                              <span className={`px-2 py-0.5 rounded text-xs ${leadStatusColors[lead.status] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}>
+                                {leadStatuses.find((s) => s.key === lead.status)?.label || lead.status}
+                              </span>
+                              {lead.leadColor && (
+                                <span className={`px-2 py-0.5 rounded text-xs font-bold ${badgeCls}`}>
+                                  {badgeLabel}
+                                </span>
+                              )}
+                            </div>
+                            <div className={`text-sm ${detailCls}`}>
+                              {lead.email && <span className="mr-3">{lead.email}</span>}
+                              {lead.phone && <span>{lead.phone}</span>}
+                            </div>
+                            {lead.notes && <div className={`text-xs mt-1 ${detailCls}`}>{lead.notes}</div>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-12 px-4 text-center text-gray-500 dark:text-gray-400">
+                    {filter !== 'all' || searchQuery ? (
+                      <p className="text-sm">A kiválasztott szűrőkkel nem található lead. Módosítsd a szűrőket vagy a keresést.</p>
+                    ) : (
+                      <p className="text-sm">Még nincsenek leadek. Használd az Importot az új lead hozzáadásához.</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </Card>
+        </div>
 
         {/* Tartalom naptár */}
         <div className="md:col-span-2">
@@ -539,6 +890,60 @@ const MarketingPage = () => {
         </div>
       </Modal>
       )}
+
+      {/* Lead Import Modal */}
+      <Modal
+        isOpen={showLeadImport}
+        onClose={handleCloseLeadImport}
+        title="Lead import"
+        size="md"
+      >
+        <div className="space-y-4">
+          <div className="p-3 bg-white dark:bg-gray-800 rounded border dark:border-gray-700">
+            <div className="font-medium text-sm dark:text-gray-200 mb-1">Excel fájl</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Oszlopok: name, email, phone, source, notes. Szín: Excel sor háttérszíne vagy »szín« oszlop (zöld=meleg, piros=Később, szürke=Nem aktuális, fekete=elveszett) – a kártyák ez alapján színeződnek.</div>
+            <input
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleFileImport}
+              className="w-full text-sm dark:text-gray-200 dark:file:text-gray-200"
+              aria-label="Excel fájl kiválasztása lead importhoz"
+            />
+          </div>
+
+          <div className="p-3 bg-white dark:bg-gray-800 rounded border dark:border-gray-700">
+            <div className="font-medium text-sm dark:text-gray-200 mb-1">CSV fájl</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Oszlopok: name, email, phone, source, notes</div>
+            <input
+              type="file"
+              accept=".csv"
+              onChange={handleFileImport}
+              className="w-full text-sm dark:text-gray-200 dark:file:text-gray-200"
+              aria-label="CSV fájl kiválasztása lead importhoz"
+            />
+          </div>
+
+          <div className="p-3 bg-white dark:bg-gray-800 rounded border dark:border-gray-700">
+            <div className="font-medium text-sm dark:text-gray-200 mb-1">JSON fájl</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Tömbben objektumok: {'{name, email, phone, source, notes}'}</div>
+            <input
+              type="file"
+              accept=".json"
+              onChange={handleFileImport}
+              aria-label="JSON fájl kiválasztása lead importhoz"
+              className="w-full text-sm dark:text-gray-200 dark:file:text-gray-200"
+            />
+          </div>
+
+          <Button
+            onClick={downloadCSVTemplate}
+            variant="secondary"
+            className="w-full"
+          >
+            Sablon letöltése (CSV)
+          </Button>
+        </div>
+      </Modal>
 
       {/* Törlés megerősítés - csak ha van edit jogosultság */}
       {canEditMarketing('marketing') && (

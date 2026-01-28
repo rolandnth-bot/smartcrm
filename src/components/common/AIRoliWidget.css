@@ -1,0 +1,322 @@
+/* AI Roli Widget - Kék színséma */
+
+:root {
+  --airoli-bg: #0f172a;
+  --airoli-header: #1e40af;
+  --airoli-header-gradient: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  --airoli-input-border: #3b82f6;
+  --airoli-text: #f8fafc;
+  --airoli-text-muted: #94a3b8;
+  --airoli-online: #22c55e;
+  --airoli-message-bg: #1e293b;
+}
+
+/* Minimized FAB */
+.airoli-fab {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--airoli-header-gradient);
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.airoli-fab:hover {
+  transform: scale(1.1);
+  box-shadow: 0 15px 35px rgba(59, 130, 246, 0.5);
+}
+
+.airoli-fab:active {
+  transform: scale(0.95);
+}
+
+/* Chat Window */
+.airoli-chat-window {
+  background: var(--airoli-bg);
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #334155;
+  min-width: 300px;
+  min-height: 350px;
+  max-width: 500px;
+  max-height: 600px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Header */
+.airoli-header {
+  background: var(--airoli-header-gradient);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: grab;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.airoli-header:active {
+  cursor: grabbing;
+}
+
+.airoli-avatar {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.online-dot {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  background: var(--airoli-online);
+  border-radius: 50%;
+  border: 2px solid #1e40af;
+}
+
+.airoli-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.airoli-info h4 {
+  color: white;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.airoli-info span {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  display: block;
+  margin-top: 2px;
+}
+
+.airoli-controls {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.airoli-controls button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  line-height: 1;
+}
+
+.airoli-controls button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.airoli-controls button:active {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.airoli-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Messages Area */
+.airoli-messages {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--airoli-bg);
+  min-height: 0;
+}
+
+.airoli-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.airoli-messages::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.airoli-messages::-webkit-scrollbar-thumb {
+  background: #3b82f6;
+  border-radius: 10px;
+}
+
+.airoli-messages::-webkit-scrollbar-thumb:hover {
+  background: #60a5fa;
+}
+
+/* Message Bubbles */
+.message {
+  max-width: 85%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.message.assistant {
+  background: var(--airoli-message-bg);
+  color: var(--airoli-text);
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+.message.user {
+  background: #3b82f6;
+  color: white;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+
+.message-text {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* Typing Indicator */
+.typing-indicator {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  background: #3b82f6;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Input Area */
+.airoli-input-area {
+  padding: 16px;
+  border-top: 1px solid #334155;
+  display: flex;
+  gap: 8px;
+  background: var(--airoli-bg);
+  flex-shrink: 0;
+}
+
+.airoli-input-area input {
+  flex: 1;
+  background: var(--airoli-message-bg);
+  border: 2px solid var(--airoli-input-border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: var(--airoli-text);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.airoli-input-area input::placeholder {
+  color: #64748b;
+}
+
+.airoli-input-area input:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.airoli-input-area input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.send-button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.send-button:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.send-button:active:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.send-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Resize Handle */
+.resize-handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  cursor: nwse-resize;
+  background: linear-gradient(135deg, transparent 0%, transparent 40%, rgba(59, 130, 246, 0.3) 40%, rgba(59, 130, 246, 0.3) 60%, transparent 60%);
+  z-index: 10;
+}
+
+.resize-handle:hover {
+  background: linear-gradient(135deg, transparent 0%, transparent 40%, rgba(59, 130, 246, 0.5) 40%, rgba(59, 130, 246, 0.5) 60%, transparent 60%);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .airoli-chat-window {
+    width: calc(100vw - 2rem) !important;
+    height: calc(100vh - 2rem) !important;
+    max-width: none;
+    max-height: none;
+    right: 1rem !important;
+    left: 1rem !important;
+    bottom: 1rem !important;
+    top: 1rem !important;
+  }
+
+  .airoli-fab {
+    bottom: 16px;
+    right: 16px;
+  }
+}

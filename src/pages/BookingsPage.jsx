@@ -12,7 +12,7 @@ import Modal from '../components/common/Modal';
 import ConfirmDialog from '../components/common/ConfirmDialog';
 import Calendar from '../components/common/Calendar';
 import IcalSettingsModal from '../components/common/IcalSettingsModal';
-import { Plus, Edit2, Trash2, X, ChevronUp, ChevronDown, RefreshCw, Sync, Calendar as CalendarIcon } from '../components/common/Icons';
+import { Plus, Edit2, Trash2, X, ChevronUp, ChevronDown } from '../components/common/Icons';
 import { SkeletonListItem, SkeletonStatsCard } from '../components/common/Skeleton';
 import { exportToCSV, exportToExcel, printToPDF, exportToJSON } from '../utils/exportUtils';
 import api from '../services/api';
@@ -21,6 +21,7 @@ import { formatCurrencyHUF, formatCurrencyEUR } from '../utils/numberUtils';
 import EmptyState, { EmptyStateWithFilter } from '../components/common/EmptyState';
 import Tooltip from '../components/common/Tooltip';
 import { sendTemplatedEmail, isEmailConfigured } from '../services/emailService';
+import BookingsToolbar from '../components/bookings/BookingsToolbar';
 
 // Platform színek és címkék (komponensen kívül, hogy ne jöjjön létre minden render során)
 const platformColors = {
@@ -502,6 +503,26 @@ const BookingsPage = () => {
     setImportState((prev) => ({ ...prev, isOpen: true }));
   }, []);
 
+  const handleToolbarImport = useCallback((type) => {
+    if (type === 'ical') {
+      navigate('/apartments');
+      return;
+    }
+    handleOpenBookingImport();
+  }, [handleOpenBookingImport, navigate]);
+
+  const handleToolbarExport = useCallback((type) => {
+    if (type === 'csv') {
+      handleExportCSV();
+    } else if (type === 'excel') {
+      handleExportExcel();
+    } else if (type === 'pdf') {
+      handlePrintPDF();
+    } else if (type === 'ical') {
+      navigate('/apartments');
+    }
+  }, [handleExportCSV, handleExportExcel, handlePrintPDF, navigate]);
+
   const handleCloseBookingImport = useCallback(() => {
     setImportState({
       isOpen: false,
@@ -665,80 +686,17 @@ const BookingsPage = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center flex-wrap gap-4">
         <h2 className="text-2xl font-bold dark:text-gray-200">Foglalások kezelése</h2>
-        <div className="no-print flex gap-2 flex-wrap">
-          <Button
-            onClick={() => {
-              fetchFromApi();
-              fetchApartments();
-            }}
-            variant="outline"
-            disabled={isLoading}
-            loading={isLoading}
-            aria-label="Adatok frissítése"
-            title="Adatok frissítése"
-          >
-            <RefreshCw /> Frissítés
-          </Button>
-          <div className="flex border rounded-lg overflow-hidden">
-            <Button
-              onClick={handleViewModeList}
-              variant={viewMode === 'list' ? 'primary' : 'outline'}
-              size="sm"
-              className={viewMode === 'list' ? '' : 'bg-white dark:bg-gray-800'}
-              aria-pressed={viewMode === 'list'}
-              aria-label="Lista nézet"
-            >
-              Lista
-            </Button>
-            <Button
-              onClick={handleViewModeCalendar}
-              variant={viewMode === 'calendar' ? 'primary' : 'outline'}
-              size="sm"
-              className={viewMode === 'calendar' ? '' : 'bg-white dark:bg-gray-800'}
-              aria-pressed={viewMode === 'calendar'}
-              aria-label="Naptár nézet"
-            >
-              Naptár
-            </Button>
-          </div>
-          <Button
-            onClick={handleOpenBookingImport}
-            variant="primary"
-          >
-            <Plus /> Import
-          </Button>
-          {canEditBookings('bookings') && (
-            <Button
-              onClick={() => seedTestBookings()}
-              variant="outline"
-              title="3 teszt foglalás hozzáadása (Akác 57, Gozsdu, Király 87)"
-            >
-              3 teszt foglalás
-            </Button>
-          )}
-          <Button onClick={handleExportCSV} variant="outline">
-            CSV export
-          </Button>
-          <Button onClick={handleExportExcel} variant="outline">
-            Excel export
-          </Button>
-          <Button onClick={handlePrintPDF} variant="outline">
-            Nyomtatás / PDF
-          </Button>
-          <Button
-            onClick={() => navigate('/apartments')}
-            variant="outline"
-            title="iCal beállítások megtekintése a Lakások oldalon"
-          >
-            <CalendarIcon /> iCal beállítások
-          </Button>
-          {canEditBookings('bookings') && (
-            <Button onClick={handleOpenAddBooking} variant="success">
-              <Plus /> Új foglalás
-            </Button>
-          )}
+        <div className="no-print">
+          <BookingsToolbar
+            view={viewMode}
+            setView={setViewMode}
+            onImport={handleToolbarImport}
+            onExport={handleToolbarExport}
+            onNewBooking={handleOpenAddBooking}
+            canEdit={canEditBookings('bookings')}
+          />
         </div>
       </div>
 
@@ -1617,13 +1575,11 @@ const BookingsPage = () => {
       )}
 
       {/* iCal beállítások modal – foglalások naptárból, lakás nevére kattintva */}
-      {canEditBookings('apartments') && (
-        <IcalSettingsModal
-          apartment={icalSettingsApartment}
-          isOpen={!!icalSettingsApartment}
-          onClose={() => setIcalSettingsApartment(null)}
-        />
-      )}
+      <IcalSettingsModal
+        apartment={icalSettingsApartment}
+        isOpen={!!icalSettingsApartment}
+        onClose={() => setIcalSettingsApartment(null)}
+      />
 
       {/* Import modal - csak ha van edit jogosultság */}
       {canEditBookings('bookings') && (

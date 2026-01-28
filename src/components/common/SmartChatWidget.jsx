@@ -24,7 +24,7 @@ const SmartChatWidget = () => {
       onClick={() => navigate('/smart-chat')}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
-      className="relative bg-rose-700 hover:bg-rose-800 dark:bg-rose-800 dark:hover:bg-rose-900 text-white border-0 rounded-lg px-4 py-2 flex items-center gap-2 transition-all duration-200 shadow-lg"
+      className="relative bg-blue-700 hover:bg-blue-800 dark:bg-blue-800 dark:hover:bg-blue-900 text-white border-0 rounded-lg px-4 py-2 flex items-center gap-2 transition-all duration-200 shadow-lg"
       aria-label="SmartChat megnyitása (külön ablak)"
       aria-current={isSmartChatPage ? 'page' : undefined}
     >

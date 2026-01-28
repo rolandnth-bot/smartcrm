@@ -13,12 +13,25 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:123456789:web:abcdef'
 };
 
-// Firebase inicializálás
-const app = initializeApp(firebaseConfig);
+// Firebase inicializálás (DEV-ban invalid config esetén ne dögöljön el az app)
+let app;
+let auth;
+let db;
+try {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+} catch (e) {
+  if (import.meta.env.DEV) {
+    console.warn('[SmartCRM] Firebase init failed (local dev). Auth will show login.', e?.message || e);
+    app = { name: 'fake' };
+    auth = null;
+    db = null;
+  } else {
+    throw e;
+  }
+}
 
-// Firebase szolgáltatások
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-
+export { auth, db };
 export default app;
 

@@ -1,0 +1,143 @@
+.bookings-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 0;
+  flex-wrap: wrap;
+}
+
+.toolbar-group {
+  display: flex;
+  gap: 0;
+}
+
+.toolbar-group.view-toggle .toolbar-btn {
+  border-radius: 0;
+}
+
+.toolbar-group.view-toggle .toolbar-btn:first-child {
+  border-radius: 8px 0 0 8px;
+}
+
+.toolbar-group.view-toggle .toolbar-btn:last-child {
+  border-radius: 0 8px 8px 0;
+  border-left: none;
+}
+
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  color: #e2e8f0;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.toolbar-btn:hover {
+  background: #334155;
+  border-color: #475569;
+}
+
+.toolbar-btn.active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+.toolbar-btn.primary {
+  background: #22c55e;
+  border-color: #22c55e;
+  color: white;
+}
+
+.toolbar-btn.primary:hover {
+  background: #16a34a;
+  border-color: #16a34a;
+}
+
+.dropdown-wrapper {
+  position: relative;
+}
+
+.dropdown-trigger .rotated {
+  transform: rotate(180deg);
+  display: inline-flex;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 180px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 6px;
+  z-index: 100;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.dropdown-menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #e2e8f0;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.dropdown-menu button:hover {
+  background: #334155;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: #334155;
+  margin: 6px 0;
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 24px;
+  background: #334155;
+  margin: 0 8px;
+}
+
+/* Dark mode overrides - use existing dark classes if page has dark */
+.dark .toolbar-btn {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+.dark .toolbar-btn:hover {
+  background: #334155;
+  border-color: #475569;
+}
+
+.dark .toolbar-btn.active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+.dark .dropdown-menu {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.dark .dropdown-menu button:hover {
+  background: #334155;
+}

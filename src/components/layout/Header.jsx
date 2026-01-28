@@ -84,7 +84,13 @@ const Header = memo(({ onLogout }) => {
             <AIRoliWidget />
           </div>
           {pageTitle !== 'Vállalatirányítási Rendszer' && (
-            <p className="text-gray-700 dark:text-gray-800 text-sm">{pageTitle}</p>
+            <div className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
+              location.pathname !== '/' 
+                ? 'bg-purple-600 text-white shadow-lg ring-2 ring-purple-300 dark:ring-purple-700' 
+                : 'bg-white bg-opacity-70 text-gray-700 dark:text-gray-800 hover:bg-opacity-90'
+            }`}>
+              {pageTitle}
+            </div>
           )}
         </div>
         <div className="flex items-center gap-3">

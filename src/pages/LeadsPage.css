@@ -1,0 +1,506 @@
+/* Leadek Kezelése - Redesign CSS */
+
+/* Színséma változók */
+.leads-page {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-card: #1e293b;
+  --bg-card-hover: #334155;
+  --bg-card-selected: rgba(59, 130, 246, 0.15);
+  
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  
+  --accent-blue: #3b82f6;
+  --accent-green: #22c55e;
+  --accent-yellow: #eab308;
+  --accent-red: #ef4444;
+  --accent-purple: #8b5cf6;
+  
+  --border-color: #334155;
+  --border-light: #475569;
+  
+  /* Pipeline státusz színek */
+  --status-new: #3b82f6;
+  --status-contacted: #8b5cf6;
+  --status-meeting: #f59e0b;
+  --status-proposal: #06b6d4;
+  --status-negotiation: #10b981;
+  --status-won: #22c55e;
+  --status-lost: #64748b;
+}
+
+/* LEADS PAGE LAYOUT - 1/3 + 2/3 */
+.leads-page-content {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 24px;
+  padding: 0;
+}
+
+@media (max-width: 1024px) {
+  .leads-page-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* SALES PIPELINE - BAL OLDAL (1/3) */
+.sales-pipeline {
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 20px;
+  height: fit-content;
+  position: sticky;
+  top: 24px;
+}
+
+.dark .sales-pipeline {
+  background: #1e293b;
+}
+
+/* Kereső */
+.pipeline-search {
+  margin-bottom: 16px;
+}
+
+.pipeline-search input {
+  width: 100%;
+  padding: 12px 14px;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  color: #f8fafc;
+  font-size: 14px;
+}
+
+.dark .pipeline-search input {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+.pipeline-search input::placeholder {
+  color: #64748b;
+}
+
+.pipeline-search input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Összesen sor */
+.pipeline-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: #0f172a;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+  width: 100%;
+  text-align: left;
+}
+
+.dark .pipeline-total {
+  background: #0f172a;
+}
+
+.pipeline-total:hover {
+  background: #1e3a5f;
+}
+
+.dark .pipeline-total:hover {
+  background: #1e3a5f;
+}
+
+.pipeline-total.active {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.15);
+}
+
+.total-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.total-count {
+  font-size: 24px;
+  font-weight: 700;
+  color: #3b82f6;
+}
+
+/* Csoport */
+.pipeline-group {
+  margin-bottom: 20px;
+}
+
+.group-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0 8px;
+  margin-bottom: 8px;
+}
+
+/* Egy sor */
+.pipeline-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 2px;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+}
+
+.pipeline-row:hover {
+  background: #334155;
+}
+
+.dark .pipeline-row:hover {
+  background: #334155;
+}
+
+.pipeline-row.active {
+  background: rgba(59, 130, 246, 0.15);
+}
+
+.row-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.row-label {
+  flex: 1;
+  font-size: 14px;
+  color: #e2e8f0;
+}
+
+.row-count {
+  font-size: 14px;
+  font-weight: 600;
+  color: #94a3b8;
+  min-width: 28px;
+  text-align: right;
+}
+
+.pipeline-row.active .row-count {
+  color: #3b82f6;
+}
+
+/* Ha van lead az adott státuszban, legyen hangsúlyosabb */
+.pipeline-row .row-count:not(:empty) {
+  color: #f8fafc;
+}
+
+.pipeline-row.active .row-count {
+  color: #3b82f6;
+}
+
+/* LEAD LISTA - JOBB OLDAL (2/3) */
+.leads-list-container {
+  min-width: 0;
+}
+
+/* Lead Card */
+.lead-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 20px;
+  background: var(--bg-card);
+  border-radius: 12px;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.lead-card:hover {
+  border-color: var(--border-color);
+  background: #243044;
+}
+
+.lead-card.selected {
+  border-color: var(--accent-blue);
+  background: var(--bg-card-selected);
+}
+
+/* Excel szín sync támogatás */
+.lead-card.excel-green {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.lead-card.excel-orange {
+  background: rgba(234, 179, 8, 0.1);
+  border-color: rgba(234, 179, 8, 0.3);
+}
+
+.lead-card.excel-gray {
+  background: rgba(100, 116, 139, 0.1);
+  border-color: rgba(100, 116, 139, 0.3);
+}
+
+.lead-card.excel-red {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.lead-card.excel-black {
+  background: rgba(15, 23, 42, 0.5);
+  border-color: rgba(100, 116, 139, 0.5);
+}
+
+.lead-checkbox {
+  padding-top: 4px;
+}
+
+.lead-checkbox input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent-blue);
+}
+
+.lead-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.lead-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.lead-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.lead-name {
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.lead-status {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  display: inline-block;
+}
+
+.lead-status.status-later {
+  background: rgba(234, 179, 8, 0.15);
+  color: var(--accent-yellow);
+}
+
+.dark .lead-status.status-later {
+  background: rgba(234, 179, 8, 0.2);
+  color: #fbbf24;
+}
+
+.lead-status.status-not-actual {
+  background: rgba(100, 116, 139, 0.2);
+  color: var(--text-secondary);
+}
+
+.dark .lead-status.status-not-actual {
+  background: rgba(100, 116, 139, 0.3);
+  color: #cbd5e1;
+}
+
+.lead-status.status-new {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+}
+
+.dark .lead-status.status-new {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+}
+
+.lead-contact {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.lead-email,
+.lead-phone {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.lead-note {
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.lead-meta {
+  display: flex;
+  gap: 16px;
+}
+
+.lead-source,
+.lead-date {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.lead-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.status-dropdown {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #e2e8f0;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.action-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+
+/* Toolbar */
+.leads-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.leads-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.toolbar-btn {
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.toolbar-btn.secondary {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: #e2e8f0;
+}
+
+.toolbar-btn.secondary:hover {
+  background: var(--bg-card-hover);
+}
+
+.toolbar-btn.primary {
+  background: var(--accent-blue);
+  border: none;
+  color: white;
+}
+
+.toolbar-btn.primary:hover {
+  background: #2563eb;
+}
+
+.stats-badge {
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  padding: 12px 16px;
+  display: flex;
+  gap: 20px;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.stat-value.highlight {
+  color: var(--accent-green);
+}
+
+.stat-value.warning {
+  color: var(--accent-red);
+}

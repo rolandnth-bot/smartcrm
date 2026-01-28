@@ -356,7 +356,6 @@ const ApartmentsPage = () => {
   } = useApartmentsStore();
 
   const { salesTargets, getTotalStats } = useSalesStore();
-  const [unitPlanPeriod, setUnitPlanPeriod] = useState('year'); // 'year', 'month', 'week', 'day' - alapértelmezett: Éves
 
   const { canEdit: canEditApartments } = usePermissions();
   const [deleteConfirm, setDeleteConfirm] = useState(null);
@@ -416,84 +415,6 @@ const ApartmentsPage = () => {
     }));
   }, []);
   const stats = useMemo(() => getStats(), [getStats, apartments]);
-  
-  // Lakás egység terv/tény számítások (értékesítési célok alapján)
-  const unitPlanFact = useMemo(() => {
-    const now = new Date();
-    let dateFrom, dateTo;
-    
-    switch (unitPlanPeriod) {
-      case 'year':
-        dateFrom = new Date(now.getFullYear(), 0, 1);
-        dateTo = new Date(now.getFullYear(), 11, 31);
-        break;
-      case 'month':
-        dateFrom = getFirstDayOfMonth(now);
-        dateTo = getLastDayOfMonth(now);
-        break;
-      case 'week':
-        const monday = new Date(now);
-        monday.setDate(now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1));
-        monday.setHours(0, 0, 0, 0);
-        dateFrom = monday;
-        const sunday = new Date(monday);
-        sunday.setDate(monday.getDate() + 6);
-        sunday.setHours(23, 59, 59, 999);
-        dateTo = sunday;
-        break;
-      case 'day':
-        dateFrom = new Date(now);
-        dateFrom.setHours(0, 0, 0, 0);
-        dateTo = new Date(now);
-        dateTo.setHours(23, 59, 59, 999);
-        break;
-      default:
-        dateFrom = new Date(now.getFullYear(), 0, 1);
-        dateTo = new Date(now.getFullYear(), 11, 31);
-    }
-
-    // Terv (értékesítési célokból - planUnits)
-    const salesStats = getTotalStats();
-    let planUnits = 0;
-    
-    if (unitPlanPeriod === 'year') {
-      planUnits = salesStats.totalPlanUnits;
-    } else if (unitPlanPeriod === 'month') {
-      const currentMonth = now.getMonth();
-      const monthTarget = salesTargets[currentMonth];
-      planUnits = monthTarget?.planUnits || 0;
-    } else if (unitPlanPeriod === 'week') {
-      planUnits = salesStats.totalPlanUnits / 52;
-    } else {
-      planUnits = salesStats.totalPlanUnits / 365;
-    }
-
-    // Tény (értékesítési célokból - actualUnits)
-    let factUnits = 0;
-    
-    if (unitPlanPeriod === 'year') {
-      factUnits = salesStats.totalActualUnits;
-    } else if (unitPlanPeriod === 'month') {
-      const currentMonth = now.getMonth();
-      const monthTarget = salesTargets[currentMonth];
-      factUnits = monthTarget?.actualUnits || 0;
-    } else if (unitPlanPeriod === 'week') {
-      factUnits = salesStats.totalActualUnits / 52;
-    } else {
-      factUnits = salesStats.totalActualUnits / 365;
-    }
-
-    const hasData = factUnits > 0 || planUnits > 0;
-    const completionRate = planUnits > 0 ? (factUnits / planUnits) * 100 : 0;
-
-    return {
-      plan: Math.round(planUnits),
-      fact: Math.round(factUnits),
-      hasData,
-      completionRate,
-      period: unitPlanPeriod
-    };
-  }, [unitPlanPeriod, salesTargets, getTotalStats]);
   
   // Skeleton elemek (konstans, memoizálva)
   const skeletonListItems = useMemo(() => Array.from({ length: 5 }, (_, i) => i), []);
@@ -877,73 +798,6 @@ const ApartmentsPage = () => {
           </div>
         </Card>
       </div>
-
-      {/* Lakás egység terv/tény */}
-      <Card>
-        <div className="mb-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">Lakás egység terv/tény</h3>
-            <div className="flex gap-2">
-              <Button
-                variant={unitPlanPeriod === 'year' ? 'primary' : 'outline'}
-                size="sm"
-                onClick={() => setUnitPlanPeriod('year')}
-              >
-                Éves
-              </Button>
-              <Button
-                variant={unitPlanPeriod === 'month' ? 'primary' : 'outline'}
-                size="sm"
-                onClick={() => setUnitPlanPeriod('month')}
-              >
-                Havi
-              </Button>
-              <Button
-                variant={unitPlanPeriod === 'week' ? 'primary' : 'outline'}
-                size="sm"
-                onClick={() => setUnitPlanPeriod('week')}
-              >
-                Heti
-              </Button>
-              <Button
-                variant={unitPlanPeriod === 'day' ? 'primary' : 'outline'}
-                size="sm"
-                onClick={() => setUnitPlanPeriod('day')}
-              >
-                Napi
-              </Button>
-            </div>
-          </div>
-          {/* 2 kis kártya: Egység Terv, Egység Tény */}
-          <div className="grid grid-cols-2 gap-3">
-            {/* Egység Terv */}
-            <div className="text-center p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
-              <div className="text-xs text-orange-700 dark:text-orange-400 mb-1 font-semibold">Egység Terv</div>
-              <div className="text-xl font-bold text-orange-600 dark:text-orange-500">
-                {formatNumber(unitPlanFact.plan)}
-              </div>
-            </div>
-            {/* Egység Tény */}
-            <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-              <div className="text-xs text-green-700 dark:text-green-400 mb-1 font-semibold">Egység Tény</div>
-              <div className="text-xl font-bold text-green-600 dark:text-green-500">
-                {formatNumber(unitPlanFact.fact)}
-              </div>
-            </div>
-          </div>
-          <div className="mt-4 flex items-center justify-center gap-2">
-            <div className={`w-3 h-3 rounded-full ${
-              unitPlanFact.hasData ? 'bg-green-500' : 'bg-red-500'
-            }`} aria-label={unitPlanFact.hasData ? 'Adatok megvannak' : 'Nincs adat'} />
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              {unitPlanFact.hasData 
-                ? `Teljesítés: ${unitPlanFact.completionRate.toFixed(1)}%`
-                : 'Nincs adat'
-              }
-            </span>
-          </div>
-        </div>
-      </Card>
 
       {/* Filter */}
       <Card>

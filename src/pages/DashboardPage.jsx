@@ -584,7 +584,7 @@ const DashboardPage = () => {
         )}
         {/* 4. Partnerek */}
         <Link
-          to="/register"
+          to="/apps"
           className="bg-gradient-to-r from-blue-500 to-blue-600 p-4 rounded-xl text-white text-left hover:from-blue-600 hover:to-blue-700 transition shadow-lg tile-click-animation"
           aria-label="Ugrás a Partnerek oldalra"
         >

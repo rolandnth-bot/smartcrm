@@ -18,6 +18,7 @@ import { sendTemplatedEmail, isEmailConfigured } from '../services/emailService'
 import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
 import FormField from '../components/common/FormField';
 import { excelFillToLeadColor } from '../utils/excelRowColorUtils';
+import './LeadsPage.css';
 
 // Státusz színek – Új érdeklődő sárga jelvény és pipeline csempe; Később amber; Nem aktuális szürke
 const statusColors = {
@@ -68,6 +69,62 @@ const ratingColors = {
   hot: 'text-red-600 dark:text-red-400',
   warm: 'text-orange-500 dark:text-orange-400',
   cold: 'text-blue-500 dark:text-blue-400'
+};
+
+// Státusz szín mapping a redesign-hoz
+const statusColorMap = {
+  new: '#3b82f6',
+  uj_erdeklodo: '#3b82f6',
+  contacted: '#8b5cf6',
+  kapcsolatfelvetel: '#8b5cf6',
+  felmeres_tervezve: '#f59e0b',
+  felmeres_megtortent: '#f59e0b',
+  meeting: '#f59e0b',
+  offer: '#06b6d4',
+  ajanlat_kuldve: '#06b6d4',
+  negotiation: '#10b981',
+  targyalas: '#10b981',
+  szerzodes_kuldve: '#10b981',
+  won: '#22c55e',
+  alairva: '#22c55e',
+  aktiv_partner: '#22c55e',
+  lost: '#64748b',
+  elutasitva: '#64748b',
+  kesobb: '#eab308',
+  nem_aktualis: '#64748b'
+};
+
+// Státusz csoportosítás
+const activeStatuses = ['uj_erdeklodo', 'new', 'kapcsolatfelvetel', 'contacted', 'felmeres_tervezve', 'felmeres_megtortent', 'meeting', 'ajanlat_kuldve', 'offer', 'targyalas', 'negotiation', 'szerzodes_kuldve'];
+const closedStatuses = ['alairva', 'aktiv_partner', 'won', 'lost', 'elutasitva'];
+const waitingStatuses = ['kesobb', 'nem_aktualis'];
+
+// Helper függvény az inicialok generálásához
+const getInitials = (name) => {
+  if (!name) return '??';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+  return name.substring(0, 2).toUpperCase();
+};
+
+// Státusz badge színek a redesign-hoz
+const getStatusBadgeClass = (status) => {
+  if (status === 'kesobb') return 'status-later';
+  if (status === 'nem_aktualis') return 'status-not-actual';
+  if (['new', 'uj_erdeklodo'].includes(status)) return 'status-new';
+  return '';
+};
+
+// Státusz badge inline style a színhez
+const getStatusBadgeStyle = (status) => {
+  const color = statusColorMap[status] || '#64748b';
+  return {
+    background: `${color}20`,
+    color: color,
+    border: `1px solid ${color}40`
+  };
 };
 
 const LeadsPage = () => {
@@ -636,9 +693,9 @@ const LeadsPage = () => {
   }, []);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold dark:text-gray-200">Leadek kezelése</h2>
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 leads-page">
+      <div className="leads-toolbar">
+        <h2 className="leads-title dark:text-slate-100">Leadek kezelése</h2>
         {isLoading && (
           <div className="text-sm text-gray-500 dark:text-gray-400" aria-live="polite" aria-busy="true">Betöltés...</div>
         )}
@@ -647,147 +704,178 @@ const LeadsPage = () => {
             {error}
           </div>
         )}
-        <div className="no-print flex gap-2 flex-wrap">
-          <Button
+        <div className="toolbar-actions no-print">
+          <button
+            className="toolbar-btn secondary dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200"
             onClick={fetchFromApi}
-            variant="outline"
             disabled={isLoading}
-            loading={isLoading}
             aria-label="Adatok frissítése"
             title="Adatok frissítése"
           >
             <RefreshCw /> Frissítés
-          </Button>
-          <Button
+          </button>
+          <button
+            className="toolbar-btn primary dark:bg-blue-600 dark:hover:bg-blue-700"
             onClick={handleOpenLeadImport}
-            variant="primary"
           >
             <Plus /> Import
-          </Button>
-          <Button
+          </button>
+          <button
+            className="toolbar-btn secondary dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200"
             onClick={handleExportCSV}
-            variant="outline"
           >
-            CSV export
-          </Button>
-          <Button
+            Export CSV
+          </button>
+          <button
+            className="toolbar-btn secondary dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200"
             onClick={handleExportExcel}
-            variant="outline"
           >
-            Excel export
-          </Button>
-          <Button
-            onClick={handleExportJSON}
-            variant="outline"
-          >
-            JSON export
-          </Button>
-          <Button
-            onClick={handlePrintPDF}
-            variant="outline"
-          >
-            Nyomtatás / PDF
-          </Button>
+            Export Excel
+          </button>
           {canEditLeads('leads') && (
-            <Button
+            <button
+              className="toolbar-btn primary dark:bg-blue-600 dark:hover:bg-blue-700"
               onClick={handleOpenAddLead}
-              variant="success"
             >
               <Plus /> Új lead
-            </Button>
+            </button>
           )}
         </div>
       </div>
 
-      {/* Konverziós arányok - kompakt kis ablak */}
+      {/* Konverziós arányok - redesign */}
       <div className="mb-4 flex justify-end">
-        <div className="bg-green-50 dark:bg-green-900 p-3 rounded-lg border border-green-200 dark:border-green-700 inline-block">
-          <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Konverziós arányok</div>
-          <div className="flex gap-4 text-xs">
-            <div>
-              <span className="text-gray-600 dark:text-gray-400">Összes: </span>
-              <span className="font-bold dark:text-gray-200">{conversionStats.total}</span>
+        <div className="stats-badge dark:bg-slate-800">
+          <div className="stat-item">
+            <div className="stat-value dark:text-slate-100">{conversionStats.total}</div>
+            <div className="stat-label dark:text-slate-400">Összes</div>
+          </div>
+          <div className="stat-item">
+            <div className="stat-value dark:text-slate-100">{conversionStats.active}</div>
+            <div className="stat-label dark:text-slate-400">Aktív</div>
+          </div>
+          <div className="stat-item">
+            <div className={`stat-value ${conversionStats.winRate >= 50 ? 'highlight' : 'warning'} dark:text-green-400`}>
+              {conversionStats.winRate.toFixed(1)}%
             </div>
-            <div>
-              <span className="text-gray-600 dark:text-gray-400">Aktív: </span>
-              <span className="font-bold dark:text-gray-200">{conversionStats.active}</span>
+            <div className="stat-label dark:text-slate-400">Win rate</div>
+          </div>
+          <div className="stat-item">
+            <div className={`stat-value ${conversionStats.conversionRate >= 20 ? 'highlight' : 'warning'} dark:text-green-400`}>
+              {conversionStats.conversionRate.toFixed(1)}%
             </div>
-            <div>
-              <span className="text-gray-600 dark:text-gray-400">Win rate: </span>
-              <span className={`font-bold ${conversionStats.winRate >= 50 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`}>
-                {conversionStats.winRate.toFixed(1)}%
-              </span>
-            </div>
-            <div>
-              <span className="text-gray-600 dark:text-gray-400">Konverzió: </span>
-              <span className={`font-bold ${conversionStats.conversionRate >= 20 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`}>
-                {conversionStats.conversionRate.toFixed(1)}%
-              </span>
-            </div>
+            <div className="stat-label dark:text-slate-400">Konverzió</div>
           </div>
         </div>
       </div>
 
-      {/* Bal: Sales Pipeline (fele méret, balra) | Jobb: Leadek – színek Excel sync */}
-      <div className="flex flex-row gap-6 items-start">
-        {/* Bal: Pipeline – fele méretű csempék, balra igazítva */}
-        <div className="flex-shrink-0 w-[280px]">
-          <div className="bg-orange-50 dark:bg-orange-900 p-4 rounded-lg border border-orange-200 dark:border-orange-700">
-            <h3 className="font-bold text-orange-800 dark:text-orange-300 mb-2 text-sm">Sales Pipeline</h3>
-            <div className="mb-2">
-              <label htmlFor="lead-search" className="sr-only">Keresés lead-ek között</label>
-              <input
-                id="lead-search"
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Keresés név, email, telefon vagy megjegyzés alapján..."
-                className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                aria-label="Keresés lead-ek között"
-              />
-            </div>
-            <div className="grid grid-cols-4 gap-1.5 max-w-[260px]">
-              <button
-                type="button"
-                onClick={handleFilterAll}
-                className={`flex flex-col items-center justify-center p-1.5 rounded-md aspect-square w-full transition-all focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-1 dark:focus:ring-offset-orange-900 ${
-                  filter === 'all'
-                    ? 'bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white ring-2 ring-orange-500 ring-offset-1 dark:ring-offset-orange-900 shadow-md'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:shadow'
-                }`}
-                aria-pressed={filter === 'all'}
-                aria-label={`Összes lead (${leads.length}) – kattintás a szűréshez`}
-              >
-                <span className="text-[9px] font-medium leading-tight text-center line-clamp-2 mb-0.5">Összes</span>
-                <span className="text-xs font-bold">{leads.length}</span>
-              </button>
-              {leadStatuses.map((status) => {
+      {/* Bal: Sales Pipeline (1/3) | Jobb: Leadek (2/3) */}
+      <div className="leads-page-content">
+        {/* Bal: Pipeline – vertikális lista sorokkal */}
+        <div className="sales-pipeline">
+          {/* Kereső */}
+          <div className="pipeline-search">
+            <label htmlFor="lead-search" className="sr-only">Keresés lead-ek között</label>
+            <input
+              id="lead-search"
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Keresés név, email, telefon..."
+              aria-label="Keresés lead-ek között"
+            />
+          </div>
+
+          {/* Összesen */}
+          <button
+            type="button"
+            className={`pipeline-total ${filter === 'all' ? 'active' : ''}`}
+            onClick={handleFilterAll}
+            aria-pressed={filter === 'all'}
+          >
+            <span className="total-label">📊 Összesen</span>
+            <span className="total-count">{leads.length}</span>
+          </button>
+
+          {/* Aktív szakaszok */}
+          <div className="pipeline-group">
+            <div className="group-label">AKTÍV</div>
+            {leadStatuses
+              .filter(s => activeStatuses.includes(s.key))
+              .map((status) => {
                 const count = getLeadsByStatus(status.key).length;
                 const isActive = filter === status.key;
-                const colorClass = statusColors[status.key] || 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
+                const color = statusColorMap[status.key] || '#3b82f6';
                 return (
                   <button
                     key={status.key}
                     type="button"
                     onClick={() => handleFilterByStatus(status.key)}
-                    className={`flex flex-col items-center justify-center p-1.5 rounded-md aspect-square w-full transition-all focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-1 dark:focus:ring-offset-orange-900 ${colorClass} ${
-                      isActive ? 'ring-2 ring-orange-500 ring-offset-1 dark:ring-offset-orange-900 shadow-md' : 'hover:shadow'
-                    }`}
+                    className={`pipeline-row ${isActive ? 'active' : ''}`}
                     aria-pressed={isActive}
-                    aria-label={`${status.label} (${count}) – kattintás a szűréshez`}
                   >
-                    <span className="text-[9px] font-medium leading-tight text-center line-clamp-2 mb-0.5">
-                      {status.label}
-                    </span>
-                    <span className="text-xs font-bold">{count}</span>
+                    <span className="row-indicator" style={{ background: color }} />
+                    <span className="row-label">{status.label}</span>
+                    <span className="row-count">{count}</span>
                   </button>
                 );
               })}
-            </div>
+          </div>
+
+          {/* Lezárt */}
+          <div className="pipeline-group">
+            <div className="group-label">LEZÁRT</div>
+            {leadStatuses
+              .filter(s => closedStatuses.includes(s.key))
+              .map((status) => {
+                const count = getLeadsByStatus(status.key).length;
+                const isActive = filter === status.key;
+                const color = statusColorMap[status.key] || '#64748b';
+                return (
+                  <button
+                    key={status.key}
+                    type="button"
+                    onClick={() => handleFilterByStatus(status.key)}
+                    className={`pipeline-row ${isActive ? 'active' : ''}`}
+                    aria-pressed={isActive}
+                  >
+                    <span className="row-indicator" style={{ background: color }} />
+                    <span className="row-label">{status.label}</span>
+                    <span className="row-count">{count}</span>
+                  </button>
+                );
+              })}
+          </div>
+
+          {/* Várakozik */}
+          <div className="pipeline-group">
+            <div className="group-label">VÁRAKOZIK</div>
+            {leadStatuses
+              .filter(s => waitingStatuses.includes(s.key))
+              .map((status) => {
+                const count = getLeadsByStatus(status.key).length;
+                const isActive = filter === status.key;
+                const color = statusColorMap[status.key] || '#eab308';
+                return (
+                  <button
+                    key={status.key}
+                    type="button"
+                    onClick={() => handleFilterByStatus(status.key)}
+                    className={`pipeline-row ${isActive ? 'active' : ''}`}
+                    aria-pressed={isActive}
+                  >
+                    <span className="row-indicator" style={{ background: color }} />
+                    <span className="row-label">{status.label}</span>
+                    <span className="row-count">{count}</span>
+                  </button>
+                );
+              })}
           </div>
         </div>
-        {/* Jobb: Leadek – Excel szín sync megtartva */}
-        <div className="flex-1 min-w-0 overflow-y-auto max-h-[calc(100vh-16rem)]" id="leads-list-column">
+
+        {/* Jobb: Leadek lista (2/3) */}
+        <div className="leads-list-container">
+          <div className="flex-1 min-w-0 overflow-y-auto max-h-[calc(100vh-16rem)]" id="leads-list-column">
           {isLoading && filteredLeads.length === 0 ? (
             <div className="mt-2" aria-live="polite" aria-busy="true">
               <Skeleton variant="title" className="mb-3" width="200px" />
@@ -871,50 +959,96 @@ const LeadsPage = () => {
               )}
               <div className="space-y-2">
                 {filteredLeads.map((lead) => {
-                  let cardBgClass = 'bg-gray-50 dark:bg-gray-800';
-                  let cardBorderClass = 'border-gray-300 dark:border-gray-700';
-                  let cardTextClass = '';
-                  if (lead.leadColor) {
-                    if (lead.leadColor === 'green') { cardBgClass = 'bg-green-50 dark:bg-green-900'; cardBorderClass = 'border-green-400 dark:border-green-600 border-2'; cardTextClass = 'text-green-900 dark:text-green-100'; }
-                    else if (lead.leadColor === 'orange') { cardBgClass = 'bg-amber-50 dark:bg-amber-900'; cardBorderClass = 'border-amber-400 dark:border-amber-600 border-2'; cardTextClass = 'text-amber-900 dark:text-amber-100'; }
-                    else if (lead.leadColor === 'gray') { cardBgClass = 'bg-gray-100 dark:bg-gray-700'; cardBorderClass = 'border-gray-400 dark:border-gray-500 border-2'; cardTextClass = 'text-gray-800 dark:text-gray-200'; }
-                    else if (lead.leadColor === 'black') { cardBgClass = 'bg-gray-900 dark:bg-black'; cardBorderClass = 'border-gray-700 dark:border-gray-500 border-2'; cardTextClass = 'text-white dark:text-gray-200'; }
-                    else if (lead.leadColor === 'red') { cardBgClass = 'bg-red-50 dark:bg-red-900'; cardBorderClass = 'border-red-400 dark:border-red-600 border-2'; cardTextClass = 'text-red-900 dark:text-red-100'; }
-                  }
+                  const isSelected = selectedLeads.includes(lead.id);
+                  const excelColorClass = lead.leadColor 
+                    ? `excel-${lead.leadColor}` 
+                    : '';
                   return (
-                    <div key={lead.id} className={`p-3 ${cardBgClass} rounded-lg ${cardBorderClass} flex gap-2 items-start transition-all duration-200 hover:shadow-lg cursor-pointer ${cardTextClass}`}>
+                    <div 
+                      key={lead.id} 
+                      className={`lead-card dark:bg-slate-800 bg-slate-50 ${isSelected ? 'selected' : ''} ${excelColorClass}`}
+                      onClick={() => canEditLeads('leads') && handleToggleLeadSelection(lead.id)}
+                    >
                       {canEditLeads('leads') && (
-                        <input type="checkbox" checked={selectedLeads.includes(lead.id)} onChange={() => handleToggleLeadSelection(lead.id)} className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" aria-label={`Lead kijelölése: ${lead.name}`} />
+                        <div className="lead-checkbox">
+                          <input 
+                            type="checkbox" 
+                            checked={isSelected} 
+                            onChange={() => handleToggleLeadSelection(lead.id)} 
+                            onClick={(e) => e.stopPropagation()}
+                            aria-label={`Lead kijelölése: ${lead.name}`} 
+                          />
+                        </div>
                       )}
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className={`font-bold ${lead.leadColor === 'black' ? 'text-white' : lead.leadColor === 'green' ? 'text-green-900 dark:text-green-100' : lead.leadColor === 'orange' ? 'text-amber-900 dark:text-amber-100' : lead.leadColor === 'gray' ? 'text-gray-800 dark:text-gray-200' : lead.leadColor === 'red' ? 'text-red-900 dark:text-red-100' : 'dark:text-gray-200'}`}>{lead.name}</span>
-                          <span className={`px-2 py-0.5 rounded text-xs ${statusColors[lead.status] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}>{statusLabels[lead.status] || lead.status}</span>
-                          {lead.leadColor && (
-                            <span className={`px-2 py-0.5 rounded text-xs font-bold ${lead.leadColor === 'green' ? 'bg-green-200 dark:bg-green-700 text-green-900 dark:text-green-100' : lead.leadColor === 'orange' ? 'bg-amber-200 dark:bg-amber-700 text-amber-900 dark:text-amber-100' : lead.leadColor === 'gray' ? 'bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100' : lead.leadColor === 'red' ? 'bg-red-200 dark:bg-red-700 text-red-900 dark:text-red-100' : 'bg-gray-700 dark:bg-gray-800 text-white'}`}>
-                              {lead.leadColor === 'green' ? '🟢 Meleg lead' : lead.leadColor === 'orange' ? '🟠 Később' : lead.leadColor === 'gray' ? '⬜ Nem aktuális' : lead.leadColor === 'red' ? '🔴 Nem vette fel' : '⚫ Elveszett'}
+                      
+                      <div className="lead-avatar">
+                        {getInitials(lead.name)}
+                      </div>
+                      
+                      <div className="lead-content">
+                        <div className="lead-header">
+                          <h4 className="lead-name dark:text-slate-100">{lead.name}</h4>
+                          <span 
+                            className={`lead-status ${getStatusBadgeClass(lead.status)}`}
+                            style={getStatusBadgeStyle(lead.status)}
+                          >
+                            {statusLabels[lead.status] || lead.status}
+                          </span>
+                        </div>
+                        
+                        <div className="lead-contact">
+                          {lead.email && <span className="lead-email dark:text-slate-400">{lead.email}</span>}
+                          {lead.phone && <span className="lead-phone dark:text-slate-400">{lead.phone}</span>}
+                        </div>
+                        
+                        {lead.notes && (
+                          <div className="lead-note dark:text-slate-500">
+                            {lead.notes}
+                          </div>
+                        )}
+                        
+                        <div className="lead-meta">
+                          <span className="lead-source dark:text-slate-500">
+                            {leadSources.find((s) => s.key === lead.source)?.label || lead.source}
+                          </span>
+                          {lead.createdAt && (
+                            <span className="lead-date dark:text-slate-500">
+                              {formatTimeAgo(lead.createdAt)}
                             </span>
                           )}
-                          <span className={`text-xs ${ratingColors[lead.rating || 'warm']}`}>{lead.rating === 'hot' ? '***' : lead.rating === 'warm' ? '**' : '*'}</span>
-                        </div>
-                        <div className={`text-sm ${lead.leadColor === 'black' ? 'text-gray-200' : lead.leadColor === 'green' ? 'text-green-800 dark:text-green-200' : lead.leadColor === 'orange' ? 'text-amber-800 dark:text-amber-200' : lead.leadColor === 'gray' ? 'text-gray-700 dark:text-gray-300' : lead.leadColor === 'red' ? 'text-red-800 dark:text-red-200' : 'text-gray-600 dark:text-gray-400'}`}>
-                          {lead.email && <span className="mr-3">{lead.email}</span>}
-                          {lead.phone && <span>{lead.phone}</span>}
-                        </div>
-                        {lead.notes && <div className={`text-xs mt-1 ${lead.leadColor === 'black' ? 'text-gray-300' : lead.leadColor === 'green' ? 'text-green-700 dark:text-green-300' : lead.leadColor === 'orange' ? 'text-amber-700 dark:text-amber-300' : lead.leadColor === 'gray' ? 'text-gray-600 dark:text-gray-400' : lead.leadColor === 'red' ? 'text-red-700 dark:text-red-300' : 'text-gray-500 dark:text-gray-400'}`}>{lead.notes}</div>}
-                        <div className={`text-xs mt-1 ${lead.leadColor === 'black' ? 'text-gray-400' : lead.leadColor === 'green' ? 'text-green-700 dark:text-green-300' : lead.leadColor === 'orange' ? 'text-amber-700 dark:text-amber-300' : lead.leadColor === 'gray' ? 'text-gray-500 dark:text-gray-400' : lead.leadColor === 'red' ? 'text-red-700 dark:text-red-300' : 'text-gray-400 dark:text-gray-500'}`}>
-                          Forrás: {leadSources.find((s) => s.key === lead.source)?.label || lead.source} | Létrehozva: {lead.createdAt ? formatTimeAgo(lead.createdAt) : '-'}
                         </div>
                       </div>
-                      <div className="flex gap-2">
+                      
+                      <div className="lead-actions" onClick={(e) => e.stopPropagation()}>
                         <label htmlFor={`lead-status-${lead.id}`} className="sr-only">Státusz változtatása</label>
-                        <select id={`lead-status-${lead.id}`} value={lead.status} onChange={(e) => setLeadStatus(lead.id, e.target.value)} className="text-xs border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded px-2 py-1" aria-label={`Státusz változtatása: ${lead.name}`} disabled={!canEditLeads('leads')}>
-                          {leadStatuses.map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}
+                        <select 
+                          id={`lead-status-${lead.id}`} 
+                          value={lead.status} 
+                          onChange={(e) => setLeadStatus(lead.id, e.target.value)} 
+                          className="status-dropdown dark:bg-slate-900 dark:border-slate-700 dark:text-slate-200"
+                          disabled={!canEditLeads('leads')}
+                          aria-label={`Státusz változtatása: ${lead.name}`}
+                        >
+                          {leadStatuses.map((s) => (
+                            <option key={s.key} value={s.key}>{s.label}</option>
+                          ))}
                         </select>
                         {canEditLeads('leads') && (
                           <>
-                            <Button onClick={() => handleEditLead(lead)} variant="ghost" size="sm" aria-label={`Lead szerkesztése: ${lead.name}`}><Edit2 /></Button>
-                            <Button onClick={() => handleDeleteLead(lead.id)} variant="ghost" size="sm" aria-label={`Lead törlése: ${lead.name}`}><Trash2 /></Button>
+                            <button 
+                              className="action-btn dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-700"
+                              onClick={() => handleEditLead(lead)} 
+                              aria-label={`Lead szerkesztése: ${lead.name}`}
+                            >
+                              <Edit2 />
+                            </button>
+                            <button 
+                              className="action-btn dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-700"
+                              onClick={() => handleDeleteLead(lead.id)} 
+                              aria-label={`Lead törlése: ${lead.name}`}
+                            >
+                              <Trash2 />
+                            </button>
                           </>
                         )}
                       </div>
@@ -936,6 +1070,7 @@ const LeadsPage = () => {
               )}
             </Card>
           )}
+          </div>
         </div>
       </div>
 

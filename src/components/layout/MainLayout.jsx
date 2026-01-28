@@ -19,12 +19,12 @@ const MainLayout = memo(({ onLogout }) => {
   const location = useLocation();
   const { backgroundColor } = useTheme();
 
-  // Háttérszín beállítása - türkisz/kékes/zöldes csak Dashboard-on
+  // Világos, tiszta megjelenés (mint a 2. screenshot) – fehér/világosszürke háttér
   const getBackgroundClass = () => {
     if (location.pathname === '/') {
-      return 'bg-gradient-to-br from-cyan-50 via-teal-50 to-emerald-50 dark:from-cyan-950 dark:via-teal-950 dark:to-emerald-950';
+      return 'bg-gradient-to-br from-slate-50 via-gray-50 to-slate-50 dark:from-cyan-950 dark:via-teal-950 dark:to-emerald-950';
     }
-    return 'bg-gray-100 dark:bg-gray-900';
+    return 'bg-white dark:bg-gray-900';
   };
 
   return (

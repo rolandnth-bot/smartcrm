@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import useLeadsStore, { leadStatuses } from '../stores/leadsStore';
+import useLeadsStore, { leadStatuses, leadSources } from '../stores/leadsStore';
 import useSalesStore from '../stores/salesStore';
 import useApartmentsStore from '../stores/apartmentsStore';
 import { usePermissions } from '../contexts/PermissionContext';
@@ -10,13 +10,14 @@ import LeadDetailModal from '../components/sales/LeadDetailModal';
 import SalesCalendar from '../components/sales/SalesCalendar';
 import SalesScriptPanel from '../components/sales/SalesScriptPanel';
 import SalesWizardScriptPanel from '../components/sales/SalesWizardScriptPanel';
-import { Plus, Edit2 } from '../components/common/Icons';
+import { Plus } from '../components/common/Icons';
 import { Skeleton, SkeletonCard, SkeletonTableRow } from '../components/common/Skeleton';
 import { exportToCSV, exportToExcel, printToPDF } from '../utils/exportUtils';
 import { formatCurrencyHUF, formatPercent, formatNumber } from '../utils/numberUtils';
-import { todayISO } from '../utils/dateUtils';
+import { todayISO, formatTimeAgo } from '../utils/dateUtils';
 import useToastStore from '../stores/toastStore';
 import { excelFillToLeadColor } from '../utils/excelRowColorUtils';
+import './SalesPage.css';
 
 // Státusz színek – Új érdeklődő sárga; Később amber; Nem aktuális szürke
 const statusColors = {
@@ -38,6 +39,16 @@ const statusColors = {
   offer: 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-300',
   negotiation: 'bg-cyan-100 dark:bg-cyan-900 text-cyan-800 dark:text-cyan-300',
   won: 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300'
+};
+
+// Helper függvény az inicialok generálásához
+const getInitials = (name) => {
+  if (!name) return '??';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+  return name.substring(0, 2).toUpperCase();
 };
 
 const SalesPage = () => {
@@ -62,27 +73,15 @@ const SalesPage = () => {
   } = useLeadsStore();
   const { apartments, selectedApartment, showEditApartment, setSelectedApartment, setShowEditApartment, fetchFromApi, updateApartment } = useApartmentsStore();
   const {
-    salesTargets,
-    selectedYear,
-    showSalesTargetEdit,
-    editingTarget,
-    isLoading,
-    setSelectedYear,
-    setShowSalesTargetEdit,
-    setEditingTarget,
-    updateSalesTarget,
-    generateYearTargets,
     getTotalStats
   } = useSalesStore();
-
-  const { canEdit: canEditSales } = usePermissions();
-  const [localTargets, setLocalTargets] = useState(salesTargets);
   const [selectedLead, setSelectedLead] = useState(null);
   const [showLeadDetail, setShowLeadDetail] = useState(false);
   const [addLeadPresetDate, setAddLeadPresetDate] = useState(null);
   const [showSalesWizard, setShowSalesWizard] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [showStatusLeadsModal, setShowStatusLeadsModal] = useState(false);
+  const [activeLead, setActiveLead] = useState(null);
 
   const handleAddLeadForDay = useCallback((date) => {
     setAddLeadPresetDate(date);
@@ -91,6 +90,24 @@ const SalesPage = () => {
   }, []);
 
   const filteredLeads = useMemo(() => getFilteredLeads(), [getFilteredLeads, filter, searchQuery, leads]);
+
+  // Aktív lead (kiválasztott vagy első aktív lead)
+  useEffect(() => {
+    if (!activeLead && filteredLeads.length > 0) {
+      // Válasszuk ki az első aktív leadet (új érdeklődő vagy kapcsolatfelvétel)
+      const firstActive = filteredLeads.find(l => 
+        ['uj_erdeklodo', 'new', 'kapcsolatfelvetel', 'contacted'].includes(l.status)
+      ) || filteredLeads[0];
+      setActiveLead(firstActive);
+    }
+  }, [filteredLeads, activeLead]);
+
+  // Következő leadek (aktív lead kivételével)
+  const nextLeads = useMemo(() => {
+    return filteredLeads
+      .filter(l => !activeLead || l.id !== activeLead.id)
+      .slice(0, 6);
+  }, [filteredLeads, activeLead]);
 
   const handleFilterAll = useCallback(() => {
     setFilter('all');
@@ -247,12 +264,11 @@ const SalesPage = () => {
 
   useEffect(() => {
     document.title = 'Értékesítés - SmartCRM';
-    setLocalTargets(salesTargets);
     if (apartments.length === 0) {
       fetchFromApi();
     }
     fetchLeads();
-  }, [salesTargets, apartments.length, fetchFromApi, fetchLeads]);
+  }, [apartments.length, fetchFromApi, fetchLeads]);
 
   // Sales pipeline statisztikák
   const pipelineStats = useMemo(() => ({
@@ -299,74 +315,6 @@ const SalesPage = () => {
 
   const totalStats = useMemo(() => getTotalStats(), [getTotalStats]);
 
-  // Skeleton elemek (konstans, memoizálva)
-  const skeletonTableRows = useMemo(() => Array.from({ length: 12 }, (_, i) => i), []);
-
-  // Év változtatás
-  const handleYearChange = useCallback((year) => {
-    setSelectedYear(year);
-    const newTargets = generateYearTargets(year);
-    setLocalTargets(newTargets);
-  }, [setSelectedYear, generateYearTargets]);
-
-  // Évek listája (konstans, memoizálva)
-  const availableYears = useMemo(() => [2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035, 2036], []);
-
-  const salesExportColumns = useMemo(() => [
-    { key: 'month', label: 'Hónap' },
-    { key: 'planUnits', label: 'Tervezett egység' },
-    { key: 'planAvgPrice', label: 'Átlagár (Ft)' },
-    { key: 'planRevenue', label: 'Tervezett bevétel (Ft)' },
-    { key: 'actualUnits', label: 'Tényleges egység' },
-    { key: 'actualRevenue', label: 'Tényleges bevétel (Ft)' },
-    { key: 'completionRate', label: 'Teljesítés (%)' }
-  ], []);
-
-  const getExportData = useCallback(() => {
-    return localTargets.map((t) => ({
-      ...t,
-      completionRate: t.planUnits > 0 ? ((t.actualUnits / t.planUnits) * 100).toFixed(1) : 0
-    }));
-  }, [localTargets]);
-
-  const handleExportCSV = useCallback(() => {
-    const rows = getExportData();
-    exportToCSV(rows, salesExportColumns, `ertekesitesi_celok_${selectedYear}_${new Date().toISOString().split('T')[0]}.csv`);
-  }, [getExportData, salesExportColumns, selectedYear]);
-
-  const handleExportExcel = useCallback(() => {
-    const rows = getExportData();
-    exportToExcel(rows, salesExportColumns, `ertekesitesi_celok_${selectedYear}_${new Date().toISOString().split('T')[0]}.xlsx`);
-  }, [getExportData, salesExportColumns, selectedYear]);
-
-  const handlePrintPDF = useCallback(() => {
-    printToPDF(`SmartCRM – Értékesítés ${selectedYear}`);
-  }, [selectedYear]);
-
-  const handleOpenSalesTargetEdit = useCallback(() => {
-    setShowSalesTargetEdit(true);
-  }, [setShowSalesTargetEdit]);
-
-  const handleSaveSalesTargets = useCallback(async () => {
-    try {
-      for (const target of localTargets) {
-        await updateSalesTarget(target.id || target.month, target);
-      }
-      setShowSalesTargetEdit(false);
-      setEditingTarget(null);
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('Hiba a célok mentésekor:', error);
-      }
-    }
-  }, [localTargets, updateSalesTarget, setShowSalesTargetEdit, setEditingTarget]);
-
-  const handleCancelSalesTargetEdit = useCallback(() => {
-    setLocalTargets(salesTargets);
-    setShowSalesTargetEdit(false);
-    setEditingTarget(null);
-  }, [salesTargets, setShowSalesTargetEdit, setEditingTarget]);
-
   if (isLoading || leadsLoading) {
     return (
       <div className="space-y-6" aria-live="polite" aria-busy="true">
@@ -405,7 +353,7 @@ const SalesPage = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 sales-page">
       {/* Felső sáv - Mai teendők */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -442,10 +390,11 @@ const SalesPage = () => {
         onAddLead={handleAddLeadForDay}
       />
 
-      {/* Fő tartalom: Script panel + Lead lista */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Fő tartalom: Script panel + Aktív Lead */}
+      <div className="sales-main">
         {/* Bal oldal - Telefonos Script Panel */}
-        <div className="lg:col-span-1">
+        <div className="sales-script-panel dark:bg-slate-800">
+          <h2 className="dark:text-slate-100">Telefonos Script</h2>
           <SalesScriptPanel />
         </div>
 
@@ -618,249 +567,66 @@ const SalesPage = () => {
           </div>
         </div>
 
-      {/* Összesített statisztikák és célok (alul) – teljes szélesség a gridben */}
-      <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Összesített statisztikák és célok (alul) */}
+      <div className="sales-stats">
         {/* Összesített statisztikák */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-          <h3 className="font-bold text-blue-800 dark:text-blue-300 mb-3">Összesített statisztikák</h3>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-600 dark:text-gray-400">Tervezett egységek:</span>
-              <span className="font-bold dark:text-gray-200">{totalStats.totalPlanUnits.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600 dark:text-gray-400">Tényleges egységek:</span>
-              <span className="font-bold dark:text-gray-200">{totalStats.totalActualUnits.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600 dark:text-gray-400">Tervezett bevétel:</span>
-              <span className="font-bold dark:text-gray-200">{totalStats.totalPlanRevenue.toLocaleString()} Ft</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600 dark:text-gray-400">Tényleges bevétel:</span>
-              <span className="font-bold dark:text-gray-200">{formatCurrencyHUF(totalStats.totalActualRevenue)}</span>
-            </div>
-            <div className="flex justify-between pt-2 border-t dark:border-gray-700">
-              <span className="text-gray-600 dark:text-gray-400">Teljesítési arány:</span>
-              <span className={`font-bold ${totalStats.completionRate >= 100 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`}>
-                {formatPercent(totalStats.completionRate, 1)}
-              </span>
-            </div>
+        <div className="stat-card dark:bg-slate-800">
+          <h4 className="dark:text-blue-400">Összesített statisztikák</h4>
+          <div className="stat-row dark:border-slate-700 dark:text-slate-200">
+            <span>Tervezett egységek:</span>
+            <strong>{totalStats.totalPlanUnits.toLocaleString()}</strong>
+          </div>
+          <div className="stat-row dark:border-slate-700 dark:text-slate-200">
+            <span>Tényleges egységek:</span>
+            <strong>{totalStats.totalActualUnits.toLocaleString()}</strong>
+          </div>
+          <div className="stat-row dark:border-slate-700 dark:text-slate-200">
+            <span>Tervezett bevétel:</span>
+            <strong>{totalStats.totalPlanRevenue.toLocaleString()} Ft</strong>
+          </div>
+          <div className="stat-row dark:border-slate-700 dark:text-slate-200">
+            <span>Tényleges bevétel:</span>
+            <strong>{formatCurrencyHUF(totalStats.totalActualRevenue)}</strong>
+          </div>
+          <div className="stat-row dark:border-slate-700 dark:text-slate-200" style={{ borderBottom: 'none' }}>
+            <span>Teljesítési arány:</span>
+            <strong className={totalStats.completionRate >= 100 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}>
+              {formatPercent(totalStats.completionRate, 1)}
+            </strong>
           </div>
         </div>
 
         {/* Konverziós arányok */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-          <h3 className="font-bold text-green-800 dark:text-green-300 mb-3">Konverziós arányok</h3>
-          <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="stat-card dark:bg-slate-800">
+          <h4 className="dark:text-blue-400">Konverziós arányok</h4>
+          <div className="stat-grid">
             <div>
-              <div className="text-gray-600 dark:text-gray-400">Összes lead:</div>
-              <div className="font-bold text-lg dark:text-gray-200">{conversionStats.total}</div>
+              <span className="stat-value dark:text-slate-100">{conversionStats.total}</span>
+              <span className="stat-label dark:text-slate-500">Összes lead</span>
             </div>
             <div>
-              <div className="text-gray-600 dark:text-gray-400">Aktív lead:</div>
-              <div className="font-bold text-lg dark:text-gray-200">{conversionStats.active}</div>
+              <span className="stat-value dark:text-slate-100">{conversionStats.active}</span>
+              <span className="stat-label dark:text-slate-500">Aktív lead</span>
             </div>
             <div>
-              <div className="text-gray-600 dark:text-gray-400">Win rate:</div>
-              <div className={`font-bold text-lg ${conversionStats.winRate >= 50 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`}>
+              <span className={`stat-value ${conversionStats.winRate >= 50 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`}>
                 {formatPercent(conversionStats.winRate, 1)}
-              </div>
-              <div className="text-xs text-gray-500 dark:text-gray-500">
-                ({conversionStats.won} / {conversionStats.closed})
-              </div>
+              </span>
+              <span className="stat-label dark:text-slate-500">
+                Win rate ({conversionStats.won} / {conversionStats.closed})
+              </span>
             </div>
             <div>
-              <div className="text-gray-600 dark:text-gray-400">Konverziós arány:</div>
-              <div className={`font-bold text-lg ${conversionStats.conversionRate >= 20 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`}>
+              <span className={`stat-value ${conversionStats.conversionRate >= 20 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`}>
                 {formatPercent(conversionStats.conversionRate, 1)}
-              </div>
-              <div className="text-xs text-gray-500 dark:text-gray-500">
-                ({conversionStats.won} / {conversionStats.total})
-              </div>
+              </span>
+              <span className="stat-label dark:text-slate-500">
+                Konverzió ({conversionStats.won} / {conversionStats.total})
+              </span>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Értékesítési célok */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold dark:text-gray-200">Értékesítési célok</h2>
-          <div className="flex gap-2 items-center">
-            <label htmlFor="sales-year-select" className="sr-only">
-              Év kiválasztása
-            </label>
-            <select
-              id="sales-year-select"
-              value={selectedYear}
-              onChange={(e) => handleYearChange(parseInt(e.target.value))}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-gray-200 text-sm"
-              aria-label="Év kiválasztása"
-            >
-              {availableYears.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
-            {canEditSales('sales') && (
-              <Button onClick={handleOpenSalesTargetEdit} variant="primary" aria-label="Értékesítési célok szerkesztése">
-                <Edit2 /> Szerkesztés
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {/* Növekedési stratégia üzenet */}
-        <div className="text-xs text-gray-500 dark:text-gray-400 mb-4 bg-blue-50 dark:bg-blue-900 p-3 rounded">
-          <span aria-hidden="true">📈</span> Stratégia: Évente +50 egység/hónap | {selectedYear}: +{(selectedYear - 2026) * 50} egység a 2026-os bázishoz képest
-        </div>
-
-        {/* Célok táblázat */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <caption className="sr-only">Értékesítési célok táblázata {selectedYear} évre</caption>
-            <thead>
-              <tr className="bg-gray-100 dark:bg-gray-700">
-                <th scope="col" className="px-4 py-2 text-left text-gray-800 dark:text-gray-200">Hónap</th>
-                <th scope="col" className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">Tervezett egység</th>
-                <th scope="col" className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">Átlagár (Ft)</th>
-                <th scope="col" className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">Tervezett bevétel (Ft)</th>
-                <th scope="col" className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">Tényleges egység</th>
-                <th scope="col" className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">Tényleges bevétel (Ft)</th>
-                <th scope="col" className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">Teljesítés</th>
-              </tr>
-            </thead>
-            <tbody>
-              {localTargets.map((target, index) => {
-                const completionRate = target.planUnits > 0 ? (target.actualUnits / target.planUnits) * 100 : 0;
-                return (
-                  <tr key={index} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <th scope="row" className="px-4 py-2 font-medium dark:text-gray-200">{target.month}</th>
-                    <td className="px-4 py-2 text-right dark:text-gray-200">{formatNumber(target.planUnits)}</td>
-                    <td className="px-4 py-2 text-right dark:text-gray-200">{formatCurrencyHUF(target.planAvgPrice)}</td>
-                    <td className="px-4 py-2 text-right dark:text-gray-200">{formatCurrencyHUF(target.planRevenue)}</td>
-                    <td className="px-4 py-2 text-right dark:text-gray-200">{formatNumber(target.actualUnits)}</td>
-                    <td className="px-4 py-2 text-right dark:text-gray-200">{formatCurrencyHUF(target.actualRevenue)}</td>
-                    <td className="px-4 py-2 text-right">
-                      <span className={`font-bold ${completionRate >= 100 ? 'text-green-600 dark:text-green-400' : completionRate >= 50 ? 'text-orange-600 dark:text-orange-400' : 'text-red-600 dark:text-red-400'}`}>
-                        {formatPercent(completionRate, 1)}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Cél szerkesztés modal - csak ha van edit jogosultság */}
-      {canEditSales('sales') && (
-      <Modal
-        isOpen={showSalesTargetEdit}
-        onClose={() => {
-          setShowSalesTargetEdit(false);
-          setEditingTarget(null);
-        }}
-        title={`Értékesítési célok szerkesztése - ${selectedYear}`}
-        size="lg"
-      >
-        <div className="space-y-4">
-          {localTargets.map((target, index) => (
-            <div key={index} className="p-4 border dark:border-gray-700 rounded-lg">
-              <h4 className="font-bold dark:text-gray-200 mb-3">{target.month}</h4>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor={`sales-target-${index}-planUnits`} className="block text-xs text-gray-700 dark:text-gray-300 mb-1">Tervezett egység</label>
-                  <input
-                    id={`sales-target-${index}-planUnits`}
-                    type="number"
-                    value={target.planUnits}
-                    onChange={(e) => {
-                      const newTargets = [...localTargets];
-                      newTargets[index] = {
-                        ...newTargets[index],
-                        planUnits: parseInt(e.target.value) || 0,
-                        planRevenue: (parseInt(e.target.value) || 0) * newTargets[index].planAvgPrice
-                      };
-                      setLocalTargets(newTargets);
-                    }}
-                    className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg text-sm"
-                  />
-                </div>
-                <div>
-                  <label htmlFor={`sales-target-${index}-planAvgPrice`} className="block text-xs text-gray-700 dark:text-gray-300 mb-1">Átlagár (Ft)</label>
-                  <input
-                    id={`sales-target-${index}-planAvgPrice`}
-                    type="number"
-                    value={target.planAvgPrice}
-                    onChange={(e) => {
-                      const newTargets = [...localTargets];
-                      newTargets[index] = {
-                        ...newTargets[index],
-                        planAvgPrice: parseInt(e.target.value) || 0,
-                        planRevenue: newTargets[index].planUnits * (parseInt(e.target.value) || 0)
-                      };
-                      setLocalTargets(newTargets);
-                    }}
-                    className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg text-sm"
-                  />
-                </div>
-                <div>
-                  <label htmlFor={`sales-target-${index}-actualUnits`} className="block text-xs text-gray-700 dark:text-gray-300 mb-1">Tényleges egység</label>
-                  <input
-                    id={`sales-target-${index}-actualUnits`}
-                    type="number"
-                    value={target.actualUnits}
-                    onChange={(e) => {
-                      const newTargets = [...localTargets];
-                      newTargets[index].actualUnits = parseInt(e.target.value) || 0;
-                      setLocalTargets(newTargets);
-                    }}
-                    className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg text-sm"
-                  />
-                </div>
-                <div>
-                  <label htmlFor={`sales-target-${index}-actualRevenue`} className="block text-xs text-gray-700 dark:text-gray-300 mb-1">Tényleges bevétel (Ft)</label>
-                  <input
-                    id={`sales-target-${index}-actualRevenue`}
-                    type="number"
-                    value={target.actualRevenue}
-                    onChange={(e) => {
-                      const newTargets = [...localTargets];
-                      newTargets[index].actualRevenue = parseInt(e.target.value) || 0;
-                      setLocalTargets(newTargets);
-                    }}
-                    className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg text-sm"
-                  />
-                </div>
-              </div>
-              <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                Tervezett bevétel: {target.planRevenue.toLocaleString()} Ft
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="flex gap-2 mt-6">
-          <Button
-            onClick={handleSaveSalesTargets}
-            variant="primary"
-            className="flex-1"
-          >
-            Mentés
-          </Button>
-          <Button
-            onClick={handleCancelSalesTargetEdit}
-            variant="secondary"
-          >
-            Mégse
-          </Button>
-        </div>
-      </Modal>
-      )}
 
       {/* Státusz alapú lead lista modal */}
       {selectedStatus && (

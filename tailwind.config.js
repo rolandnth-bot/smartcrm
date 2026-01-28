@@ -11,6 +11,9 @@ export default {
         'neon-pink': '#ff2d92',
         'neon-purple': '#9d4edd',
         'neon-cyan': '#00f5ff',
+        'neon-blue': '#3b82f6',
+        'neon-blue-soft': '#60a5fa',
+        'neon-blue-dim': '#1e40af',
         'dark-bg': '#0a0a0f',
       },
       animation: {
