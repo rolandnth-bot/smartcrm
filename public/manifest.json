@@ -1,0 +1,21 @@
+{
+  "name": "SmartCRM - Vállalatirányítási Rendszer",
+  "short_name": "SmartCRM",
+  "description": "Ingatlan kezelés, foglalások kezelése és ügyfélkapcsolat-kezelés",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "hu"
+}
+

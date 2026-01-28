@@ -1,0 +1,28 @@
+---
+description: Excel lead import – sor háttérszín olvasása, szín→lead megfeleltetés. Örökre megtartandó.
+alwaysApply: true
+---
+
+# Excel lead import – sor szín alapján színezés
+
+## Alapelv
+
+- Lead Excel import **mindig** az **Excel sor háttérszíne** alapján is színez. Ne térj vissza csak „szín” oszlopra.
+- **ExcelJS** (nem xlsx) olvassa a fill-t. A **sor első cellájának** (A2, A3, …) kitöltését használjuk.
+
+## Színkezelés
+
+- **`excelRowColorUtils.excelFillToLeadColor(fill)`**: ARGB → `'zöld' | 'piros' | 'szürke' | 'fekete' | null`
+- **Megfeleltetés**: zöld = meleg, piros = Később, szürke = Nem aktuális, fekete = elveszett.
+- A store **»szín«** oszlopot (sor fill-ből befecskendezett vagy explicit) ugyanígy kezeli; a kártyák ez alapján színeződnek.
+
+## Implementáció
+
+- **LeadsPage**, **SalesPage**: Excel import ExcelJS-sel; fejléc 1. sor, adat 2+; minden sorhoz `row.getCell(1).style?.fill` → `excelFillToLeadColor` → **szín** oszlop befecskendezése.
+- **leadsStore** `importLeadsFromExcel`: a **szín** oszlop (zöld/piros/szürke/fekete) → `leadColor` és szükség esetén `status` (pl. piros→Később, szürke→Nem aktuális).
+
+## Ne változtass
+
+- Ne cseréld vissza ExcelJS-t xlsx-re.
+- Ne távolítsd el a sor fill olvasást; ne csak „szín” oszlopra támaszkodj.
+- Import modal szöveg: „Szín: **Excel sor háttérszíne** vagy »szín« oszlop (zöld=meleg, piros=Később, szürke=Nem aktuális, fekete=elveszett).”

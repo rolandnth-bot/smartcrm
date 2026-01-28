@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Teszt - Egyszerű</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #2563eb; margin-top: 0; }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover { background: #1d4ed8; }
+        .info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #3b82f6;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📧 Email Teszt - Egyszerű Verzió</h1>
+        <p>Ez egy egyszerű HTML oldal, hogy ellenőrizzük, hogy a böngésző helyesen jeleníti meg az oldalt.</p>
+        
+        <form id="emailForm">
+            <div class="form-group">
+                <label for="email">Email cím:</label>
+                <input type="email" id="email" name="email" value="teszt@example.com" required>
+            </div>
+            <button type="button" onclick="sendEmail()">Küldés</button>
+        </form>
+        
+        <div id="result"></div>
+        
+        <div class="info">
+            <strong>Fontos:</strong> Ha ezt az oldalt látod, akkor a böngésző helyesen működik!<br>
+            Most próbáld meg a PHP verziót: <a href="test-email.php">test-email.php</a>
+        </div>
+    </div>
+    
+    <script>
+        async function sendEmail() {
+            const email = document.getElementById('email').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.innerHTML = '<div class="info">Küldés folyamatban...</div>';
+            
+            try {
+                const response = await fetch('api/endpoints/email/send.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        to: email,
+                        subject: 'SmartCRM Email Teszt',
+                        body: 'Ez egy teszt email',
+                        html: '<p>Ez egy teszt email</p>',
+                        from: 'registration@rackhost.hu',
+                        smtp: {
+                            user: 'registration@rackhost.hu',
+                            password: 'Smartregistration',
+                            host: 'mail.rackhost.hu',
+                            port: 587,
+                            secure: false
+                        }
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = '<div style="background: #d1fae5; color: #065f46; padding: 15px; border-radius: 4px; border: 1px solid #10b981;">✅ Email sikeresen elküldve!</div>';
+                } else {
+                    resultDiv.innerHTML = '<div style="background: #fee2e2; color: #991b1b; padding: 15px; border-radius: 4px; border: 1px solid #ef4444;">❌ Hiba: ' + (data.error || 'Ismeretlen hiba') + '</div>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<div style="background: #fee2e2; color: #991b1b; padding: 15px; border-radius: 4px; border: 1px solid #ef4444;">❌ Hiba: ' + error.message + '</div>';
+            }
+        }
+    </script>
+</body>
+</html>
+

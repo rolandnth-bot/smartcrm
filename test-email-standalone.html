@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Teszt - Standalone</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .content {
+            padding: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+        .btn-primary:hover:not(:disabled) {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+        .btn-primary:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+        .result.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 2px solid #10b981;
+        }
+        .result.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #ef4444;
+        }
+        .result.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 2px solid #3b82f6;
+        }
+        .log {
+            margin-top: 20px;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+        }
+        .log-entry {
+            margin-bottom: 8px;
+            padding: 4px 0;
+            border-bottom: 1px solid #333;
+        }
+        .log-entry.success { color: #4ec9b0; }
+        .log-entry.error { color: #f48771; }
+        .log-entry.info { color: #569cd6; }
+        .log-toggle {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #374151;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .log-toggle:hover {
+            background: #4b5563;
+        }
+        .api-url-section {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .api-url-section input {
+            margin-top: 8px;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #2563eb;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .instructions {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .instructions h3 {
+            color: #92400e;
+            margin-bottom: 10px;
+        }
+        .instructions ol {
+            margin-left: 20px;
+            color: #78350f;
+        }
+        .instructions li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📧 Email Küldés Teszt</h1>
+            <p>SmartCRM - Rackhost SMTP tesztelés</p>
+        </div>
+        
+        <div class="content">
+            <div class="instructions">
+                <h3>⚠️ Fontos: PHP szerver szükséges!</h3>
+                <ol>
+                    <li>Nyisd meg a Terminal-t</li>
+                    <li>Futtasd: <code>cd ~/Desktop/SmartCRM/smartcrm-cpanel && php -S localhost:8080</code></li>
+                    <li>Vagy telepítsd a PHP-t: <code>brew install php</code></li>
+                    <li>Majd használd az alábbi űrlapot</li>
+                </ol>
+            </div>
+            
+            <div class="api-url-section">
+                <label for="apiUrl">API URL (backend szerver):</label>
+                <input 
+                    type="text" 
+                    id="apiUrl" 
+                    value="http://localhost:8080/api" 
+                    placeholder="http://localhost:8080/api"
+                >
+                <small style="color: #6b7280; display: block; margin-top: 5px;">
+                    Ha a szerver más porton fut, módosítsd itt!
+                </small>
+            </div>
+            
+            <form id="emailForm">
+                <div class="form-group">
+                    <label for="to">Címzett email cím *</label>
+                    <input 
+                        type="email" 
+                        id="to" 
+                        name="to" 
+                        required 
+                        placeholder="teszt@example.com"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="subject">Tárgy *</label>
+                    <input 
+                        type="text" 
+                        id="subject" 
+                        name="subject" 
+                        required 
+                        value="SmartCRM Email Teszt"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="body">Üzenet (szöveg) *</label>
+                    <textarea 
+                        id="body" 
+                        name="body" 
+                        required
+                    >Ez egy teszt email a SmartCRM rendszerből.
+
+Ha ezt az emailt megkaptad, az email küldési funkció helyesen működik!
+
+Üdvözlettel,
+SmartCRM</textarea>
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" id="submitBtn" class="btn-primary">
+                        📧 Email küldése
+                    </button>
+                </div>
+            </form>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px;">Email küldése folyamatban...</p>
+            </div>
+            
+            <div class="result" id="result"></div>
+            
+            <button class="log-toggle" id="logToggle" onclick="toggleLog()">
+                📋 Részletes log megjelenítése
+            </button>
+            <div class="log" id="log"></div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('emailForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+        const log = document.getElementById('log');
+        const apiUrlInput = document.getElementById('apiUrl');
+        let logEntries = [];
+        
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            logEntries.push({ timestamp, message, type });
+            updateLogDisplay();
+        }
+        
+        function updateLogDisplay() {
+            log.innerHTML = logEntries.map(entry => {
+                const icon = entry.type === 'success' ? '✅' : entry.type === 'error' ? '❌' : 'ℹ️';
+                return `<div class="log-entry ${entry.type}">[${entry.timestamp}] ${icon} ${entry.message}</div>`;
+            }).join('');
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        function toggleLog() {
+            const isVisible = log.style.display === 'block';
+            log.style.display = isVisible ? 'none' : 'block';
+            document.getElementById('logToggle').textContent = isVisible 
+                ? '📋 Részletes log megjelenítése' 
+                : '📋 Részletes log elrejtése';
+        }
+        
+        // API elérhetőség ellenőrzése
+        async function checkApiAvailability(url) {
+            try {
+                const response = await fetch(url.replace('/api', '/api/auth/check'), {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                return response.status !== 404;
+            } catch {
+                return false;
+            }
+        }
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const to = document.getElementById('to').value;
+            const subject = document.getElementById('subject').value;
+            const body = document.getElementById('body').value;
+            const apiUrl = apiUrlInput.value.trim() || 'http://localhost:8080/api';
+            
+            const html = `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h2 style="color: #2563eb;">${subject}</h2>
+                    <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                        ${body.replace(/\n/g, '<br>')}
+                    </div>
+                    <p style="color: #6b7280; font-size: 12px; margin-top: 30px;">
+                        Ez egy automatikus teszt email a SmartCRM rendszerből.
+                    </p>
+                </div>
+            `;
+            
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            logEntries = [];
+            log.style.display = 'block';
+            
+            addLog('Email küldés indítása...', 'info');
+            addLog(`API URL: ${apiUrl}`, 'info');
+            
+            // API elérhetőség ellenőrzése
+            addLog('API elérhetőség ellenőrzése...', 'info');
+            const isAvailable = await checkApiAvailability(apiUrl);
+            if (!isAvailable) {
+                addLog('⚠️ API nem elérhető!', 'error');
+                addLog('Indítsd el a PHP szervert:', 'error');
+                addLog('cd ~/Desktop/SmartCRM/smartcrm-cpanel && php -S localhost:8080', 'error');
+                result.className = 'result error';
+                result.style.display = 'block';
+                result.innerHTML = `
+                    <strong>❌ API szerver nem elérhető!</strong><br>
+                    <p style="margin-top: 10px;">Indítsd el a PHP szervert a Terminal-ban:</p>
+                    <code style="background: #1e1e1e; color: #4ec9b0; padding: 10px; display: block; border-radius: 4px; margin-top: 10px;">
+                        cd ~/Desktop/SmartCRM/smartcrm-cpanel && php -S localhost:8080
+                    </code>
+                    <p style="margin-top: 10px;">Ha nincs PHP telepítve:</p>
+                    <code style="background: #1e1e1e; color: #4ec9b0; padding: 10px; display: block; border-radius: 4px; margin-top: 10px;">
+                        brew install php
+                    </code>
+                `;
+                submitBtn.disabled = false;
+                loading.style.display = 'none';
+                return;
+            }
+            
+            addLog('✅ API elérhető!', 'success');
+            
+            try {
+                const requestData = {
+                    to: to,
+                    subject: subject,
+                    body: body,
+                    html: html,
+                    from: 'registration@rackhost.hu',
+                    smtp: {
+                        user: 'registration@rackhost.hu',
+                        password: 'Smartregistration',
+                        host: 'mail.rackhost.hu',
+                        port: 587,
+                        secure: false
+                    }
+                };
+                
+                addLog('Kérés adatok előkészítése...', 'info');
+                addLog(`Címzett: ${to}`, 'info');
+                addLog(`Tárgy: ${subject}`, 'info');
+                addLog(`SMTP szerver: mail.rackhost.hu:587`, 'info');
+                
+                addLog('HTTP kérés küldése...', 'info');
+                const startTime = Date.now();
+                
+                const response = await fetch(`${apiUrl}/email/send`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(requestData)
+                });
+                
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+                addLog(`HTTP válasz érkezett (${duration}ms)`, 'info');
+                addLog(`HTTP státusz: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+                
+                let data;
+                const responseText = await response.text();
+                addLog(`Válasz szöveg hossza: ${responseText.length} karakter`, 'info');
+                
+                try {
+                    data = JSON.parse(responseText);
+                    addLog('JSON válasz sikeresen feldolgozva', 'success');
+                    addLog(`Válasz: ${JSON.stringify(data, null, 2)}`, 'info');
+                } catch (e) {
+                    addLog(`JSON parse hiba: ${e.message}`, 'error');
+                    addLog(`Válasz első 200 karaktere: ${responseText.substring(0, 200)}`, 'error');
+                    throw new Error('Érvénytelen JSON válasz: ' + responseText.substring(0, 200));
+                }
+                
+                if (response.ok && data.success) {
+                    addLog('✅ Email sikeresen elküldve!', 'success');
+                    addLog(`Message ID: ${data.messageId || 'N/A'}`, 'success');
+                    result.className = 'result success';
+                    result.style.display = 'block';
+                    result.innerHTML = `
+                        <strong>✅ Sikeres!</strong><br>
+                        Email sikeresen elküldve!<br>
+                        <small>Message ID: ${data.messageId || 'N/A'}</small><br>
+                        <small style="display: block; margin-top: 10px;">📬 Ellenőrizd a postafiókodat!</small>
+                    `;
+                } else {
+                    addLog(`Hiba a válaszban: ${data.error || data.message}`, 'error');
+                    throw new Error(data.error || data.message || 'Ismeretlen hiba');
+                }
+            } catch (error) {
+                addLog(`❌ Hiba történt: ${error.message}`, 'error');
+                if (error.stack) {
+                    addLog(`Stack: ${error.stack}`, 'error');
+                }
+                result.className = 'result error';
+                result.style.display = 'block';
+                let errorMsg = error.message || 'Ismeretlen hiba az email küldése során.';
+                if (error.message && (error.message.includes('fetch') || error.message.includes('Failed to fetch'))) {
+                    errorMsg += '<br><small style="display: block; margin-top: 10px;">Lehet, hogy a backend API nem elérhető. Ellenőrizd, hogy a szerver fut-e.</small>';
+                }
+                result.innerHTML = `
+                    <strong>❌ Hiba történt!</strong><br>
+                    ${errorMsg}<br>
+                    <small style="display: block; margin-top: 10px;">Nézd meg a részletes logot lentebb!</small>
+                `;
+            } finally {
+                submitBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        });
+        
+        // Kezdeti log információk
+        addLog('Email teszt oldal betöltve', 'info');
+        addLog(`Aktuális URL: ${window.location.href}`, 'info');
+        addLog(`API URL: ${apiUrlInput.value}`, 'info');
+        
+        // API elérhetőség automatikus ellenőrzése
+        setTimeout(async () => {
+            const apiUrl = apiUrlInput.value.trim() || 'http://localhost:8080/api';
+            addLog('API elérhetőség automatikus ellenőrzése...', 'info');
+            const isAvailable = await checkApiAvailability(apiUrl);
+            if (isAvailable) {
+                addLog('✅ API elérhető!', 'success');
+            } else {
+                addLog('⚠️ API nem elérhető ezen az útvonalon', 'error');
+                addLog('Indítsd el a PHP szervert:', 'error');
+                addLog('cd ~/Desktop/SmartCRM/smartcrm-cpanel && php -S localhost:8080', 'error');
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
+
+

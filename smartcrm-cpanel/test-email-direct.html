@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Teszt - Közvetlen</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #2563eb; margin-top: 0; }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover { background: #1d4ed8; }
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+        .info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #3b82f6;
+        }
+        pre {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📧 Email Teszt - Közvetlen PHP hívás</h1>
+        <p>Ez az oldal közvetlenül a PHP fájlt hívja meg, routing nélkül.</p>
+        
+        <form id="emailForm">
+            <div class="form-group">
+                <label for="email">Email cím:</label>
+                <input type="email" id="email" name="email" value="rolandnth@gmail.com" required>
+            </div>
+            <button type="button" onclick="sendEmail()" id="sendBtn">Küldés</button>
+        </form>
+        
+        <div id="result"></div>
+    </div>
+    
+    <script>
+        async function sendEmail() {
+            const email = document.getElementById('email').value;
+            const resultDiv = document.getElementById('result');
+            const sendBtn = document.getElementById('sendBtn');
+            
+            sendBtn.disabled = true;
+            sendBtn.textContent = 'Küldés folyamatban...';
+            resultDiv.innerHTML = '<div class="info">Email küldése...</div>';
+            
+            try {
+                // Közvetlenül az email/send.php fájlt hívjuk meg
+                const response = await fetch('api/endpoints/email/send.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        to: email,
+                        subject: 'SmartCRM Email Teszt - ' + new Date().toLocaleString('hu-HU'),
+                        body: 'Ez egy teszt email a SmartCRM rendszerből.\n\nHa ezt az emailt megkaptad, az email küldési funkció helyesen működik!',
+                        html: '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;"><h2 style="color: #2563eb;">SmartCRM Email Teszt</h2><div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;"><p>Ez egy teszt email a SmartCRM rendszerből.</p><p>Ha ezt az emailt megkaptad, az email küldési funkció helyesen működik!</p></div><p style="color: #6b7280; font-size: 12px; margin-top: 30px;">Küldve: ' + new Date().toLocaleString('hu-HU') + '</p></div>',
+                        from: 'registration@rackhost.hu',
+                        smtp: {
+                            user: 'registration@rackhost.hu',
+                            password: 'Smartregistration',
+                            host: 'mail.rackhost.hu',
+                            port: 587,
+                            secure: false
+                        }
+                    })
+                });
+                
+                const text = await response.text();
+                let data;
+                
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    // Ha nem JSON, akkor HTML hibaüzenet
+                    resultDiv.innerHTML = '<div class="error">❌ Hiba: A szerver HTML-t adott vissza JSON helyett.<br><br>Válasz:<br><pre>' + text.substring(0, 500) + '</pre></div>';
+                    sendBtn.disabled = false;
+                    sendBtn.textContent = 'Küldés';
+                    return;
+                }
+                
+                if (data.success) {
+                    resultDiv.innerHTML = '<div class="success">✅ ' + (data.message || 'Email sikeresen elküldve!') + '<br><br>Válasz:<br><pre>' + JSON.stringify(data, null, 2) + '</pre></div>';
+                } else {
+                    resultDiv.innerHTML = '<div class="error">❌ Hiba: ' + (data.error || data.message || 'Ismeretlen hiba') + '<br><br>Válasz:<br><pre>' + JSON.stringify(data, null, 2) + '</pre></div>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<div class="error">❌ Hálózati hiba: ' + error.message + '<br><br>Ellenőrizd, hogy:<br>1. A MAMP szerver fut-e<br>2. Az URL helyes-e: api/endpoints/email/send.php</div>';
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Küldés';
+            }
+        }
+    </script>
+</body>
+</html>
+
+

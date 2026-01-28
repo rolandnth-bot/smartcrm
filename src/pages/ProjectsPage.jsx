@@ -1,0 +1,632 @@
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import useLeadsStore from '../stores/leadsStore';
+import useApartmentsStore from '../stores/apartmentsStore';
+import useToastStore from '../stores/toastStore';
+import Card from '../components/common/Card';
+import Modal from '../components/common/Modal';
+import Button from '../components/common/Button';
+import FormField from '../components/common/FormField';
+import { Plus, Edit2, Trash2, Check } from '../components/common/Icons';
+import { formatDate, todayISO, addDays, addMonths, getFirstDayOfMonth, getLastDayOfMonth } from '../utils/dateUtils';
+
+// Helper functions
+
+const isSameDay = (date1, date2) => {
+  if (!date1 || !date2) return false;
+  const d1 = typeof date1 === 'string' ? new Date(date1) : date1;
+  const d2 = typeof date2 === 'string' ? new Date(date2) : date2;
+  return d1.getFullYear() === d2.getFullYear() &&
+         d1.getMonth() === d2.getMonth() &&
+         d1.getDate() === d2.getDate();
+};
+
+const ProjectsPage = () => {
+  const navigate = useNavigate();
+  const { leads } = useLeadsStore();
+  const { apartments } = useApartmentsStore();
+  const { success } = useToastStore();
+
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [showTaskModal, setShowTaskModal] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
+  const [tasks, setTasks] = useState(() => {
+    const saved = localStorage.getItem('projectsTasks');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // Aktív projektek (minden lezárt lead: alairva, aktiv_partner, won)
+  const activeProjects = useMemo(() => {
+    return leads.filter(lead => {
+      const status = lead.status;
+      return status === 'alairva' || status === 'aktiv_partner' || status === 'won';
+    });
+  }, [leads]);
+
+  // Naptár adatok
+  const calendarData = useMemo(() => {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const firstDay = getFirstDayOfMonth(currentDate);
+    const lastDay = getLastDayOfMonth(currentDate);
+    const daysInMonth = lastDay.getDate();
+    const firstDayOfWeek = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1; // Hétfővel kezdődik
+
+    const days = [];
+    
+    // Előző hónap utolsó napjai
+    const prevMonth = month === 0 ? 11 : month - 1;
+    const prevYear = month === 0 ? year - 1 : year;
+    const prevMonthLastDay = new Date(prevYear, prevMonth + 1, 0).getDate();
+    
+    for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+      days.push({
+        date: new Date(prevYear, prevMonth, prevMonthLastDay - i),
+        isCurrentMonth: false,
+        tasks: []
+      });
+    }
+
+    // Aktuális hónap napjai
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day);
+      const dayTasks = tasks.filter(task => {
+        if (!task.dueDate) return false;
+        const taskDate = new Date(task.dueDate);
+        return isSameDay(taskDate, date);
+      });
+      days.push({
+        date,
+        isCurrentMonth: true,
+        tasks: dayTasks
+      });
+    }
+
+    // Következő hónap első napjai (42 nap összesen = 6 hét)
+    const totalDays = days.length;
+    const remainingDays = 42 - totalDays;
+    const nextMonth = month === 11 ? 0 : month + 1;
+    const nextYear = month === 11 ? year + 1 : year;
+
+    for (let day = 1; day <= remainingDays; day++) {
+      days.push({
+        date: new Date(nextYear, nextMonth, day),
+        isCurrentMonth: false,
+        tasks: []
+      });
+    }
+
+    return days;
+  }, [currentDate, tasks]);
+
+  // Teendők mentése localStorage-ba
+  useEffect(() => {
+    localStorage.setItem('projectsTasks', JSON.stringify(tasks));
+  }, [tasks]);
+
+  // Automatikus teendők generálása aláírt szerződésekhez és followup dátumokhoz
+  useEffect(() => {
+    activeProjects.forEach(project => {
+      // Lakásátvétel teendő generálása
+      if (project.contract?.status === 'aláírva' && project.contract?.keyHandoverDate) {
+        const handoverDate = new Date(project.contract.keyHandoverDate);
+        const taskExists = tasks.some(task => 
+          task.leadId === project.id && 
+          task.type === 'lakasatvetel' &&
+          task.dueDate === project.contract.keyHandoverDate
+        );
+
+        if (!taskExists && handoverDate >= new Date()) {
+          setTasks(prev => [...prev, {
+            id: `auto-${project.id}-lakasatvetel-${Date.now()}`,
+            leadId: project.id,
+            leadName: project.name,
+            type: 'lakasatvetel',
+            title: 'Lakásátvétel időpontegyeztetés',
+            dueDate: project.contract.keyHandoverDate,
+            status: 'pending',
+            description: `Lakásátvétel időpontegyeztetés: ${project.name}`,
+            apartmentId: project.apartmentId || '',
+            partnerId: project.partnerId || '',
+            notes: '',
+            createdAt: todayISO(),
+            isAutoGenerated: true
+          }]);
+        }
+      }
+
+      // Followup teendő generálása
+      if (project.followupDate) {
+        const followupDate = new Date(project.followupDate);
+        const taskExists = tasks.some(task => 
+          task.leadId === project.id && 
+          task.type === 'followup' &&
+          task.dueDate === project.followupDate
+        );
+
+        if (!taskExists && followupDate >= new Date()) {
+          setTasks(prev => [...prev, {
+            id: `auto-${project.id}-followup-${Date.now()}`,
+            leadId: project.id,
+            leadName: project.name,
+            type: 'followup',
+            title: `Followup: ${project.name}`,
+            dueDate: project.followupDate,
+            status: 'pending',
+            description: `Followup teendő: ${project.name}`,
+            apartmentId: project.apartmentId || '',
+            partnerId: project.partnerId || '',
+            notes: project.followupNotes || '',
+            createdAt: todayISO(),
+            isAutoGenerated: true
+          }]);
+        }
+      }
+
+      // Szerződés aláírás dátum teendő generálása
+      if (project.contract?.signedDate) {
+        const signedDate = new Date(project.contract.signedDate);
+        const taskExists = tasks.some(task => 
+          task.leadId === project.id && 
+          task.type === 'szerzodes_alairas' &&
+          task.dueDate === project.contract.signedDate
+        );
+
+        if (!taskExists && signedDate >= new Date()) {
+          setTasks(prev => [...prev, {
+            id: `auto-${project.id}-szerzodes-${Date.now()}`,
+            leadId: project.id,
+            leadName: project.name,
+            type: 'egyeb',
+            title: 'Szerződés aláírás követés',
+            dueDate: project.contract.signedDate,
+            status: 'pending',
+            description: `Szerződés aláírás követés: ${project.name}`,
+            apartmentId: project.apartmentId || '',
+            partnerId: project.partnerId || '',
+            notes: '',
+            createdAt: todayISO(),
+            isAutoGenerated: true
+          }]);
+        }
+      }
+    });
+  }, [activeProjects, tasks]);
+
+  const handlePreviousMonth = () => {
+    setCurrentDate(prev => addMonths(prev, -1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentDate(prev => addMonths(prev, 1));
+  };
+
+  const handleDayClick = (day) => {
+    setSelectedDate(day.date);
+    setEditingTask(null);
+    setShowTaskModal(true);
+  };
+
+  const handleTaskClick = (task, e) => {
+    e.stopPropagation();
+    setEditingTask(task);
+    setSelectedDate(new Date(task.dueDate));
+    setShowTaskModal(true);
+  };
+
+  const handleSaveTask = (taskData) => {
+    if (editingTask) {
+      setTasks(prev => prev.map(t => t.id === editingTask.id ? { ...t, ...taskData } : t));
+      success('Teendő frissítve');
+    } else {
+      const newTask = {
+        id: `task-${Date.now()}`,
+        ...taskData,
+        status: 'pending',
+        createdAt: todayISO()
+      };
+      setTasks(prev => [...prev, newTask]);
+      success('Teendő létrehozva');
+    }
+    setShowTaskModal(false);
+    setEditingTask(null);
+    setSelectedDate(null);
+  };
+
+  const handleDeleteTask = (taskId) => {
+    setTasks(prev => prev.filter(t => t.id !== taskId));
+    success('Teendő törölve');
+  };
+
+  const handleCompleteTask = (taskId) => {
+    setTasks(prev => prev.map(t => 
+      t.id === taskId ? { ...t, status: t.status === 'completed' ? 'pending' : 'completed' } : t
+    ));
+  };
+
+  const monthNames = ['Január', 'Február', 'Március', 'Április', 'Május', 'Június', 
+    'Július', 'Augusztus', 'Szeptember', 'Október', 'November', 'December'];
+  const dayNames = ['H', 'K', 'Sz', 'Cs', 'P', 'Sz', 'V'];
+
+  const todayTasks = useMemo(() => {
+    const today = todayISO();
+    return tasks.filter(task => task.dueDate === today && task.status !== 'completed');
+  }, [tasks]);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold dark:text-gray-200">Projektek</h2>
+        <Button onClick={() => {
+          setSelectedDate(new Date());
+          setEditingTask(null);
+          setShowTaskModal(true);
+        }} variant="primary">
+          <Plus /> Új teendő
+        </Button>
+      </div>
+
+      {/* Mai teendők */}
+      {todayTasks.length > 0 && (
+        <Card>
+          <h3 className="text-lg font-semibold mb-4 dark:text-gray-200">Mai teendők</h3>
+          <div className="space-y-2">
+            {todayTasks.map(task => (
+              <div key={task.id} className="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-700">
+                <div className="flex-1">
+                  <div className="font-medium text-gray-800 dark:text-gray-200">{task.title}</div>
+                  {task.leadName && (
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Lead: {task.leadName}</div>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => handleCompleteTask(task.id)}
+                    variant="success"
+                    size="sm"
+                  >
+                    <Check />
+                  </Button>
+                  <Button
+                    onClick={() => handleTaskClick(task, { stopPropagation: () => {} })}
+                    variant="secondary"
+                    size="sm"
+                  >
+                    <Edit2 />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Naptár */}
+      <Card>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold dark:text-gray-200">
+            {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+          </h3>
+          <div className="flex gap-2">
+            <Button onClick={handlePreviousMonth} variant="secondary" size="sm">
+              ‹ Előző
+            </Button>
+            <Button onClick={() => setCurrentDate(new Date())} variant="secondary" size="sm">
+              Ma
+            </Button>
+            <Button onClick={handleNextMonth} variant="secondary" size="sm">
+              Következő ›
+            </Button>
+          </div>
+        </div>
+
+        {/* Naptár grid */}
+        <div className="grid grid-cols-7 gap-1">
+          {/* Napnevek */}
+          {dayNames.map((day, idx) => (
+            <div key={`day-${idx}`} className="text-center font-semibold text-gray-600 dark:text-gray-400 py-2">
+              {day}
+            </div>
+          ))}
+
+          {/* Napok */}
+          {calendarData.map((day, index) => (
+            <div
+              key={index}
+              onClick={() => handleDayClick(day)}
+              className={`min-h-[100px] p-2 border rounded-lg cursor-pointer transition ${
+                day.isCurrentMonth
+                  ? 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  : 'bg-gray-50 dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-400'
+              } ${
+                isSameDay(day.date, new Date())
+                  ? 'ring-2 ring-blue-500'
+                  : ''
+              }`}
+            >
+              <div className="text-sm font-medium mb-1">
+                {day.date.getDate()}
+              </div>
+              <div className="space-y-1">
+                {day.tasks.slice(0, 3).map(task => (
+                  <div
+                    key={task.id}
+                    onClick={(e) => handleTaskClick(task, e)}
+                    className={`text-xs p-1 rounded truncate ${
+                      task.status === 'completed'
+                        ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 line-through'
+                        : task.type === 'lakasatvetel'
+                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300'
+                        : 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300'
+                    }`}
+                  >
+                    {task.title}
+                  </div>
+                ))}
+                {day.tasks.length > 3 && (
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    +{day.tasks.length - 3} további
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {/* Aktív projektek listája */}
+      <Card>
+        <h3 className="text-lg font-semibold mb-4 dark:text-gray-200">Aktív projektek</h3>
+        <div className="space-y-2">
+          {activeProjects.length === 0 ? (
+            <p className="text-gray-500 dark:text-gray-400">Nincsenek aktív projektek</p>
+          ) : (
+            activeProjects.map(project => (
+              <div key={project.id} className="p-3 border rounded-lg dark:border-gray-700">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-medium text-gray-800 dark:text-gray-200">{project.name}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      Státusz: {
+                        project.status === 'alairva' ? 'Aláírva' : 
+                        project.status === 'aktiv_partner' ? 'Aktív partner' :
+                        project.status === 'won' ? 'Megnyert' :
+                        project.status
+                      }
+                    </div>
+                    {project.contract?.keyHandoverDate && (
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        Lakásátvétel: {formatDate(project.contract.keyHandoverDate)}
+                      </div>
+                    )}
+                  </div>
+                  <Button
+                    onClick={() => navigate(`/leads?leadId=${project.id}`)}
+                    variant="secondary"
+                    size="sm"
+                  >
+                    Megnyitás
+                  </Button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </Card>
+
+      {/* Teendő modal */}
+      <TaskModal
+        isOpen={showTaskModal}
+        onClose={() => {
+          setShowTaskModal(false);
+          setEditingTask(null);
+          setSelectedDate(null);
+        }}
+        task={editingTask}
+        selectedDate={selectedDate}
+        leads={activeProjects}
+        apartments={apartments}
+        onSave={handleSaveTask}
+        onDelete={editingTask ? () => {
+          handleDeleteTask(editingTask.id);
+          setShowTaskModal(false);
+        } : null}
+      />
+    </div>
+  );
+};
+
+// Teendő modal komponens
+const TaskModal = ({ isOpen, onClose, task, selectedDate, leads, apartments, onSave, onDelete }) => {
+  const [formData, setFormData] = useState({
+    type: 'egyeb',
+    title: '',
+        dueDate: selectedDate ? selectedDate.toISOString().split('T')[0] : todayISO(),
+    description: '',
+    leadId: '',
+    apartmentId: '',
+    partnerId: '',
+    notes: '',
+    status: 'pending'
+  });
+
+  useEffect(() => {
+    if (task) {
+      setFormData({
+        type: task.type || 'egyeb',
+        title: task.title || '',
+            dueDate: task.dueDate || (selectedDate ? selectedDate.toISOString().split('T')[0] : todayISO()),
+        description: task.description || '',
+        leadId: task.leadId || '',
+        apartmentId: task.apartmentId || '',
+        partnerId: task.partnerId || '',
+        notes: task.notes || '',
+        status: task.status || 'pending'
+      });
+    } else {
+      setFormData({
+        type: 'egyeb',
+        title: '',
+        dueDate: selectedDate ? selectedDate.toISOString().split('T')[0] : todayISO(),
+        description: '',
+        leadId: '',
+        apartmentId: '',
+        partnerId: '',
+        notes: '',
+        status: 'pending'
+      });
+    }
+  }, [task, selectedDate]);
+
+  const taskTypes = [
+    { value: 'lakasatvetel', label: 'Lakásátvétel időpontegyeztetés' },
+    { value: 'fotozas', label: 'Fotózás' },
+    { value: 'okoszar', label: 'Okoszár beszerelés' },
+    { value: 'hirdetes', label: 'Hirdetés létrehozása' },
+    { value: 'followup', label: 'Followup' },
+    { value: 'szerzodes_alairas', label: 'Szerződés aláírás követés' },
+    { value: 'egyeb', label: 'Egyéb' }
+  ];
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.title) {
+      useToastStore.getState().error('A cím kötelező');
+      return;
+    }
+    onSave(formData);
+  };
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={task ? 'Teendő szerkesztése' : 'Új teendő'}
+      size="lg"
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <FormField
+          label="Típus"
+          required
+        >
+          <select
+            value={formData.type}
+            onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg"
+          >
+            {taskTypes.map(type => (
+              <option key={type.value} value={type.value}>{type.label}</option>
+            ))}
+          </select>
+        </FormField>
+
+        <FormField
+          label="Cím"
+          required
+        >
+          <input
+            type="text"
+            value={formData.title}
+            onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg"
+            placeholder="pl. Lakásátvétel időpontegyeztetés"
+          />
+        </FormField>
+
+        <FormField
+          label="Határidő"
+          required
+        >
+          <input
+            type="date"
+            value={formData.dueDate}
+            onChange={(e) => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg"
+          />
+        </FormField>
+
+        <FormField
+          label="Lead (opcionális)"
+        >
+          <select
+            value={formData.leadId}
+            onChange={(e) => setFormData(prev => ({ ...prev, leadId: e.target.value }))}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg"
+          >
+            <option value="">Válassz leadet...</option>
+            {leads.map(lead => (
+              <option key={lead.id} value={lead.id}>{lead.name}</option>
+            ))}
+          </select>
+        </FormField>
+
+        <FormField
+          label="Lakás (opcionális)"
+        >
+          <select
+            value={formData.apartmentId}
+            onChange={(e) => setFormData(prev => ({ ...prev, apartmentId: e.target.value }))}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg"
+          >
+            <option value="">Válassz lakást...</option>
+            {apartments.map(apt => (
+              <option key={apt.id} value={apt.id}>{apt.name || apt.address}</option>
+            ))}
+          </select>
+        </FormField>
+
+        <FormField
+          label="Leírás"
+        >
+          <textarea
+            value={formData.description}
+            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg"
+            rows="3"
+            placeholder="Részletes leírás..."
+          />
+        </FormField>
+
+        <FormField
+          label="Megjegyzések"
+        >
+          <textarea
+            value={formData.notes}
+            onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg"
+            rows="2"
+            placeholder="Belső megjegyzések..."
+          />
+        </FormField>
+
+        <div className="flex gap-2 justify-end">
+          {onDelete && (
+            <Button
+              type="button"
+              onClick={onDelete}
+              variant="danger"
+            >
+              <Trash2 /> Törlés
+            </Button>
+          )}
+          <Button
+            type="button"
+            onClick={onClose}
+            variant="secondary"
+          >
+            Mégse
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+          >
+            Mentés
+          </Button>
+        </div>
+      </form>
+    </Modal>
+  );
+};
+
+export default ProjectsPage;
