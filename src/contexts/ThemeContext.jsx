@@ -18,6 +18,11 @@ export const ThemeProvider = ({ children }) => {
     return 'light';
   });
 
+  const [backgroundColor, setBackgroundColor] = useState(() => {
+    const saved = localStorage.getItem('smartcrm_bg_color');
+    return saved || 'default';
+  });
+
   // Theme változtatás kezelése
   const toggleTheme = useCallback(() => {
     setTheme((prevTheme) => {
@@ -25,6 +30,14 @@ export const ThemeProvider = ({ children }) => {
       storageHelpers.setTheme(newTheme);
       return newTheme;
     });
+  }, []);
+
+  // Háttérszín változtatás
+  const setBackgroundColorValue = useCallback((color) => {
+    setBackgroundColor(color);
+    localStorage.setItem('smartcrm_bg_color', color);
+    // CSS változó beállítása
+    document.documentElement.style.setProperty('--bg-color', color === 'default' ? '' : color);
   }, []);
 
   // Theme beállítása a HTML elemre
@@ -52,7 +65,12 @@ export const ThemeProvider = ({ children }) => {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
-  const value = useMemo(() => ({ theme, toggleTheme }), [theme, toggleTheme]);
+  const value = useMemo(() => ({ 
+    theme, 
+    toggleTheme, 
+    backgroundColor, 
+    setBackgroundColor: setBackgroundColorValue 
+  }), [theme, toggleTheme, backgroundColor, setBackgroundColorValue]);
 
   return (
     <ThemeContext.Provider value={value}>

@@ -13,7 +13,7 @@ import Card from '../components/common/Card';
 import Modal from '../components/common/Modal';
 import Tooltip from '../components/common/Tooltip';
 import FormField from '../components/common/FormField';
-import { Edit2, X, Copy, Plus, Trash2 } from '../components/common/Icons';
+import { Edit2, X, Copy, Plus, Trash2, RefreshCw } from '../components/common/Icons';
 import { SkeletonListItem } from '../components/common/Skeleton';
 
 // Default role-ok (lokális fallback)
@@ -126,10 +126,11 @@ const SettingsPage = () => {
   const [isSavingEmailSettings, setIsSavingEmailSettings] = useState(false);
 
   // Email fiókok (közös store – Email oldal, Beállítások)
-  const { success } = useToastStore();
+  const { success, error: showError } = useToastStore();
   const { accounts: emailAccounts, loadFromStorage: loadEmailAccounts, updateAccount, addAccount, removeAccount } = useEmailAccountsStore();
   const [editingEmailAccount, setEditingEmailAccount] = useState(null);
   const [showEmailAccountModal, setShowEmailAccountModal] = useState(false);
+
 
   // Számla fiókok state
   const [invoiceAccounts, setInvoiceAccounts] = useState([]);

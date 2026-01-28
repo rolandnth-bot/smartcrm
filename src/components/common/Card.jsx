@@ -12,7 +12,7 @@ const Card = memo(({
 }) => {
   return (
     <div 
-      className={`bg-white dark:bg-gray-800 rounded-lg shadow-lg transition-shadow duration-200 hover:shadow-xl ${className}`} 
+      className={`bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-lg shadow-lg transition-shadow duration-200 hover:shadow-xl ${className}`} 
       role="article"
       aria-labelledby={title ? 'card-title' : undefined}
       aria-describedby={subtitle ? 'card-subtitle' : undefined}

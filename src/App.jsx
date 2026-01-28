@@ -24,6 +24,9 @@ const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const EmailPage = lazy(() => import('./pages/EmailPage'));
 const AppsPage = lazy(() => import('./pages/AppsPage'));
 const ProjectsPage = lazy(() => import('./pages/ProjectsPage'));
+const DocumentsPage = lazy(() => import('./pages/DocumentsPage'));
+const AIAssistantPage = lazy(() => import('./pages/AIAssistantPage'));
+const SmartChatPage = lazy(() => import('./pages/SmartChatPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const PartnerRegistrationPage = lazy(() => import('./pages/PartnerRegistrationPage'));
 
@@ -205,10 +208,23 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
-                <Route 
+                <Route
                   path="apps"
                   element={<AppsPage />}
                 />
+                <Route
+                  path="documents"
+                  element={<DocumentsPage />}
+                />
+                <Route
+                  path="ai-assistant"
+                  element={
+                    <ProtectedRoute permission="ai.view">
+                      <AIAssistantPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="smart-chat" element={<SmartChatPage />} />
               </Route>
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

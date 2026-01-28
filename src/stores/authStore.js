@@ -179,6 +179,50 @@ const useAuthStore = create((set, get) => ({
     }
   },
 
+  // PIN alapú bejelentkezés
+  loginWithPin: async (pin) => {
+    const CORRECT_PIN = '0222';
+    
+    if (!pin || pin.trim() === '') {
+      set({ 
+        error: 'PIN kód megadása kötelező',
+        isLoading: false
+      });
+      return { success: false, error: 'PIN kód megadása kötelező' };
+    }
+
+    if (pin.trim() !== CORRECT_PIN) {
+      set({ 
+        error: 'Hibás PIN kód',
+        isLoading: false,
+        isAuthenticated: false,
+        user: null
+      });
+      return { success: false, error: 'Hibás PIN kód' };
+    }
+
+    // Sikeres bejelentkezés
+    set({ 
+      user: { 
+        uid: 'admin-user',
+        email: 'admin@smartcrm.hu',
+        displayName: 'Admin',
+        name: 'Admin',
+        role: 'admin'
+      },
+      isAuthenticated: true,
+      isLoading: false,
+      error: null
+    });
+    localStorage.setItem('smartcrm_auth', 'true');
+    localStorage.setItem('smartcrm_user', JSON.stringify({ 
+      email: 'admin@smartcrm.hu',
+      name: 'Admin',
+      role: 'admin'
+    }));
+    return { success: true };
+  },
+
   // Mock login (teszteléshez, ha nincs Firebase konfigurálva)
   mockLogin: async (email, password) => {
     // Mock login - csak teszteléshez

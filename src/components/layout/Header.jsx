@@ -1,15 +1,18 @@
-import { memo, useMemo, useCallback } from 'react';
+import { memo, useMemo, useCallback, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Button from '../common/Button';
 import { ChevronLeft, LogOut, Sun, Moon } from '../common/Icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useOnlineStatus } from '../../hooks/useOnlineStatus';
+import AIRoliWidget from '../common/AIRoliWidget';
+import SmartChatWidget from '../common/SmartChatWidget';
 
 const Header = memo(({ onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, backgroundColor, setBackgroundColor } = useTheme();
   const isOnline = useOnlineStatus();
+  const [showColorPicker, setShowColorPicker] = useState(false);
 
   const pageTitle = useMemo(() => {
     const path = location.pathname;
@@ -28,6 +31,9 @@ const Header = memo(({ onLogout }) => {
     if (path === '/settings') return 'Beállítások';
     if (path === '/email') return 'Email / Levelező';
     if (path === '/apps') return 'Apps';
+    if (path === '/documents') return 'Dokumentumok';
+    if (path === '/ai-assistant') return 'AI Asszisztens';
+    if (path === '/smart-chat') return 'SmartChat';
     if (path === '/dashboard') return 'Dashboard';
     return 'SmartCRM';
   }, [location.pathname]);
@@ -38,8 +44,21 @@ const Header = memo(({ onLogout }) => {
     navigate('/');
   }, [navigate]);
 
+  const handleSmartCRMClick = useCallback(() => {
+    navigate('/');
+  }, [navigate]);
+
+  const backgroundColors = [
+    { name: 'Alapértelmezett', value: 'default', class: 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800' },
+    { name: 'Kék', value: '#e0f2fe', class: 'bg-blue-50 dark:bg-blue-950' },
+    { name: 'Zöld', value: '#f0fdf4', class: 'bg-green-50 dark:bg-green-950' },
+    { name: 'Lila', value: '#faf5ff', class: 'bg-purple-50 dark:bg-purple-950' },
+    { name: 'Rózsaszín', value: '#fdf2f8', class: 'bg-pink-50 dark:bg-pink-950' },
+    { name: 'Narancs', value: '#fff7ed', class: 'bg-orange-50 dark:bg-orange-950' }
+  ];
+
   return (
-    <nav className="no-print bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-slate-950 rounded-xl shadow-2xl p-6 mb-6 text-white" aria-label="Fő navigáció">
+    <nav className="no-print bg-gradient-to-r from-cyan-200 via-blue-200 to-emerald-200 dark:from-cyan-300 dark:via-blue-300 dark:to-emerald-300 rounded-xl shadow-2xl p-6 mb-6 text-gray-800 dark:text-gray-900" aria-label="Fő navigáció">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-4">
           {canGoBack && (
@@ -47,21 +66,31 @@ const Header = memo(({ onLogout }) => {
               onClick={handleGoHome}
               variant="ghost"
               size="sm"
-              className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white border-0"
+              className="bg-white bg-opacity-50 hover:bg-opacity-70 text-gray-800 dark:text-gray-900 border-0"
               aria-label="Vissza a főoldalra"
             >
               <ChevronLeft />
             </Button>
           )}
-          <div>
-            <h1 className="text-3xl font-bold mb-1">SmartCRM</h1>
-            <p className="text-slate-300 text-sm">{pageTitle}</p>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleSmartCRMClick}
+              className="text-gray-800 dark:text-gray-900 hover:text-gray-600 dark:hover:text-gray-700 transition-colors cursor-pointer"
+              aria-label="Vissza a főoldalra"
+            >
+              <h1 className="text-3xl font-bold mb-0">SmartCRM</h1>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-700">Vállalatirányítási rendszer</p>
+            </button>
+            <AIRoliWidget />
           </div>
+          {pageTitle !== 'Vállalatirányítási Rendszer' && (
+            <p className="text-gray-700 dark:text-gray-800 text-sm">{pageTitle}</p>
+          )}
         </div>
         <div className="flex items-center gap-3">
           {!isOnline && (
             <div 
-              className="px-3 py-1.5 bg-yellow-500 text-white text-xs font-semibold rounded-lg flex items-center gap-2"
+              className="px-3 py-1.5 bg-yellow-500 text-gray-900 text-xs font-semibold rounded-lg flex items-center gap-2"
               role="status"
               aria-live="polite"
               aria-label="Offline mód"
@@ -74,16 +103,18 @@ const Header = memo(({ onLogout }) => {
             onClick={toggleTheme}
             variant="ghost"
             size="sm"
-            className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white border-0"
+            className="bg-white bg-opacity-50 hover:bg-opacity-70 text-gray-800 dark:text-gray-900 border-0"
             aria-label={theme === 'dark' ? 'Világos téma bekapcsolása' : 'Sötét téma bekapcsolása'}
             title={theme === 'dark' ? 'Világos téma' : 'Sötét téma'}
           >
             {theme === 'dark' ? <Sun /> : <Moon />}
           </Button>
+          {/* SmartChat Widget */}
+          <SmartChatWidget />
           <Button
             onClick={onLogout}
             variant="ghost"
-            className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white border-0"
+            className="bg-white bg-opacity-50 hover:bg-opacity-70 text-gray-800 dark:text-gray-900 border-0"
             aria-label="Kijelentkezés"
           >
             <LogOut /> Kilépés

@@ -28,4 +28,7 @@ export const Database = ({ size, className = '' }) => <span className={className
 export const Package = ({ size, className = '' }) => <span className={className} style={size ? { fontSize: `${size}px` } : {}}>📦</span>;
 export const Users = ({ size, className = '' }) => <span className={className} style={size ? { fontSize: `${size}px` } : {}}>👥</span>;
 export const Home = ({ size, className = '' }) => <span className={className} style={size ? { fontSize: `${size}px` } : {}}>🏠</span>;
+export const Download = ({ size, className = '' }) => <span className={className} style={size ? { fontSize: `${size}px` } : {}}>⬇️</span>;
+export const Upload = ({ size, className = '' }) => <span className={className} style={size ? { fontSize: `${size}px` } : {}}>⬆️</span>;
+export const Folder = ({ size, className = '' }) => <span className={className} style={size ? { fontSize: `${size}px` } : {}}>📁</span>;
 

@@ -693,5 +693,53 @@ export async function loadTestData() {
   return api.post('test/load-seed-data');
 }
 
+/** Revenue Plan/Fact */
+export async function revenueCreate(body) {
+  return api.post('revenue/create', body);
+}
+
+/** AI Assistant - Chat */
+export async function chatWithAI(body) {
+  return api.post('chat', body);
+}
+
+/** AI Assistant - Knowledge Search */
+export async function searchKnowledge(params) {
+  return api.get('knowledge', params);
+}
+
+/** AI Assistant - Agent */
+export async function startAgent(body) {
+  return api.post('agent/start', body);
+}
+
+export async function getAgentStatus() {
+  return api.get('agent/status');
+}
+
+/** AI Assistant - Voice */
+export async function sendVoiceInput(body) {
+  try {
+    return await api.post('voice', body);
+  } catch (error) {
+    // Ha az API nem elérhető (fejlesztési környezetben), mock válasszal térünk vissza
+    if (import.meta.env.DEV && (error.isNetworkError || error.status === 0 || error.status >= 500)) {
+      console.log('Voice API not available, returning mock response');
+      return {
+        success: true,
+        text: 'Köszönöm a kérdésedet. Segíthetek a SmartCRM rendszer használatában. Miben segíthetek?',
+        message: 'Köszönöm a kérdésedet. Segíthetek a SmartCRM rendszer használatában. Miben segíthetek?'
+      };
+    }
+    // Éles környezetben vagy valódi hibánál dobjuk a hibát
+    throw error;
+  }
+}
+
+/** AI Assistant - Calls */
+export async function initiateCall(body) {
+  return api.post('call/outgoing', body);
+}
+
 export default api;
 
