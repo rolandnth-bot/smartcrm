@@ -3,7 +3,8 @@ import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: process.env.NODE_ENV === 'production' ? '/smartcrm/' : '/',
+  // GitHub Pages esetén /smartcrm/, Vercel esetén / (nincs base path)
+  base: process.env.VERCEL ? '/' : (process.env.NODE_ENV === 'production' ? '/smartcrm/' : '/'),
   plugins: [react()],
   server: {
     port: 3000,
