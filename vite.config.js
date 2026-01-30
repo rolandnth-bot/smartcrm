@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
+// Force rebuild: 2026-01-30
 export default defineConfig({
   // Vercel deployment: base path must be / (root)
   base: '/',
