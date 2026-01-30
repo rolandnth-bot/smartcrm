@@ -3,10 +3,8 @@
  * Offline támogatás és cache kezelés
  */
 
-const CACHE_NAME = 'smartcrm-v1.1.0';
+const CACHE_NAME = 'smartcrm-v1.2.0-' + Date.now();
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
   '/manifest.json'
 ];
 
@@ -77,7 +75,23 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Statikus assetek - cache-first stratégia
+  // HTML és JS fájlok - MINDIG network-first (friss verzió)
+  if (request.destination === 'document' || request.destination === 'script' ||
+      url.pathname.endsWith('.html') || url.pathname.endsWith('.js')) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          return response;
+        })
+        .catch(() => {
+          // Offline esetén próbáljuk cache-ből
+          return caches.match(request);
+        })
+    );
+    return;
+  }
+
+  // Egyéb statikus assetek (CSS, képek) - cache-first stratégia
   event.respondWith(
     caches.match(request).then((cachedResponse) => {
       if (cachedResponse) {
