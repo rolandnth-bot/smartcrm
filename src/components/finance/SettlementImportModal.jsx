@@ -33,6 +33,67 @@ const AUTO_DETECT_PATTERNS = {
 };
 
 /**
+ * Excel serial date to JavaScript Date
+ * @param {number} serial - Excel serial date (days since 1900-01-01)
+ * @returns {Date} JavaScript Date object
+ */
+function excelDateToJS(serial) {
+  if (typeof serial !== 'number' || serial < 1) return null;
+  // Excel epoch: 1900-01-01 (but Excel incorrectly treats 1900 as leap year)
+  const excelEpoch = new Date(1899, 11, 30);
+  return new Date(excelEpoch.getTime() + serial * 86400 * 1000);
+}
+
+/**
+ * Format date to readable Hungarian format
+ * @param {string|number|Date} dateInput - Date input (can be serial, string, or Date)
+ * @param {number} year - Year for MM.DD. format dates
+ * @returns {string} Formatted date string (e.g., "2024.09.15.")
+ */
+function formatCheckInDate(dateInput, year = new Date().getFullYear()) {
+  if (!dateInput) return '';
+
+  let date;
+
+  // If it's a number, assume Excel serial date
+  if (typeof dateInput === 'number') {
+    date = excelDateToJS(dateInput);
+    if (!date) return dateInput.toString();
+  }
+  // If it's a string
+  else if (typeof dateInput === 'string') {
+    // Try MM.DD. format
+    const parts = dateInput.split('.');
+    if (parts.length >= 2) {
+      const month = parseInt(parts[0]);
+      const day = parseInt(parts[1]);
+      if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+        date = new Date(year, month - 1, day);
+      }
+    }
+
+    // If not parsed, try standard Date parsing
+    if (!date) {
+      date = new Date(dateInput);
+    }
+  }
+  // If it's already a Date
+  else if (dateInput instanceof Date) {
+    date = dateInput;
+  }
+
+  // Format to YYYY.MM.DD.
+  if (date && !isNaN(date.getTime())) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}.${m}.${d}.`;
+  }
+
+  return String(dateInput);
+}
+
+/**
  * Összesítés számítása (bookings, totals, partner payout, SmartProperties revenue)
  * @param {Array} bookings - Parsed bookings from Excel
  * @param {Array} headers - Column headers
@@ -56,8 +117,10 @@ function calculateSummary(bookings, headers, mapping, metadata) {
   // Process each booking
   const processedBookings = bookings.map(booking => {
     const guestName = booking[headers[mapping.guestName]] || '';
-    const checkIn = booking[headers[mapping.checkIn]] || '';
+    const checkInRaw = booking[headers[mapping.checkIn]] || '';
+    const checkIn = formatCheckInDate(checkInRaw, metadata.year);
     const nights = getValue(booking, 'checkOut') || 1;
+    const commission = getValue(booking, 'commission');
     const netRentFee = getValue(booking, 'netRentFee');
     const cityTax = getValue(booking, 'cityTax') || (netRentFee * 0.04);
     const cleaning = getValue(booking, 'cleaning') || 38;
@@ -68,6 +131,7 @@ function calculateSummary(bookings, headers, mapping, metadata) {
       guestName,
       checkIn,
       nights,
+      commission,
       netRentFee,
       cityTax,
       cleaning,
@@ -220,6 +284,8 @@ const SettlementImportModal = ({ isOpen, onClose, onImportSuccess, apartments })
   const [exchangeRate, setExchangeRate] = useState(410);
   const [isProcessing, setIsProcessing] = useState(false);
   const [summaryData, setSummaryData] = useState(null); // Calculated summary for display
+  const [selectedBooking, setSelectedBooking] = useState(null); // Selected booking for detail modal
+  const [showBookingDetail, setShowBookingDetail] = useState(false); // Show booking detail modal
 
   const fileInputRef = useRef(null);
 
@@ -699,41 +765,70 @@ const SettlementImportModal = ({ isOpen, onClose, onImportSuccess, apartments })
             <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
               <h4 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
                 📊 FOGLALÁSOK
+                <span className="text-xs font-normal text-gray-500 dark:text-gray-400 ml-2">(Kattints egy sorra a részletekért)</span>
               </h4>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-xs">
                   <thead className="bg-gray-100 dark:bg-gray-700">
                     <tr>
-                      <th className="px-3 py-2 text-left font-semibold">Platform</th>
-                      <th className="px-3 py-2 text-left font-semibold">Vendég</th>
-                      <th className="px-3 py-2 text-left font-semibold">Check-in</th>
-                      <th className="px-3 py-2 text-right font-semibold">Éjszakák</th>
-                      <th className="px-3 py-2 text-right font-semibold">Payout</th>
+                      <th className="px-2 py-2 text-left font-semibold">Platform</th>
+                      <th className="px-2 py-2 text-left font-semibold">Vendég</th>
+                      <th className="px-2 py-2 text-left font-semibold">Check-in</th>
+                      <th className="px-2 py-2 text-right font-semibold">Éjszakák</th>
+                      <th className="px-2 py-2 text-right font-semibold">Commission</th>
+                      <th className="px-2 py-2 text-right font-semibold">Net Rent</th>
+                      <th className="px-2 py-2 text-right font-semibold">City Tax</th>
+                      <th className="px-2 py-2 text-right font-semibold">Cleaning</th>
+                      <th className="px-2 py-2 text-right font-semibold">Payout</th>
                     </tr>
                   </thead>
                   <tbody>
                     {/* Airbnb bookings */}
                     {summaryData.airbnbBookings.map((booking, idx) => (
-                      <tr key={`airbnb-${idx}`} className="bg-pink-50 dark:bg-pink-900/20 border-b border-pink-100 dark:border-pink-800">
-                        <td className="px-3 py-2">
+                      <tr
+                        key={`airbnb-${idx}`}
+                        onClick={() => {
+                          setSelectedBooking({ ...booking, index: idx, type: 'airbnb' });
+                          setShowBookingDetail(true);
+                        }}
+                        className="bg-pink-50 dark:bg-pink-900/20 border-b border-pink-100 dark:border-pink-800 hover:bg-pink-100 dark:hover:bg-pink-900/30 cursor-pointer transition-colors"
+                        title="Kattints a részletekért"
+                      >
+                        <td className="px-2 py-2">
                           <span className="inline-block bg-pink-500 text-white text-xs px-2 py-0.5 rounded font-semibold">Airbnb</span>
                         </td>
-                        <td className="px-3 py-2">{booking.guestName}</td>
-                        <td className="px-3 py-2">{booking.checkIn}</td>
-                        <td className="px-3 py-2 text-right">{booking.nights}</td>
-                        <td className="px-3 py-2 text-right font-semibold">€{booking.payout.toFixed(2)}</td>
+                        <td className="px-2 py-2">{booking.guestName}</td>
+                        <td className="px-2 py-2">{booking.checkIn}</td>
+                        <td className="px-2 py-2 text-right">{booking.nights}</td>
+                        <td className="px-2 py-2 text-right">€{booking.commission?.toFixed(2) || '0.00'}</td>
+                        <td className="px-2 py-2 text-right">€{booking.netRentFee.toFixed(2)}</td>
+                        <td className="px-2 py-2 text-right">€{booking.cityTax.toFixed(2)}</td>
+                        <td className="px-2 py-2 text-right">€{booking.cleaning.toFixed(2)}</td>
+                        <td className="px-2 py-2 text-right font-semibold">€{booking.payout.toFixed(2)}</td>
                       </tr>
                     ))}
                     {/* Booking.com bookings */}
                     {summaryData.bookingBookings.map((booking, idx) => (
-                      <tr key={`booking-${idx}`} className="bg-blue-50 dark:bg-blue-900/20 border-b border-blue-100 dark:border-blue-800">
-                        <td className="px-3 py-2">
+                      <tr
+                        key={`booking-${idx}`}
+                        onClick={() => {
+                          setSelectedBooking({ ...booking, index: idx, type: 'booking' });
+                          setShowBookingDetail(true);
+                        }}
+                        className="bg-blue-50 dark:bg-blue-900/20 border-b border-blue-100 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 cursor-pointer transition-colors"
+                        title="Kattints a részletekért"
+                      >
+                        <td className="px-2 py-2">
                           <span className="inline-block bg-blue-600 text-white text-xs px-2 py-0.5 rounded font-semibold">Booking</span>
                         </td>
-                        <td className="px-3 py-2">{booking.guestName}</td>
-                        <td className="px-3 py-2">{booking.checkIn}</td>
-                        <td className="px-3 py-2 text-right">{booking.nights}</td>
-                        <td className="px-3 py-2 text-right font-semibold">€{booking.payout.toFixed(2)}</td>
+                        <td className="px-2 py-2">{booking.guestName}</td>
+                        <td className="px-2 py-2">{booking.checkIn}</td>
+                        <td className="px-2 py-2 text-right">{booking.nights}</td>
+                        <td className="px-2 py-2 text-right">€{booking.commission?.toFixed(2) || '0.00'}</td>
+                        <td className="px-2 py-2 text-right">€{booking.netRentFee.toFixed(2)}</td>
+                        <td className="px-2 py-2 text-right">€{booking.cityTax.toFixed(2)}</td>
+                        <td className="px-2 py-2 text-right">€{booking.cleaning.toFixed(2)}</td>
+                        <td className="px-2 py-2 text-right font-semibold">€{booking.payout.toFixed(2)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -770,10 +865,10 @@ const SettlementImportModal = ({ isOpen, onClose, onImportSuccess, apartments })
               </div>
             </div>
 
-            {/* PARTNER KIFIZETÉS (Co-host) */}
+            {/* PARTNER BEVÉTEL */}
             <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg border-2 border-orange-300 dark:border-orange-700 p-4">
               <h4 className="text-lg font-bold text-orange-800 dark:text-orange-300 mb-3 flex items-center gap-2">
-                👤 PARTNER KIFIZETÉS (Co-host)
+                👤 PARTNER BEVÉTEL
               </h4>
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="flex justify-between py-2">
@@ -787,10 +882,10 @@ const SettlementImportModal = ({ isOpen, onClose, onImportSuccess, apartments })
               </div>
             </div>
 
-            {/* SMARTPROPERTIES BEVÉTEL */}
+            {/* ÜZEMELTETÉS */}
             <div className="bg-green-50 dark:bg-green-900/20 rounded-lg border-2 border-green-400 dark:border-green-600 p-4">
               <h4 className="text-lg font-bold text-green-800 dark:text-green-300 mb-3 flex items-center gap-2">
-                ★ SMARTPROPERTIES BEVÉTEL
+                ★ ÜZEMELTETÉS
               </h4>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between py-2 border-b border-green-200 dark:border-green-700">
@@ -843,6 +938,218 @@ const SettlementImportModal = ({ isOpen, onClose, onImportSuccess, apartments })
                 Mégse
               </Button>
             </div>
+
+            {/* BOOKING DETAIL/EDIT MODAL */}
+            {showBookingDetail && selectedBooking && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60]" onClick={() => setShowBookingDetail(false)}>
+                <div
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Header */}
+                  <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">FOGLALÁS RÉSZLETEI</h3>
+                    <button
+                      onClick={() => setShowBookingDetail(false)}
+                      className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  {/* Body */}
+                  <div className="p-4 space-y-4">
+                    {/* Basic Info */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Vendég neve
+                      </label>
+                      <input
+                        type="text"
+                        value={selectedBooking.guestName}
+                        onChange={(e) => setSelectedBooking({ ...selectedBooking, guestName: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-md text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Platform
+                      </label>
+                      <select
+                        value={selectedBooking.platform}
+                        onChange={(e) => setSelectedBooking({ ...selectedBooking, platform: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-md text-sm"
+                      >
+                        <option value="airbnb">Airbnb</option>
+                        <option value="booking">Booking.com</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Check-in
+                      </label>
+                      <input
+                        type="text"
+                        value={selectedBooking.checkIn}
+                        onChange={(e) => setSelectedBooking({ ...selectedBooking, checkIn: e.target.value })}
+                        placeholder="2024.12.01."
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-md text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Éjszakák száma
+                      </label>
+                      <input
+                        type="number"
+                        value={selectedBooking.nights}
+                        onChange={(e) => setSelectedBooking({ ...selectedBooking, nights: parseInt(e.target.value) || 1 })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-md text-sm"
+                      />
+                    </div>
+
+                    {/* Financial Details */}
+                    <div className="border-t border-gray-300 dark:border-gray-600 pt-4">
+                      <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">PÉNZÜGYI RÉSZLETEK</h4>
+
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                            Commission (szerkeszthető)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={selectedBooking.commission || 0}
+                            onChange={(e) => {
+                              const commission = parseFloat(e.target.value) || 0;
+                              setSelectedBooking({
+                                ...selectedBooking,
+                                commission,
+                                // Recalculate dependent fields
+                                netRentFee: selectedBooking.netRentFee,
+                                cityTax: selectedBooking.netRentFee * 0.04,
+                                payout: selectedBooking.netRentFee + (selectedBooking.netRentFee * 0.04)
+                              });
+                            }}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-md text-sm"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                            Net Rent Fee (szerkeszthető)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={selectedBooking.netRentFee}
+                            onChange={(e) => {
+                              const netRentFee = parseFloat(e.target.value) || 0;
+                              const cityTax = netRentFee * 0.04;
+                              const payout = netRentFee + cityTax;
+                              setSelectedBooking({
+                                ...selectedBooking,
+                                netRentFee,
+                                cityTax,
+                                payout
+                              });
+                            }}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-md text-sm"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                            City Tax (IFA 4%) - automatikus
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={selectedBooking.cityTax}
+                            readOnly
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-600 dark:text-gray-300 rounded-md text-sm"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                            Cleaning (szerkeszthető)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={selectedBooking.cleaning}
+                            onChange={(e) => setSelectedBooking({ ...selectedBooking, cleaning: parseFloat(e.target.value) || 0 })}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-md text-sm"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                            Payout - automatikus
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={selectedBooking.payout}
+                            readOnly
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-600 dark:text-gray-300 rounded-md text-sm font-semibold"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Calculation Info */}
+                    <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 text-xs text-gray-700 dark:text-gray-300">
+                      <div className="font-semibold mb-1">SZÁMÍTÁSOK:</div>
+                      <div>• City Tax = Net Rent Fee × 4%</div>
+                      <div>• Payout = Net Rent Fee + City Tax</div>
+                    </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="flex gap-3 p-4 border-t border-gray-200 dark:border-gray-700">
+                    <Button
+                      onClick={() => {
+                        // Update the booking in summaryData
+                        const newSummaryData = { ...summaryData };
+                        if (selectedBooking.type === 'airbnb') {
+                          newSummaryData.airbnbBookings[selectedBooking.index] = selectedBooking;
+                        } else {
+                          newSummaryData.bookingBookings[selectedBooking.index] = selectedBooking;
+                        }
+                        setSummaryData(newSummaryData);
+                        setShowBookingDetail(false);
+                        useToastStore.getState().success('Foglalás frissítve');
+                      }}
+                      variant="primary"
+                      className="flex-1"
+                    >
+                      Mentés
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        // TODO: Implement delete functionality
+                        useToastStore.getState().warning('Törlés funkció hamarosan elérhető');
+                      }}
+                      variant="outline"
+                    >
+                      Törlés
+                    </Button>
+                    <Button
+                      onClick={() => setShowBookingDetail(false)}
+                      variant="ghost"
+                    >
+                      Mégse
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
