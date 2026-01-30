@@ -6,6 +6,7 @@ import Button from '../components/common/Button';
 import { Upload, Download } from '../components/common/Icons';
 import { formatCurrencyEUR, formatNumber } from '../utils/numberUtils';
 import { exportToCSV, exportToExcel } from '../utils/exportUtils';
+import SettlementImportModal from '../components/finance/SettlementImportModal';
 
 const SettlementsPage = () => {
   const {
@@ -275,18 +276,16 @@ const SettlementsPage = () => {
         </div>
       </Card>
 
-      {/* TODO: Import Modal */}
-      {showImportModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4">
-            <h2 className="text-xl font-bold mb-4">Import Elszámolás</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Az import funkció hamarosan elérhető lesz.
-            </p>
-            <Button onClick={() => setShowImportModal(false)}>Bezárás</Button>
-          </div>
-        </div>
-      )}
+      {/* Import Modal */}
+      <SettlementImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImportSuccess={(settlement) => {
+          console.log('Settlement imported:', settlement);
+          setShowImportModal(false);
+        }}
+        apartments={apartments}
+      />
 
       {/* TODO: Detail Modal */}
       {selectedSettlement && (
