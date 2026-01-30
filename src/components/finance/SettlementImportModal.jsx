@@ -1013,32 +1013,9 @@ const SettlementImportModal = ({ isOpen, onClose, onImportSuccess, apartments })
 
                     {/* Financial Details */}
                     <div className="border-t border-gray-300 dark:border-gray-600 pt-4">
-                      <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">PÉNZÜGYI RÉSZLETEK</h4>
+                      <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">💰 BEVÉTELEK</h4>
 
                       <div className="space-y-3">
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            Commission (szerkeszthető)
-                          </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={selectedBooking.commission || 0}
-                            onChange={(e) => {
-                              const commission = parseFloat(e.target.value) || 0;
-                              setSelectedBooking({
-                                ...selectedBooking,
-                                commission,
-                                // Recalculate dependent fields
-                                netRentFee: selectedBooking.netRentFee,
-                                cityTax: selectedBooking.netRentFee * 0.04,
-                                payout: selectedBooking.netRentFee + (selectedBooking.netRentFee * 0.04)
-                              });
-                            }}
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-md text-sm"
-                          />
-                        </div>
-
                         <div>
                           <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
                             Net Rent Fee (szerkeszthető)
@@ -1059,19 +1036,6 @@ const SettlementImportModal = ({ isOpen, onClose, onImportSuccess, apartments })
                               });
                             }}
                             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-md text-sm"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            City Tax (IFA 4%) - automatikus
-                          </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={selectedBooking.cityTax}
-                            readOnly
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-600 dark:text-gray-300 rounded-md text-sm"
                           />
                         </div>
 
@@ -1103,11 +1067,64 @@ const SettlementImportModal = ({ isOpen, onClose, onImportSuccess, apartments })
                       </div>
                     </div>
 
+                    {/* Taxes Section */}
+                    <div className="border-t border-gray-300 dark:border-gray-600 pt-4">
+                      <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">📊 ADÓK</h4>
+
+                      <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 rounded-lg p-3 space-y-2 text-sm">
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-700 dark:text-gray-300">Idegenforgalmi adó (IFA 4%):</span>
+                          <span className="font-semibold text-gray-900 dark:text-gray-100">€{selectedBooking.cityTax?.toFixed(2) || '0.00'}</span>
+                        </div>
+
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center gap-1">
+                            <span className="text-gray-700 dark:text-gray-300">Turisztikai fejlesztési hozzájárulás:</span>
+                            <span
+                              className="inline-block w-3 h-3 rounded-full bg-blue-500 text-white text-[10px] flex items-center justify-center cursor-help"
+                              title="A turisztikai fejlesztési hozzájárulás mértéke megegyezik az IFA összeggel"
+                            >
+                              i
+                            </span>
+                          </div>
+                          <span className="font-semibold text-gray-900 dark:text-gray-100">€{selectedBooking.cityTax?.toFixed(2) || '0.00'}</span>
+                        </div>
+
+                        <div className="border-t border-yellow-300 dark:border-yellow-700 pt-2 mt-2">
+                          <div className="flex justify-between items-center mb-2">
+                            <label className="text-gray-700 dark:text-gray-300">Platform Commission (szerkeszthető):</label>
+                            <input
+                              type="number"
+                              step="0.01"
+                              value={selectedBooking.commission || 0}
+                              onChange={(e) => {
+                                const commission = parseFloat(e.target.value) || 0;
+                                setSelectedBooking({
+                                  ...selectedBooking,
+                                  commission
+                                });
+                              }}
+                              className="w-24 px-2 py-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded text-sm text-right"
+                            />
+                          </div>
+
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-700 dark:text-gray-300">Jutalékáfa (Commission × 13,5%):</span>
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">
+                              €{((selectedBooking.commission || 0) * 0.135).toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                     {/* Calculation Info */}
                     <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 text-xs text-gray-700 dark:text-gray-300">
-                      <div className="font-semibold mb-1">SZÁMÍTÁSOK:</div>
-                      <div>• City Tax = Net Rent Fee × 4%</div>
-                      <div>• Payout = Net Rent Fee + City Tax</div>
+                      <div className="font-semibold mb-1">📝 SZÁMÍTÁSOK:</div>
+                      <div>• IFA (City Tax) = Net Rent Fee × 4%</div>
+                      <div>• Turisztikai hozzájárulás = IFA (ugyanaz az összeg)</div>
+                      <div>• Jutalékáfa = Platform Commission × 13,5%</div>
+                      <div>• Payout = Net Rent Fee + IFA</div>
                     </div>
                   </div>
 
