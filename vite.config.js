@@ -3,8 +3,8 @@ import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  // Vercel: / (default). GitHub Pages: VITE_BASE_PATH=/smartcrm/ a workflow-ban
-  base: process.env.VITE_BASE_PATH || '/',
+  // Vercel deployment: base path must be / (root)
+  base: '/',
   plugins: [react()],
   server: {
     port: 3000,

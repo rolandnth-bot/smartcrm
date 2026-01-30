@@ -1,0 +1,5 @@
+# Ignore local build artifacts - Vercel will build fresh
+dist
+node_modules
+.env.local
+.vite
