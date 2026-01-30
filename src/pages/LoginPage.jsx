@@ -17,7 +17,7 @@ const LoginPage = () => {
     e.preventDefault();
     
     if (!pin || pin.length === 0) {
-      useToastStore.getState().error('PIN kód megadása kötelező');
+      useToastStore.getState().error('PIN kód megadása kötelez');
       return;
     }
 
@@ -46,7 +46,7 @@ const LoginPage = () => {
               value={pin}
               onChange={(e) => setPin(e.target.value)}
               className="w-full px-4 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-2xl tracking-widest font-mono"
-              placeholder="••••"
+              placeholder=""
               maxLength="4"
               required
               aria-required="true"
@@ -56,7 +56,7 @@ const LoginPage = () => {
               autoFocus
             />
             <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-1">
-              4 számjegyű PIN kód
+              4 számjegy PIN kód
             </p>
           </div>
 

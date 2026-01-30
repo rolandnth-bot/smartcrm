@@ -40,7 +40,7 @@ class ErrorBoundary extends Component {
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-8 max-w-2xl w-full">
             <div className="text-center mb-6">
-              <div className="text-6xl mb-4">⚠️</div>
+              <div className="text-6xl mb-4"></div>
               <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">
                 Hiba történt
               </h1>
@@ -67,7 +67,7 @@ class ErrorBoundary extends Component {
                 onClick={() => window.location.href = '/'}
                 variant="secondary"
               >
-                Főoldal
+                Foldal
               </Button>
             </div>
           </div>

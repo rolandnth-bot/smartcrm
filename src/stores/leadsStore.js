@@ -19,11 +19,11 @@ export const leadStatuses = [
   { key: 'felmeres_megtortent', label: 'Felmérés megtörtént', color: 'blue', order: 4 },
   { key: 'ajanlat_kuldve', label: 'Ajánlat kiküldve', color: 'purple', order: 5 },
   { key: 'targyalas', label: 'Tárgyalás', color: 'cyan', order: 6 },
-  { key: 'szerzodes_kuldve', label: 'Szerződés elküldve', color: 'indigo', order: 7 },
+  { key: 'szerzodes_kuldve', label: 'Szerzdés elküldve', color: 'indigo', order: 7 },
   { key: 'alairva', label: 'Aláírva', color: 'green', order: 8 },
   { key: 'aktiv_partner', label: 'Aktív partner', color: 'green', order: 9 },
   { key: 'elutasitva', label: 'Elutasítva', color: 'red', order: 10 },
-  { key: 'kesobb', label: 'Később', color: 'gray', order: 11 },
+  { key: 'kesobb', label: 'Késbb', color: 'gray', order: 11 },
   { key: 'nem_aktualis', label: 'Nem aktuális', color: 'gray', order: 12 }
 ];
 
@@ -53,9 +53,9 @@ export const leadSources = [
 
 // Lead értékelések
 export const leadRatings = [
-  { key: 'hot', label: 'Forró - Sürgős', color: 'red' },
-  { key: 'warm', label: 'Meleg - Érdeklődő', color: 'orange' },
-  { key: 'cold', label: 'Hideg - Későbbi', color: 'blue' }
+  { key: 'hot', label: 'Forró - Sürgs', color: 'red' },
+  { key: 'warm', label: 'Meleg - Érdekld', color: 'orange' },
+  { key: 'cold', label: 'Hideg - Késbbi', color: 'blue' }
 ];
 
 const useLeadsStore = create((set, get) => ({
@@ -63,7 +63,7 @@ const useLeadsStore = create((set, get) => ({
   leads: [],
   isLoading: false,
   error: null,
-  legacyStatusMap: legacyStatusMap, // Hozzáadjuk a state-hez, hogy elérhető legyen
+  legacyStatusMap: legacyStatusMap, // Hozzáadjuk a state-hez, hogy elérhet legyen
   filter: 'all', // 'all' vagy státusz key
   searchQuery: '', // Szöveges keresés
   showAddLead: false,
@@ -193,7 +193,7 @@ const useLeadsStore = create((set, get) => ({
     const { leads, filter, searchQuery, legacyStatusMap } = get();
     let filtered = leads;
     
-    // Státusz szűrés (kompatibilitás régi és új státuszokkal)
+    // Státusz szrés (kompatibilitás régi és új státuszokkal)
     if (filter !== 'all') {
       const mappedFilter = legacyStatusMap[filter] || filter;
       filtered = filtered.filter((lead) => {
@@ -260,7 +260,7 @@ const useLeadsStore = create((set, get) => ({
       const state = get();
       const existingLeads = state.leads || [];
       
-      // Egyezés ellenőrzés: email vagy név alapján
+      // Egyezés ellenrzés: email vagy név alapján
       const isDuplicate = (newLead) => {
         const newEmail = (newLead.email || '').toLowerCase().trim();
         const newName = (newLead.name || '').toLowerCase().trim();
@@ -269,11 +269,11 @@ const useLeadsStore = create((set, get) => ({
           const existingEmail = (existing.email || '').toLowerCase().trim();
           const existingName = (existing.name || '').toLowerCase().trim();
           
-          // Email egyezés (ha mindkettő van)
+          // Email egyezés (ha mindkett van)
           if (newEmail && existingEmail && newEmail === existingEmail) {
             return true;
           }
-          // Név egyezés (ha mindkettő van és nincs email)
+          // Név egyezés (ha mindkett van és nincs email)
           if (newName && existingName && newName === existingName && !newEmail && !existingEmail) {
             return true;
           }
@@ -301,13 +301,13 @@ const useLeadsStore = create((set, get) => ({
           importedData: {}
         };
         
-        // Egyezés ellenőrzés
+        // Egyezés ellenrzés
         if (isDuplicate(newLead)) {
           skippedLeads.push(newLead);
           return; // Kihagyjuk
         }
         
-        // Minden egyéb mezőt tárolunk az importedData-ban
+        // Minden egyéb mezt tárolunk az importedData-ban
         Object.keys(item).forEach(key => {
           if (!['name', 'email', 'phone', 'source', 'status', 'rating', 'notes', 'apartmentInterest', 'budget', 'assignedTo'].includes(key.toLowerCase())) {
             const normalizedKey = key.toLowerCase()
@@ -375,7 +375,7 @@ const useLeadsStore = create((set, get) => ({
           const value = values[index];
           
           if (value) {
-            // Standard mezők
+            // Standard mezk
             if (headerLower === 'name' || headerLower === 'név') {
               lead.name = value;
             } else if (headerLower === 'email') {
@@ -391,7 +391,7 @@ const useLeadsStore = create((set, get) => ({
             } else if (headerLower === 'rating') {
               lead.rating = value;
             } else if (headerLower === 'szín' || headerLower === 'color' || headerLower === 'lead_szín' || headerLower === 'lead_color') {
-              // Szín: zöld=meleg; piros→Később (amber); szürke→Nem aktuális; fekete=elveszett
+              // Szín: zöld=meleg; pirosKésbb (amber); szürkeNem aktuális; fekete=elveszett
               const colorValue = String(value).toLowerCase().trim();
               if (colorValue === 'zöld' || colorValue === 'green' || colorValue === 'meleg' || colorValue === 'warm') {
                 lead.leadColor = 'green';
@@ -409,7 +409,7 @@ const useLeadsStore = create((set, get) => ({
               if (!lead.importedData) {
                 lead.importedData = {};
               }
-              // Oszlopnév normalizálása (kisbetű, ékezetek nélkül, szóköz helyett aláhúzás)
+              // Oszlopnév normalizálása (kisbet, ékezetek nélkül, szóköz helyett aláhúzás)
               const normalizedKey = headerLower
                 .normalize('NFD')
                 .replace(/[\u0300-\u036f]/g, '')
@@ -422,9 +422,9 @@ const useLeadsStore = create((set, get) => ({
           }
         });
         
-        // Excel specifikus mezők – ugyanaz a normalizálás mint CSV, hogy az Ingatlan információk űrlappal egyezzen
+        // Excel specifikus mezk  ugyanaz a normalizálás mint CSV, hogy az Ingatlan információk rlappal egyezzen
         if (lead.importedData) {
-          // Van jelenleg kiadó ingatlanod → igen_van / hamarosan_lesz / nem
+          // Van jelenleg kiadó ingatlanod  igen_van / hamarosan_lesz / nem
           if (lead.importedData.van_jelenleg_kiado_ingatlanod_vagy_hamarosan_lesz) {
             const val = String(lead.importedData.van_jelenleg_kiado_ingatlanod_vagy_hamarosan_lesz).toLowerCase().replace(/[,_]/g, ' ');
             if (val.includes('igen') && val.includes('van')) {
@@ -437,7 +437,7 @@ const useLeadsStore = create((set, get) => ({
               lead.hasProperty = lead.importedData.van_jelenleg_kiado_ingatlanod_vagy_hamarosan_lesz;
             }
           }
-          // Jelenleg milyen formában adod ki → airbnb_rövidtáv / hosszútáv / nincs_kiadva_még
+          // Jelenleg milyen formában adod ki  airbnb_rövidtáv / hosszútáv / nincs_kiadva_még
           if (lead.importedData.jelenleg_milyen_formaban_adod_ki) {
             const val = String(lead.importedData.jelenleg_milyen_formaban_adod_ki).toLowerCase().replace(/[/_\s]/g, ' ');
             if (val.includes('airbnb') && (val.includes('rövid') || val.includes('rovid') || val.includes('rovidtav'))) {
@@ -450,20 +450,20 @@ const useLeadsStore = create((set, get) => ({
               lead.currentRentalType = lead.importedData.jelenleg_milyen_formaban_adod_ki;
             }
           }
-          // Van most aktív üzemeltetőd → igen / nincs
+          // Van most aktív üzemeltetd  igen / nincs
           if (lead.importedData.van_most_aktiv_uzemeltetod) {
             const val = String(lead.importedData.van_most_aktiv_uzemeltetod).toLowerCase();
             lead.hasOperator = val.includes('igen') ? 'igen' : 'nincs';
           }
-          // Miért szeretnél üzemeltetőt váltani – szöveg, változatlan
+          // Miért szeretnél üzemeltett váltani  szöveg, változatlan
           if (lead.importedData.miert_szeretnel_uzemeltetot_valtani) {
             lead.whyChangeOperator = lead.importedData.miert_szeretnel_uzemeltetot_valtani;
           }
-          // Melyik városban található az ingatlan – változatlan
+          // Melyik városban található az ingatlan  változatlan
           if (lead.importedData.melyik_varosban_talalhato_az_ingatlan) {
             lead.city = lead.importedData.melyik_varosban_talalhato_az_ingatlan;
           }
-          // Jelentkezett dátum → YYYY-MM-DD
+          // Jelentkezett dátum  YYYY-MM-DD
           if (lead.importedData.jelentkezett) {
             try {
               const raw = lead.importedData.jelentkezett;
@@ -488,7 +488,7 @@ const useLeadsStore = create((set, get) => ({
         return { success: false, error: 'Nem található érvényes lead az Excel fájlban' };
       }
 
-      // Egyezés ellenőrzés: email vagy név alapján
+      // Egyezés ellenrzés: email vagy név alapján
       const state = get();
       const existingLeads = state.leads || [];
       
@@ -500,11 +500,11 @@ const useLeadsStore = create((set, get) => ({
           const existingEmail = (existing.email || '').toLowerCase().trim();
           const existingName = (existing.name || '').toLowerCase().trim();
           
-          // Email egyezés (ha mindkettő van)
+          // Email egyezés (ha mindkett van)
           if (newEmail && existingEmail && newEmail === existingEmail) {
             return true;
           }
-          // Név egyezés (ha mindkettő van és nincs email)
+          // Név egyezés (ha mindkett van és nincs email)
           if (newName && existingName && newName === existingName && !newEmail && !existingEmail) {
             return true;
           }
@@ -564,7 +564,7 @@ const useLeadsStore = create((set, get) => ({
           const value = values[index];
           
           if (value) {
-            // Standard mezők
+            // Standard mezk
             if (headerLower === 'name' || headerLower === 'név') {
               lead.name = value;
             } else if (headerLower === 'email') {
@@ -605,7 +605,7 @@ const useLeadsStore = create((set, get) => ({
           }
         });
         
-        // Excel specifikus mezők kezelése
+        // Excel specifikus mezk kezelése
         if (lead.importedData) {
           // Van jelenleg kiadó ingatlanod
           if (lead.importedData.van_jelenleg_kiado_ingatlanod_vagy_hamarosan_lesz) {
@@ -629,12 +629,12 @@ const useLeadsStore = create((set, get) => ({
               lead.currentRentalType = 'nincs_kiadva_még';
             }
           }
-          // Van most aktív üzemeltetőd
+          // Van most aktív üzemeltetd
           if (lead.importedData.van_most_aktiv_uzemeltetod) {
             const val = lead.importedData.van_most_aktiv_uzemeltetod.toLowerCase();
             lead.hasOperator = val.includes('igen') ? 'igen' : 'nincs';
           }
-          // Miért szeretnél üzemeltetőt váltani
+          // Miért szeretnél üzemeltett váltani
           if (lead.importedData.miert_szeretnel_uzemeltetot_valtani) {
             lead.whyChangeOperator = lead.importedData.miert_szeretnel_uzemeltetot_valtani;
           }
@@ -664,7 +664,7 @@ const useLeadsStore = create((set, get) => ({
         return { success: false, error: 'CSV fájl üres vagy csak fejlécet tartalmaz' };
       }
 
-      // Egyezés ellenőrzés: email vagy név alapján
+      // Egyezés ellenrzés: email vagy név alapján
       const state = get();
       const existingLeads = state.leads || [];
       
@@ -676,11 +676,11 @@ const useLeadsStore = create((set, get) => ({
           const existingEmail = (existing.email || '').toLowerCase().trim();
           const existingName = (existing.name || '').toLowerCase().trim();
           
-          // Email egyezés (ha mindkettő van)
+          // Email egyezés (ha mindkett van)
           if (newEmail && existingEmail && newEmail === existingEmail) {
             return true;
           }
-          // Név egyezés (ha mindkettő van és nincs email)
+          // Név egyezés (ha mindkett van és nincs email)
           if (newName && existingName && newName === existingName && !newEmail && !existingEmail) {
             return true;
           }

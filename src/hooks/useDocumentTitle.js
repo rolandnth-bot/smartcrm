@@ -18,7 +18,7 @@ export function useDocumentTitle(title, includeAppName = true) {
       document.title = appName;
     }
 
-    // Cleanup: visszaállítja az előző címet (opcionális)
+    // Cleanup: visszaállítja az elz címet (opcionális)
     return () => {
       document.title = previousTitle;
     };

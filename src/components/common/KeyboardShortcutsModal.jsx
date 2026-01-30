@@ -14,7 +14,7 @@ const KeyboardShortcutsModal = memo(({ isOpen, onClose }) => {
     }
   }, [isOpen, onClose]);
 
-  // Platform-specifikus billentyű címkék
+  // Platform-specifikus billenty címkék
   const isMac = useMemo(() => {
     if (typeof window === 'undefined') return false;
     return navigator.platform.toUpperCase().indexOf('MAC') >= 0;
@@ -24,7 +24,7 @@ const KeyboardShortcutsModal = memo(({ isOpen, onClose }) => {
     const ctrlKey = isMac ? 'Cmd' : 'Ctrl';
     return [
       { keys: [ctrlKey, 'K'], description: 'Gyors keresés megnyitása' },
-      { keys: [ctrlKey, '/'], description: 'Billentyűparancsok megjelenítése' },
+      { keys: [ctrlKey, '/'], description: 'Billentyparancsok megjelenítése' },
       { keys: [ctrlKey, '1'], description: 'Dashboard' },
       { keys: [ctrlKey, '2'], description: 'Leadek' },
       { keys: [ctrlKey, '3'], description: 'Marketing' },
@@ -38,10 +38,10 @@ const KeyboardShortcutsModal = memo(({ isOpen, onClose }) => {
   }, [isMac]);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Billentyűparancsok" size="md">
+    <Modal isOpen={isOpen} onClose={onClose} title="Billentyparancsok" size="md">
       <div className="space-y-4">
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Használja ezeket a billentyűparancsokat a gyorsabb navigációhoz és műveletekhez.
+          Használja ezeket a billentyparancsokat a gyorsabb navigációhoz és mveletekhez.
         </p>
         <div className="space-y-3">
           {shortcuts.map((shortcut, index) => (
@@ -65,8 +65,8 @@ const KeyboardShortcutsModal = memo(({ isOpen, onClose }) => {
         <div className="pt-4 border-t dark:border-gray-700">
           <p className="text-xs text-gray-500 dark:text-gray-400">
             <strong>Megjegyzés:</strong> {isMac 
-              ? 'Mac gépeken a billentyűparancsok automatikusan a Cmd billentyűt használják.'
-              : 'Windows/Linux gépeken használja a Ctrl billentyűt.'}
+              ? 'Mac gépeken a billentyparancsok automatikusan a Cmd billentyt használják.'
+              : 'Windows/Linux gépeken használja a Ctrl billentyt.'}
           </p>
         </div>
       </div>

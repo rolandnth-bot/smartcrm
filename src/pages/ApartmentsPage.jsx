@@ -17,13 +17,13 @@ import EmptyState, { EmptyStateWithFilter } from '../components/common/EmptyStat
 import { AIRBNB_AMENITIES, BOOKING_FELSZERELTSEG } from '../config/amenities';
 
 // Common item types (konstans, komponensen kívül)
-const COMMON_ITEM_TYPES = ['Ágynemű', 'Törölköző', 'Konyharuha', 'Párna', 'Takaró', 'Függöny', 'Szőnyeg', 'Törölközőszett', 'Fürdőruha', 'Egyéb'];
+const COMMON_ITEM_TYPES = ['Ágynem', 'Törölköz', 'Konyharuha', 'Párna', 'Takaró', 'Függöny', 'Sznyeg', 'Törölközszett', 'Fürdruha', 'Egyéb'];
 
 const COMMON_SIZES = ['90x200', '140x200', '160x200', '180x200', '200x200', 'XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'Egyéb'];
 const COMMON_BRANDS = ['IKEA', 'Zara Home', 'Jysk', 'H&M Home', 'Westwing', 'Dunelm', 'Egyéb'];
-const QUANTITY_BASE = Array.from({ length: 51 }, (_, i) => i); // 0–50
+const QUANTITY_BASE = Array.from({ length: 51 }, (_, i) => i); // 050
 
-// Inventory szerkesztő komponens
+// Inventory szerkeszt komponens
 const InventoryEditor = memo(({ inventory = [], onChange }) => {
   const [items, setItems] = useState(inventory.length > 0 ? inventory : [{ itemType: '', itemSize: '', quantity: 0, brand: '', notes: '' }]);
 
@@ -166,11 +166,11 @@ const InventoryEditor = memo(({ inventory = [], onChange }) => {
 
 InventoryEditor.displayName = 'InventoryEditor';
 
-// Airbnb Beállítások, Booking beállítások, Booking felszereltségek – iCal + felszereltségek
+// Airbnb Beállítások, Booking beállítások, Booking felszereltségek  iCal + felszereltségek
 const AirbnbBookingAmenitiesSections = ({ apartment = {}, onChange, idPrefix = 'edit-apartment' }) => {
   const amenities = apartment.amenities || [];
   const [airbnbSearch, setAirbnbSearch] = useState('');
-  const [expandedBooking, setExpandedBooking] = useState(new Set(['Legnépszerűbb szolgáltatások', 'Étkezések', 'Beszélt nyelvek']));
+  const [expandedBooking, setExpandedBooking] = useState(new Set(['Legnépszerbb szolgáltatások', 'Étkezések', 'Beszélt nyelvek']));
 
   const toggleAmenity = useCallback((item) => {
     const next = amenities.includes(item)
@@ -583,7 +583,7 @@ const ApartmentsPage = () => {
   const statusLabels = useMemo(() => ({
     active: 'Aktív',
     inactive: 'Inaktív',
-    pending: 'Függőben'
+    pending: 'Függben'
   }), []);
 
   const apartmentExportColumns = useMemo(() => [
@@ -617,7 +617,7 @@ const ApartmentsPage = () => {
   }, [getExportData, apartmentExportColumns]);
 
   const handlePrintPDF = useCallback(() => {
-    printToPDF('SmartCRM – Lakások');
+    printToPDF('SmartCRM  Lakások');
   }, []);
 
   const handleToggleApartmentSelection = useCallback((apartmentId) => {
@@ -794,7 +794,7 @@ const ApartmentsPage = () => {
         <Card>
           <div className="text-center">
             <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{stats.pending}</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Függőben</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Függben</div>
           </div>
         </Card>
       </div>
@@ -802,7 +802,7 @@ const ApartmentsPage = () => {
       {/* Filter */}
       <Card>
         <div className="space-y-3">
-          {/* Kereső mező */}
+          {/* Keres mez */}
           <div>
             <label htmlFor="apartment-search" className="sr-only">Keresés lakások között</label>
             <input
@@ -815,13 +815,13 @@ const ApartmentsPage = () => {
               aria-label="Keresés lakások között"
             />
           </div>
-          <div className="flex gap-2" role="group" aria-label="Lakások szűrése">
+          <div className="flex gap-2" role="group" aria-label="Lakások szrése">
             <Button
             variant={filter === 'all' ? 'primary' : 'outline'}
             size="sm"
             onClick={handleFilterAll}
             aria-pressed={filter === 'all'}
-            aria-label={`Szűrés: Összes lakás (${stats.total})`}
+            aria-label={`Szrés: Összes lakás (${stats.total})`}
           >
             Összes ({stats.total})
           </Button>
@@ -830,7 +830,7 @@ const ApartmentsPage = () => {
             size="sm"
             onClick={handleFilterActive}
             aria-pressed={filter === 'active'}
-            aria-label={`Szűrés: Aktív lakások (${stats.active})`}
+            aria-label={`Szrés: Aktív lakások (${stats.active})`}
           >
             Aktív ({stats.active})
           </Button>
@@ -839,7 +839,7 @@ const ApartmentsPage = () => {
             size="sm"
             onClick={handleFilterInactive}
             aria-pressed={filter === 'inactive'}
-            aria-label={`Szűrés: Inaktív lakások (${stats.inactive})`}
+            aria-label={`Szrés: Inaktív lakások (${stats.inactive})`}
           >
             Inaktív ({stats.inactive})
           </Button>
@@ -848,9 +848,9 @@ const ApartmentsPage = () => {
             size="sm"
             onClick={handleFilterPending}
             aria-pressed={filter === 'pending'}
-            aria-label={`Szűrés: Függőben lévő lakások (${stats.pending})`}
+            aria-label={`Szrés: Függben lév lakások (${stats.pending})`}
           >
-            Függőben ({stats.pending})
+            Függben ({stats.pending})
           </Button>
           </div>
         </div>
@@ -893,7 +893,7 @@ const ApartmentsPage = () => {
                     <option value="" disabled>Státusz változtatása...</option>
                     <option value="active">Aktív</option>
                     <option value="inactive">Inaktív</option>
-                    <option value="pending">Függőben</option>
+                    <option value="pending">Függben</option>
                   </select>
                   <Button
                     onClick={handleBulkDelete}
@@ -922,7 +922,7 @@ const ApartmentsPage = () => {
               type="button"
               onClick={() => handleSort('name')}
               className={`px-3 py-1 text-xs rounded border transition ${sortConfig.field === 'name' ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300' : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'}`}
-              aria-label={`Név szerint ${sortConfig.field === 'name' && sortConfig.direction === 'asc' ? 'növekvő' : 'csökkenő'}`}
+              aria-label={`Név szerint ${sortConfig.field === 'name' && sortConfig.direction === 'asc' ? 'növekv' : 'csökken'}`}
             >
               Név {sortConfig.field === 'name' && (sortConfig.direction === 'asc' ? <ChevronUp /> : <ChevronDown />)}
             </button>
@@ -930,7 +930,7 @@ const ApartmentsPage = () => {
               type="button"
               onClick={() => handleSort('city')}
               className={`px-3 py-1 text-xs rounded border transition ${sortConfig.field === 'city' ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300' : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'}`}
-              aria-label={`Város szerint ${sortConfig.field === 'city' && sortConfig.direction === 'asc' ? 'növekvő' : 'csökkenő'}`}
+              aria-label={`Város szerint ${sortConfig.field === 'city' && sortConfig.direction === 'asc' ? 'növekv' : 'csökken'}`}
             >
               Város {sortConfig.field === 'city' && (sortConfig.direction === 'asc' ? <ChevronUp /> : <ChevronDown />)}
             </button>
@@ -938,7 +938,7 @@ const ApartmentsPage = () => {
               type="button"
               onClick={() => handleSort('status')}
               className={`px-3 py-1 text-xs rounded border transition ${sortConfig.field === 'status' ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300' : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'}`}
-              aria-label={`Státusz szerint ${sortConfig.field === 'status' && sortConfig.direction === 'asc' ? 'növekvő' : 'csökkenő'}`}
+              aria-label={`Státusz szerint ${sortConfig.field === 'status' && sortConfig.direction === 'asc' ? 'növekv' : 'csökken'}`}
             >
               Státusz {sortConfig.field === 'status' && (sortConfig.direction === 'asc' ? <ChevronUp /> : <ChevronDown />)}
             </button>
@@ -953,7 +953,7 @@ const ApartmentsPage = () => {
                     <th className="px-3 py-2 font-semibold text-gray-800 dark:text-gray-200" scope="col">Státusz</th>
                     <th className="px-3 py-2 font-semibold text-gray-800 dark:text-gray-200" scope="col">Cím / Város</th>
                     <th className="px-3 py-2 font-semibold text-gray-800 dark:text-gray-200" scope="col">Megbízó</th>
-                    {canEditApartments('apartments') && <th className="px-3 py-2 text-right font-semibold text-gray-800 dark:text-gray-200" scope="col">Műveletek</th>}
+                    {canEditApartments('apartments') && <th className="px-3 py-2 text-right font-semibold text-gray-800 dark:text-gray-200" scope="col">Mveletek</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -977,9 +977,9 @@ const ApartmentsPage = () => {
                         </span>
                       </td>
                       <td className="px-3 py-2 text-gray-600 dark:text-gray-400">
-                        {[apartment.address, apartment.city].filter(Boolean).join(', ') || '–'}
+                        {[apartment.address, apartment.city].filter(Boolean).join(', ') || ''}
                       </td>
-                      <td className="px-3 py-2 text-gray-600 dark:text-gray-400">{apartment.clientName || '–'}</td>
+                      <td className="px-3 py-2 text-gray-600 dark:text-gray-400">{apartment.clientName || ''}</td>
                       {canEditApartments('apartments') && (
                         <td className="px-3 py-2 text-right">
                           <div className="flex gap-1 justify-end flex-wrap">
@@ -1004,7 +1004,7 @@ const ApartmentsPage = () => {
             {filter !== 'all' || searchQuery ? (
               <EmptyStateWithFilter
                 title="Nincsenek lakások"
-                description="A kiválasztott szűrőkkel nem található lakás. Próbáld meg módosítani a szűrőket vagy keresési feltételeket."
+                description="A kiválasztott szrkkel nem található lakás. Próbáld meg módosítani a szrket vagy keresési feltételeket."
                 onClearFilter={() => {
                   setFilter('all');
                   setSearchQuery('');
@@ -1134,7 +1134,7 @@ const ApartmentsPage = () => {
               >
                 <option value="active">Aktív</option>
                 <option value="inactive">Inaktív</option>
-                <option value="pending">Függőben</option>
+                <option value="pending">Függben</option>
               </select>
             </div>
           </div>
@@ -1279,7 +1279,7 @@ const ApartmentsPage = () => {
                 >
                   <option value="active">Aktív</option>
                   <option value="inactive">Inaktív</option>
-                  <option value="pending">Függőben</option>
+                  <option value="pending">Függben</option>
                 </select>
               </div>
             </div>
@@ -1333,7 +1333,7 @@ const ApartmentsPage = () => {
       </Modal>
       )}
 
-      {/* Törlés megerősítés - csak ha van edit jogosultság */}
+      {/* Törlés megersítés - csak ha van edit jogosultság */}
       {canEditApartments('apartments') && (
         <>
           <ConfirmDialog

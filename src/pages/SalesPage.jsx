@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useLeadsStore, { leadStatuses, leadSources } from '../stores/leadsStore';
-import useSalesStore from '../stores/salesStore';
 import useApartmentsStore from '../stores/apartmentsStore';
 import { usePermissions } from '../contexts/PermissionContext';
 import Button from '../components/common/Button';
@@ -11,15 +10,14 @@ import SalesCalendar from '../components/sales/SalesCalendar';
 import SalesScriptPanel from '../components/sales/SalesScriptPanel';
 import SalesWizardScriptPanel from '../components/sales/SalesWizardScriptPanel';
 import { Plus } from '../components/common/Icons';
-import { Skeleton, SkeletonCard, SkeletonTableRow } from '../components/common/Skeleton';
-import { exportToCSV, exportToExcel, printToPDF } from '../utils/exportUtils';
-import { formatCurrencyHUF, formatPercent, formatNumber } from '../utils/numberUtils';
-import { todayISO, formatTimeAgo } from '../utils/dateUtils';
+import { Skeleton, SkeletonCard } from '../components/common/Skeleton';
+import { exportToCSV, exportToExcel } from '../utils/exportUtils';
+import { todayISO } from '../utils/dateUtils';
 import useToastStore from '../stores/toastStore';
 import { excelFillToLeadColor } from '../utils/excelRowColorUtils';
 import './SalesPage.css';
 
-// Státusz színek – Új érdeklődő sárga; Később amber; Nem aktuális szürke
+// Státusz színek  Új érdekld sárga; Késbb amber; Nem aktuális szürke
 const statusColors = {
   uj_erdeklodo: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300',
   new: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300',
@@ -71,10 +69,7 @@ const SalesPage = () => {
     addLead,
     updateLead
   } = useLeadsStore();
-  const { apartments, selectedApartment, showEditApartment, setSelectedApartment, setShowEditApartment, fetchFromApi, updateApartment } = useApartmentsStore();
-  const {
-    getTotalStats
-  } = useSalesStore();
+  const { apartments, isLoading, selectedApartment, showEditApartment, setSelectedApartment, setShowEditApartment, fetchFromApi, updateApartment } = useApartmentsStore();
   const [selectedLead, setSelectedLead] = useState(null);
   const [showLeadDetail, setShowLeadDetail] = useState(false);
   const [addLeadPresetDate, setAddLeadPresetDate] = useState(null);
@@ -91,10 +86,10 @@ const SalesPage = () => {
 
   const filteredLeads = useMemo(() => getFilteredLeads(), [getFilteredLeads, filter, searchQuery, leads]);
 
-  // Aktív lead (kiválasztott vagy első aktív lead)
+  // Aktív lead (kiválasztott vagy els aktív lead)
   useEffect(() => {
     if (!activeLead && filteredLeads.length > 0) {
-      // Válasszuk ki az első aktív leadet (új érdeklődő vagy kapcsolatfelvétel)
+      // Válasszuk ki az els aktív leadet (új érdekld vagy kapcsolatfelvétel)
       const firstActive = filteredLeads.find(l => 
         ['uj_erdeklodo', 'new', 'kapcsolatfelvetel', 'contacted'].includes(l.status)
       ) || filteredLeads[0];
@@ -102,7 +97,7 @@ const SalesPage = () => {
     }
   }, [filteredLeads, activeLead]);
 
-  // Következő leadek (aktív lead kivételével)
+  // Következ leadek (aktív lead kivételével)
   const nextLeads = useMemo(() => {
     return filteredLeads
       .filter(l => !activeLead || l.id !== activeLead.id)
@@ -129,7 +124,7 @@ const SalesPage = () => {
     const file = event.target.files[0];
     if (!file) return;
 
-    // Excel fájl kezelése – ExcelJS-sel sor háttérszín (fill) olvasása
+    // Excel fájl kezelése  ExcelJS-sel sor háttérszín (fill) olvasása
     if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls') || file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || file.type === 'application/vnd.ms-excel') {
       try {
         const ExcelJS = (await import('exceljs')).default;
@@ -225,7 +220,7 @@ const SalesPage = () => {
   }, [importLeadsFromJSON, importLeadsFromCSV, importLeadsFromExcel, setShowLeadImport]);
 
   const downloadCSVTemplate = useCallback(() => {
-    const sampleCSV = 'name,email,phone,source,notes\nTeszt Elek,teszt@example.com,+36201234567,Weboldal,Érdeklődés 2 szobás lakásról';
+    const sampleCSV = 'name,email,phone,source,notes\nTeszt Elek,teszt@example.com,+36201234567,Weboldal,Érdekldés 2 szobás lakásról';
     const blob = new Blob([sampleCSV], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -234,24 +229,42 @@ const SalesPage = () => {
     a.click();
   }, []);
 
-  // Mai teendők számítása
+  const leadExportColumns = useMemo(() => [
+    { key: 'name', label: 'Név' },
+    { key: 'email', label: 'Email' },
+    { key: 'phone', label: 'Telefon' },
+    { key: 'source', label: 'Forrás' },
+    { key: 'status', label: 'Státusz' },
+    { key: 'notes', label: 'Megjegyzés' },
+    { key: 'createdAt', label: 'Létrehozva' }
+  ], []);
+
+  const handleExportCSV = useCallback(() => {
+    exportToCSV(filteredLeads, leadExportColumns, `leadek_export_${new Date().toISOString().split('T')[0]}.csv`);
+  }, [filteredLeads, leadExportColumns]);
+
+  const handleExportExcel = useCallback(() => {
+    exportToExcel(filteredLeads, leadExportColumns, `leadek_export_${new Date().toISOString().split('T')[0]}.xlsx`);
+  }, [filteredLeads, leadExportColumns]);
+
+  // Mai teendk számítása
   const todayTasks = useMemo(() => {
     const today = todayISO();
     const todayCalls = leads.filter(lead => {
-      // Leadek, amelyekkel ma kell hívni (pl. új érdeklődők, followup dátum ma van)
+      // Leadek, amelyekkel ma kell hívni (pl. új érdekldk, followup dátum ma van)
       return lead.status === 'uj_erdeklodo' || 
              (lead.followupDate && lead.followupDate === today) ||
              (lead.surveyDate && lead.surveyDate === today);
     });
     
     const todayAppointments = leads.filter(lead => {
-      // Leadek, amelyeknek ma van időpontja (felmérés, találkozó)
+      // Leadek, amelyeknek ma van idpontja (felmérés, találkozó)
       return (lead.surveyDate && lead.surveyDate === today && lead.surveyType === 'személyes') ||
              (lead.appointmentDate && lead.appointmentDate === today);
     });
     
     const followups = leads.filter(lead => {
-      // Leadek, amelyekkel followup kell (followupDate jövőbeli vagy ma)
+      // Leadek, amelyekkel followup kell (followupDate jövbeli vagy ma)
       return lead.followupDate && lead.followupDate >= today;
     });
 
@@ -293,60 +306,21 @@ const SalesPage = () => {
     lost: getLeadsByStatus('lost').length
   }), [getLeadsByStatus, leads]);
 
-  // Konverziós arányok számítása
-  const conversionStats = useMemo(() => {
-    const total = leads.length;
-    const won = pipelineStats.alairva + pipelineStats.aktiv_partner + pipelineStats.won;
-    const lost = pipelineStats.elutasitva + pipelineStats.kesobb + pipelineStats.nem_aktualis + pipelineStats.lost;
-    const closed = won + lost;
-    const active = total - closed;
-    
-    return {
-      total,
-      active,
-      won,
-      lost,
-      closed,
-      winRate: closed > 0 ? (won / closed) * 100 : 0,
-      conversionRate: total > 0 ? (won / total) * 100 : 0,
-      lossRate: closed > 0 ? (lost / closed) * 100 : 0
-    };
-  }, [leads, pipelineStats]);
-
-  const totalStats = useMemo(() => getTotalStats(), [getTotalStats]);
 
   if (isLoading || leadsLoading) {
     return (
       <div className="space-y-6" aria-live="polite" aria-busy="true">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
           <Skeleton variant="title" className="mb-4" width="200px" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <SkeletonCard />
             <SkeletonCard />
             <SkeletonCard />
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
           <Skeleton variant="title" className="mb-4" width="250px" />
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-gray-100 dark:bg-gray-700">
-                  <th scope="col" className="px-4 py-2 text-left text-gray-800 dark:text-gray-200">Hónap</th>
-                  <th scope="col" className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">Tervezett egység</th>
-                  <th scope="col" className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">Átlagár (Ft)</th>
-                  <th scope="col" className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">Tervezett bevétel (Ft)</th>
-                  <th scope="col" className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">Tényleges egység</th>
-                  <th scope="col" className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">Tényleges bevétel (Ft)</th>
-                  <th scope="col" className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">Teljesítés</th>
-                </tr>
-              </thead>
-              <tbody>
-                {skeletonTableRows.map((i) => (
-                  <SkeletonTableRow key={i} columns={7} />
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <SkeletonCard />
         </div>
       </div>
     );
@@ -354,25 +328,25 @@ const SalesPage = () => {
 
   return (
     <div className="space-y-6 sales-page">
-      {/* Felső sáv - Mai teendők */}
+      {/* Fels sáv - Mai teendk */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
-            <span className="text-2xl">📞</span>
+            <span className="text-2xl"></span>
             <div>
               <div className="text-sm text-gray-600 dark:text-gray-400">Mai hívások</div>
               <div className="text-2xl font-bold text-gray-800 dark:text-gray-200">{todayTasks.calls}</div>
             </div>
           </div>
           <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700">
-            <span className="text-2xl">📅</span>
+            <span className="text-2xl"></span>
             <div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Mai időpontok</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Mai idpontok</div>
               <div className="text-2xl font-bold text-gray-800 dark:text-gray-200">{todayTasks.appointments}</div>
             </div>
           </div>
           <div className="flex items-center gap-3 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-700">
-            <span className="text-2xl">📝</span>
+            <span className="text-2xl"></span>
             <div>
               <div className="text-sm text-gray-600 dark:text-gray-400">Followup</div>
               <div className="text-2xl font-bold text-gray-800 dark:text-gray-200">{todayTasks.followups}</div>
@@ -381,7 +355,7 @@ const SalesPage = () => {
         </div>
       </div>
 
-      {/* Munkanaptár – lead időpontokkal szinkronban, szerkeszthető napra kattintva */}
+      {/* Munkanaptár  lead idpontokkal szinkronban, szerkeszthet napra kattintva */}
       <SalesCalendar
         onLeadClick={(lead) => {
           setSelectedLead(lead);
@@ -390,104 +364,148 @@ const SalesPage = () => {
         onAddLead={handleAddLeadForDay}
       />
 
-      {/* Fő tartalom: Script panel + Aktív Lead */}
-      <div className="sales-main">
-        {/* Bal oldal - Telefonos Script Panel */}
-        <div className="sales-script-panel dark:bg-slate-800">
-          <h2 className="dark:text-slate-100">Telefonos Script</h2>
-          <SalesScriptPanel />
+      {/* Sales Script és Lead lista egymás mellett */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        {/* Sales Script Panel - bal oldal */}
+        <div className="h-full">
+          <SalesScriptPanel selectedLead={selectedLead} />
         </div>
 
-        {/* Jobb oldal - Lead lista / Kanban nézet */}
-        <div className="lg:col-span-2">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold dark:text-gray-200">Lead lista</h2>
-              <div className="no-print flex gap-2">
-                <Button onClick={handleOpenLeadImport} variant="primary">
-                  <Plus /> Import
-                </Button>
-                <Button onClick={handleExportCSV} variant="outline">
-                  CSV export
-                </Button>
-                <Button onClick={handleExportExcel} variant="outline">
-                  Excel export
-                </Button>
-                <Link
-                  to="/leads"
-                  className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 flex items-center gap-2 font-bold transition rounded-lg"
+        {/* Lead lista - jobb oldal */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 h-full flex flex-col">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold dark:text-gray-200">Lead lista</h2>
+            <div className="no-print flex gap-2">
+              <Button onClick={handleOpenLeadImport} variant="primary">
+                <Plus /> Import
+              </Button>
+              <Button onClick={handleExportCSV} variant="outline">
+                CSV export
+              </Button>
+              <Button onClick={handleExportExcel} variant="outline">
+                Excel export
+              </Button>
+              <Link
+                to="/leads"
+                className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 flex items-center gap-2 font-bold transition"
+              >
+                <Plus /> Lead kezelés
+              </Link>
+            </div>
+          </div>
+
+          {/* Sales Pipeline szekció - lista formátum */}
+          <div className="mb-6">
+            <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-900/20 p-6 rounded-xl border-2 border-orange-200 dark:border-orange-700 shadow-sm">
+              <h3 className="font-bold text-orange-800 dark:text-orange-300 mb-4 text-base flex items-center gap-2">
+                <span className="text-xl">📊</span>
+                Sales Pipeline
+              </h3>
+              <div className="mb-4">
+                <label htmlFor="sales-lead-search" className="sr-only">Keresés lead-ek között</label>
+                <input
+                  id="sales-lead-search"
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Keresés név, email, telefon vagy megjegyzés alapján..."
+                  className="w-full px-4 py-2.5 text-sm border-2 border-orange-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
+                  aria-label="Keresés lead-ek között"
+                />
+              </div>
+
+              {/* Pipeline státuszok - függőleges lista */}
+              <div className="space-y-1.5">
+                {/* Összes */}
+                <button
+                  type="button"
+                  onClick={handleFilterAll}
+                  className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-orange-500 border-l-4 ${
+                    filter === 'all'
+                      ? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white border-orange-500 shadow-md font-semibold'
+                      : 'bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-650 hover:border-gray-400'
+                  }`}
+                  aria-pressed={filter === 'all'}
+                  aria-label={`Összes lead (${leads.length}) – kattintás a szűréshez`}
                 >
-                  <Plus /> Lead kezelés
-                </Link>
+                  <span className="text-sm font-medium">Összes</span>
+                  <span className="text-sm font-bold bg-gray-300 dark:bg-gray-500 px-2.5 py-0.5 rounded-full">
+                    {leads.length}
+                  </span>
+                </button>
+
+                {/* Státuszok */}
+                {leadStatuses.map((status) => {
+                  const count = getLeadsByStatus(status.key).length;
+                  const isActive = filter === status.key;
+
+                  // Bal oldali border színek státusz alapján
+                  let borderColor = 'border-gray-300 dark:border-gray-600';
+                  let badgeBg = 'bg-gray-200 dark:bg-gray-600';
+
+                  if (status.key.includes('uj_erdeklodo') || status.key === 'new' || status.key.includes('kapcsolatfelvetel') || status.key === 'contacted') {
+                    borderColor = isActive ? 'border-yellow-500' : 'border-yellow-400 dark:border-yellow-600';
+                    badgeBg = 'bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200';
+                  } else if (status.key.includes('felmeres')) {
+                    borderColor = isActive ? 'border-blue-500' : 'border-blue-400 dark:border-blue-600';
+                    badgeBg = 'bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200';
+                  } else if (status.key.includes('ajanlat') || status.key === 'offer') {
+                    borderColor = isActive ? 'border-purple-500' : 'border-purple-400 dark:border-purple-600';
+                    badgeBg = 'bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-200';
+                  } else if (status.key.includes('targyalas') || status.key === 'negotiation') {
+                    borderColor = isActive ? 'border-cyan-500' : 'border-cyan-400 dark:border-cyan-600';
+                    badgeBg = 'bg-cyan-100 dark:bg-cyan-800 text-cyan-800 dark:text-cyan-200';
+                  } else if (status.key.includes('szerzodes')) {
+                    borderColor = isActive ? 'border-indigo-500' : 'border-indigo-400 dark:border-indigo-600';
+                    badgeBg = 'bg-indigo-100 dark:bg-indigo-800 text-indigo-800 dark:text-indigo-200';
+                  } else if (status.key.includes('alairva') || status.key === 'won' || status.key.includes('aktiv')) {
+                    borderColor = isActive ? 'border-green-500' : 'border-green-400 dark:border-green-600';
+                    badgeBg = 'bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200';
+                  } else if (status.key.includes('elutasitva') || status.key === 'lost') {
+                    borderColor = isActive ? 'border-red-500' : 'border-red-400 dark:border-red-600';
+                    badgeBg = 'bg-red-100 dark:bg-red-800 text-red-800 dark:text-red-200';
+                  } else if (status.key.includes('kesobb')) {
+                    borderColor = isActive ? 'border-amber-500' : 'border-amber-400 dark:border-amber-600';
+                    badgeBg = 'bg-amber-100 dark:bg-amber-800 text-amber-800 dark:text-amber-200';
+                  } else if (status.key.includes('nem_aktualis')) {
+                    borderColor = isActive ? 'border-gray-500' : 'border-gray-400 dark:border-gray-600';
+                    badgeBg = 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300';
+                  }
+
+                  return (
+                    <button
+                      key={status.key}
+                      type="button"
+                      onClick={() => handleFilterByStatus(status.key)}
+                      className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-orange-500 border-l-4 ${borderColor} ${
+                        isActive
+                          ? 'bg-white dark:bg-gray-600 shadow-md font-semibold scale-[1.02]'
+                          : 'bg-white/50 dark:bg-gray-700/50 hover:bg-white dark:hover:bg-gray-700 hover:shadow-sm'
+                      }`}
+                      aria-pressed={isActive}
+                      aria-label={`${status.label} (${count}) – kattintás a szűréshez`}
+                    >
+                      <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                        {status.label}
+                      </span>
+                      <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${badgeBg}`}>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
+          </div>
 
-            {/* Bal: Sales Pipeline (fele méret, balra) | Jobb: Lead lista – ugyanaz a táblázat, Excel színek */}
-            <div className="flex flex-row gap-6 items-start mt-4">
-              {/* Bal: Pipeline – fele méretű csempék, balra igazítva (mint Leadek oldal) */}
-              <div className="flex-shrink-0 w-[280px]">
-                <div className="bg-orange-50 dark:bg-orange-900 p-4 rounded-lg border border-orange-200 dark:border-orange-700">
-                  <h3 className="font-bold text-orange-800 dark:text-orange-300 mb-2 text-sm">Sales Pipeline</h3>
-                  <div className="mb-2">
-                    <label htmlFor="sales-lead-search" className="sr-only">Keresés lead-ek között</label>
-                    <input
-                      id="sales-lead-search"
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Keresés név, email, telefon vagy megjegyzés alapján..."
-                      className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                      aria-label="Keresés lead-ek között"
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 gap-1.5 max-w-[260px]">
-                    <button
-                      type="button"
-                      onClick={handleFilterAll}
-                      className={`flex flex-col items-center justify-center p-1.5 rounded-md aspect-square w-full transition-all focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-1 dark:focus:ring-offset-orange-900 ${
-                        filter === 'all'
-                          ? 'bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white ring-2 ring-orange-500 ring-offset-1 dark:ring-offset-orange-900 shadow-md'
-                          : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:shadow'
-                      }`}
-                      aria-pressed={filter === 'all'}
-                      aria-label={`Összes lead (${leads.length}) – kattintás a szűréshez`}
-                    >
-                      <span className="text-[9px] font-medium leading-tight text-center line-clamp-2 mb-0.5">Összes</span>
-                      <span className="text-xs font-bold">{leads.length}</span>
-                    </button>
-                    {leadStatuses.map((status) => {
-                      const count = getLeadsByStatus(status.key).length;
-                      const isActive = filter === status.key;
-                      const colorClass = statusColors[status.key] || 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
-                      return (
-                        <button
-                          key={status.key}
-                          type="button"
-                          onClick={() => handleFilterByStatus(status.key)}
-                          className={`flex flex-col items-center justify-center p-1.5 rounded-md aspect-square w-full transition-all focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-1 dark:focus:ring-offset-orange-900 ${colorClass} ${
-                            isActive ? 'ring-2 ring-orange-500 ring-offset-1 dark:ring-offset-orange-900 shadow-md' : 'hover:shadow'
-                          }`}
-                          aria-pressed={isActive}
-                          aria-label={`${status.label} (${count}) – kattintás a szűréshez`}
-                        >
-                          <span className="text-[9px] font-medium leading-tight text-center line-clamp-2 mb-0.5">
-                            {status.label}
-                          </span>
-                          <span className="text-xs font-bold">{count}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
+          {/* Lead listaScrollable terület */}
+          <div className="flex-1 overflow-y-auto" id="sales-leads-list-column">
+            {filteredLeads.length > 0 ? (
+              <div className="space-y-3">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">Leadek ({filteredLeads.length})</h3>
                 </div>
-              </div>
-              {/* Jobb: Lead lista – ugyanaz a táblázat, Excel szín sync */}
-              <div className="flex-1 min-w-0 overflow-y-auto max-h-[calc(100vh-20rem)]" id="sales-leads-list-column">
-                {filteredLeads.length > 0 ? (
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center mb-3">
-                      <h3 className="font-bold text-gray-800 dark:text-gray-200">Leadek ({filteredLeads.length})</h3>
-                    </div>
-                    {filteredLeads.map((lead) => {
+                {filteredLeads.map((lead) => {
                   const handleLeadClick = () => {
                     setSelectedLead(lead);
                     setShowLeadDetail(true);
@@ -519,12 +537,12 @@ const SalesPage = () => {
                   const nameCls = lead.leadColor === 'black' ? 'text-white' : lead.leadColor === 'green' ? 'text-green-900 dark:text-green-100' : lead.leadColor === 'orange' ? 'text-amber-900 dark:text-amber-100' : lead.leadColor === 'gray' ? 'text-gray-800 dark:text-gray-200' : lead.leadColor === 'red' ? 'text-red-900 dark:text-red-100' : 'dark:text-gray-200';
                   const detailCls = lead.leadColor === 'black' ? 'text-gray-200' : lead.leadColor === 'green' ? 'text-green-800 dark:text-green-200' : lead.leadColor === 'orange' ? 'text-amber-800 dark:text-amber-200' : lead.leadColor === 'gray' ? 'text-gray-700 dark:text-gray-300' : lead.leadColor === 'red' ? 'text-red-800 dark:text-red-200' : 'text-gray-500 dark:text-gray-400';
                   const badgeCls = lead.leadColor === 'green' ? 'bg-green-200 dark:bg-green-700 text-green-900 dark:text-green-100' : lead.leadColor === 'orange' ? 'bg-amber-200 dark:bg-amber-700 text-amber-900 dark:text-amber-100' : lead.leadColor === 'gray' ? 'bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100' : lead.leadColor === 'red' ? 'bg-red-200 dark:bg-red-700 text-red-900 dark:text-red-100' : 'bg-gray-700 dark:bg-gray-800 text-white';
-                  const badgeLabel = lead.leadColor === 'green' ? '🟢 Meleg lead' : lead.leadColor === 'orange' ? '🟠 Később' : lead.leadColor === 'gray' ? '⬜ Nem aktuális' : lead.leadColor === 'red' ? '🔴 Nem vette fel' : '⚫ Elveszett';
+                  const badgeLabel = lead.leadColor === 'green' ? ' Meleg lead' : lead.leadColor === 'orange' ? ' Késbb' : lead.leadColor === 'gray' ? ' Nem aktuális' : lead.leadColor === 'red' ? ' Nem vette fel' : ' Elveszett';
                   return (
                     <div
                       key={lead.id}
                       onClick={handleLeadClick}
-                      className={`p-3 ${cardBgClass} rounded-lg ${cardBorderClass} cursor-pointer hover:shadow-lg transition-all ${cardTextClass}`}
+                      className={`p-4 ${cardBgClass} rounded-xl ${cardBorderClass} cursor-pointer hover:shadow-xl transition-all transform hover:scale-[1.02] ${cardTextClass}`}
                       role="button"
                       tabIndex={0}
                       onKeyDown={(e) => {
@@ -535,95 +553,52 @@ const SalesPage = () => {
                       }}
                       aria-label={`Lead: ${lead.name}, Adatlap megnyitása`}
                     >
-                      <div className="flex items-center justify-between">
-                        <span className={`text-sm font-medium ${nameCls}`}>{lead.name}</span>
-                        <span className={`px-2 py-0.5 rounded text-xs ${statusColors[lead.status] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className={`text-base font-semibold ${nameCls}`}>{lead.name}</span>
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[lead.status] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}`}>
                           {leadStatuses.find((s) => s.key === lead.status)?.label || lead.status}
                         </span>
                       </div>
                       {lead.leadColor && (
-                        <span className={`inline-block mt-1 px-2 py-0.5 rounded text-xs font-bold ${badgeCls}`}>
+                        <span className={`inline-block mt-1 mb-2 px-3 py-1 rounded-full text-xs font-bold ${badgeCls}`}>
                           {badgeLabel}
                         </span>
                       )}
-                      {lead.email && <div className={`text-xs mt-1 ${detailCls}`}>{lead.email}</div>}
-                      {lead.phone && <div className={`text-xs ${detailCls}`}>{lead.phone}</div>}
+                      {lead.email && <div className={`text-sm mt-1.5 ${detailCls}`}>📧 {lead.email}</div>}
+                      {lead.phone && <div className={`text-sm mt-1 ${detailCls}`}>📱 {lead.phone}</div>}
                     </div>
                   );
                 })}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-12 px-4 text-center text-gray-500 dark:text-gray-400">
-                      {filter !== 'all' || searchQuery ? (
-                        <p className="text-sm">A kiválasztott szűrőkkel nem található lead. Módosítsd a szűrőket vagy a keresést.</p>
-                      ) : (
-                        <p className="text-sm">Még nincsenek leadek. Használd az Importot vagy a Lead kezelés linket az új lead hozzáadásához.</p>
-                      )}
-                    </div>
-                  )}
-                </div>
               </div>
-            </div>
-          </div>
-        </div>
-
-      {/* Összesített statisztikák és célok (alul) */}
-      <div className="sales-stats">
-        {/* Összesített statisztikák */}
-        <div className="stat-card dark:bg-slate-800">
-          <h4 className="dark:text-blue-400">Összesített statisztikák</h4>
-          <div className="stat-row dark:border-slate-700 dark:text-slate-200">
-            <span>Tervezett egységek:</span>
-            <strong>{totalStats.totalPlanUnits.toLocaleString()}</strong>
-          </div>
-          <div className="stat-row dark:border-slate-700 dark:text-slate-200">
-            <span>Tényleges egységek:</span>
-            <strong>{totalStats.totalActualUnits.toLocaleString()}</strong>
-          </div>
-          <div className="stat-row dark:border-slate-700 dark:text-slate-200">
-            <span>Tervezett bevétel:</span>
-            <strong>{totalStats.totalPlanRevenue.toLocaleString()} Ft</strong>
-          </div>
-          <div className="stat-row dark:border-slate-700 dark:text-slate-200">
-            <span>Tényleges bevétel:</span>
-            <strong>{formatCurrencyHUF(totalStats.totalActualRevenue)}</strong>
-          </div>
-          <div className="stat-row dark:border-slate-700 dark:text-slate-200" style={{ borderBottom: 'none' }}>
-            <span>Teljesítési arány:</span>
-            <strong className={totalStats.completionRate >= 100 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}>
-              {formatPercent(totalStats.completionRate, 1)}
-            </strong>
-          </div>
-        </div>
-
-        {/* Konverziós arányok */}
-        <div className="stat-card dark:bg-slate-800">
-          <h4 className="dark:text-blue-400">Konverziós arányok</h4>
-          <div className="stat-grid">
-            <div>
-              <span className="stat-value dark:text-slate-100">{conversionStats.total}</span>
-              <span className="stat-label dark:text-slate-500">Összes lead</span>
-            </div>
-            <div>
-              <span className="stat-value dark:text-slate-100">{conversionStats.active}</span>
-              <span className="stat-label dark:text-slate-500">Aktív lead</span>
-            </div>
-            <div>
-              <span className={`stat-value ${conversionStats.winRate >= 50 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`}>
-                {formatPercent(conversionStats.winRate, 1)}
-              </span>
-              <span className="stat-label dark:text-slate-500">
-                Win rate ({conversionStats.won} / {conversionStats.closed})
-              </span>
-            </div>
-            <div>
-              <span className={`stat-value ${conversionStats.conversionRate >= 20 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`}>
-                {formatPercent(conversionStats.conversionRate, 1)}
-              </span>
-              <span className="stat-label dark:text-slate-500">
-                Konverzió ({conversionStats.won} / {conversionStats.total})
-              </span>
-            </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-16 px-6 text-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600">
+                <div className="w-20 h-20 mb-6 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                  <span className="text-4xl">📋</span>
+                </div>
+                {filter !== 'all' || searchQuery ? (
+                  <>
+                    <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">Nincs találat</h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">A kiválasztott szrkkel nem található lead. Módosítsd a szrket vagy a keresést.</p>
+                  </>
+                ) : (
+                  <>
+                    <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">Még nincsenek leadek</h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Használd az Importot vagy a Lead kezelés linket az új lead hozzáadásához.</p>
+                    <div className="flex gap-2 mt-4">
+                      <Button onClick={handleOpenLeadImport} variant="primary" size="sm">
+                        <Plus /> Import
+                      </Button>
+                      <Link
+                        to="/leads"
+                        className="bg-orange-600 text-white px-3 py-1.5 rounded-lg hover:bg-orange-700 flex items-center gap-1 text-sm font-semibold transition"
+                      >
+                        <Plus /> Lead kezelés
+                      </Link>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -700,7 +675,7 @@ const SalesPage = () => {
         <div className="space-y-4">
           <div className="p-3 bg-white dark:bg-gray-800 rounded border dark:border-gray-700">
             <div className="font-medium text-sm dark:text-gray-200 mb-1">Excel fájl</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Oszlopok: name, email, phone, source, notes. Szín: Excel sor háttérszíne vagy »szín« oszlop (zöld=meleg, piros=Később, szürke=Nem aktuális, fekete=elveszett) – a kártyák ez alapján színeződnek.</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Oszlopok: name, email, phone, source, notes. Szín: Excel sor háttérszíne vagy »szín« oszlop (zöld=meleg, piros=Késbb, szürke=Nem aktuális, fekete=elveszett)  a kártyák ez alapján színezdnek.</div>
             <input
               type="file"
               accept=".xlsx,.xls"
@@ -773,11 +748,11 @@ const SalesPage = () => {
         }}
       />
 
-      {/* Értékesítési Wizard – Script panel a kiválasztott leaddel */}
+      {/* Értékesítési Wizard  Script panel a kiválasztott leaddel */}
       <Modal
         isOpen={showSalesWizard && !!selectedLead}
         onClose={() => setShowSalesWizard(false)}
-        title={`Értékesítési folyamat – ${selectedLead?.name || 'Lead'}`}
+        title={`Értékesítési folyamat  ${selectedLead?.name || 'Lead'}`}
         size="xl"
       >
         <div className="max-h-[70vh] overflow-y-auto pr-2">

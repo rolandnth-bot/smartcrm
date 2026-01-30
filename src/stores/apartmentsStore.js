@@ -163,7 +163,7 @@ const useApartmentsStore = create((set, get) => ({
     const { apartments, filter, searchQuery } = get();
     let filtered = apartments;
     
-    // Státusz szűrés
+    // Státusz szrés
     if (filter !== 'all') {
       filtered = filterBy(filtered, { status: filter });
     }

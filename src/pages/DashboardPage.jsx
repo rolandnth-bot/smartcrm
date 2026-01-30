@@ -19,7 +19,7 @@ import { sortBy, filterBy } from '../utils/arrayUtils';
 
 const DashboardPage = () => {
   const { leads, getLeadsByStatus } = useLeadsStore();
-  const { getTotalStats } = useSalesStore();
+  const { getTotalStats, salesTargets } = useSalesStore();
   const { apartments, getStats: getApartmentsStats } = useApartmentsStore();
   const { bookings, getStats: getBookingsStats, getTodayBookings } = useBookingsStore();
   const { canView } = usePermissions();
@@ -266,6 +266,74 @@ const DashboardPage = () => {
       period: revenuePlanPeriod
     };
   }, [revenuePlanPeriod, salesStats, bookings, financialStats]);
+
+  // Lakás terv/tény számítások (egységek alapján)
+  const apartmentPlanFact = useMemo(() => {
+    const now = new Date();
+    const currentMonth = now.getMonth(); // 0-11 (0=január)
+
+    let planUnits = 0;
+    let actualUnits = apartments.length; // Mindig az aktív lakások száma (szinkronizálva)
+
+    switch (revenuePlanPeriod) {
+      case 'year':
+        // Éves: December hónap célértéke (év végi célállapot, nem kumulatív összeg)
+        if (salesTargets && salesTargets[11]) { // December = index 11
+          planUnits = salesTargets[11].planUnits || 0;
+        }
+        break;
+      case 'month':
+        // Havi: Aktuális hónap célértéke
+        if (salesTargets && salesTargets[currentMonth]) {
+          planUnits = salesTargets[currentMonth].planUnits || 0;
+        }
+        break;
+      case 'week':
+      case 'day':
+        // Heti/Napi: Aktuális hónap értéke (interpolálva vagy hónap célértéke)
+        if (salesTargets && salesTargets[currentMonth]) {
+          planUnits = salesTargets[currentMonth].planUnits || 0;
+        }
+        break;
+      default:
+        if (salesTargets && salesTargets[11]) {
+          planUnits = salesTargets[11].planUnits || 0;
+        }
+    }
+
+    return {
+      plan: planUnits,
+      fact: actualUnits
+    };
+  }, [revenuePlanPeriod, salesTargets, apartments]);
+
+  // Státusz badge színek számítása
+  const getStatusBadgeColor = useCallback((fact, plan, isReversed = false, isResult = false) => {
+    if (plan === 0) return 'bg-gray-400'; // Nincs adat
+
+    // Eredmény esetén speciális logika
+    if (isResult) {
+      if (fact < 0) return 'bg-red-500'; // Negatív eredmény
+      const percentage = (fact / plan) * 100;
+      if (percentage >= 90) return 'bg-green-500'; // Jó
+      if (percentage >= 60) return 'bg-yellow-500'; // Közepes
+      return 'bg-red-500'; // Gyenge
+    }
+
+    const percentage = (fact / plan) * 100;
+
+    if (isReversed) {
+      // Költség esetén fordított logika
+      if (percentage <= 100) return 'bg-green-500'; // Jó
+      if (percentage <= 120) return 'bg-yellow-500'; // Közepes
+      return 'bg-red-500'; // Gyenge
+    } else {
+      // Bevétel és Lakás esetén normál logika
+      if (percentage >= 90) return 'bg-green-500'; // Jó
+      if (percentage >= 60) return 'bg-yellow-500'; // Közepes
+      return 'bg-red-500'; // Gyenge
+    }
+  }, []);
 
   // Éves/Havi/Napi sikeres lead statisztikák
   const successfulLeadStats = useMemo(() => {
@@ -533,19 +601,18 @@ const DashboardPage = () => {
       )}
 
       {/* Gyors navigáció */}
-      <nav aria-label="Gyors navigáció" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+      <nav aria-label="Gyors navigáció" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
         {/* 1. Leadek */}
         {canView('leads') && (
           <Link
             to="/leads"
-            className="bg-gradient-to-r from-indigo-500 to-purple-600 p-4 rounded-xl text-white text-left hover:from-indigo-600 hover:to-purple-700 transition shadow-lg tile-click-animation"
+            className="bg-gradient-to-r from-indigo-500 to-purple-600 p-3 rounded-lg text-white text-left hover:from-indigo-600 hover:to-purple-700 transition shadow-lg tile-click-animation"
             aria-label="Ugrás a Leadek kezelése oldalra"
           >
-            <div className="flex items-center gap-3">
-              <span className="text-2xl" aria-hidden="true">📊</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xl" aria-hidden="true">📊</span>
               <div>
-                <h3 className="font-bold">Leadek</h3>
-                <p className="text-xs opacity-80">Lead kezelés, értékesítés</p>
+                <h3 className="font-semibold text-sm">Leadek</h3>
               </div>
             </div>
           </Link>
@@ -554,14 +621,13 @@ const DashboardPage = () => {
         {canView('marketing') && (
           <Link
             to="/marketing"
-            className="bg-gradient-to-r from-pink-500 to-rose-600 p-4 rounded-xl text-white text-left hover:from-pink-600 hover:to-rose-700 transition shadow-lg tile-click-animation"
+            className="bg-gradient-to-r from-pink-500 to-rose-600 p-3 rounded-lg text-white text-left hover:from-pink-600 hover:to-rose-700 transition shadow-lg tile-click-animation"
             aria-label="Ugrás a Marketing oldalra"
           >
-            <div className="flex items-center gap-3">
-              <span className="text-2xl" aria-hidden="true">📢</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xl" aria-hidden="true">📢</span>
               <div>
-                <h3 className="font-bold">Marketing</h3>
-                <p className="text-xs opacity-80">Kampányok, csatornák</p>
+                <h3 className="font-semibold text-sm">Marketing</h3>
               </div>
             </div>
           </Link>
@@ -570,29 +636,40 @@ const DashboardPage = () => {
         {canView('sales') && (
           <Link
             to="/sales"
-            className="bg-gradient-to-r from-orange-500 to-orange-600 p-4 rounded-xl text-white text-left hover:from-orange-600 hover:to-orange-700 transition shadow-lg tile-click-animation"
+            className="bg-gradient-to-r from-orange-500 to-orange-600 p-3 rounded-lg text-white text-left hover:from-orange-600 hover:to-orange-700 transition shadow-lg tile-click-animation"
             aria-label="Ugrás az Értékesítés oldalra"
           >
-            <div className="flex items-center gap-3">
-              <span className="text-2xl" aria-hidden="true">💰</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xl" aria-hidden="true">💰</span>
               <div>
-                <h3 className="font-bold">Értékesítés</h3>
-                <p className="text-xs opacity-80">Sales pipeline, célok</p>
+                <h3 className="font-semibold text-sm">Értékesítés</h3>
               </div>
             </div>
           </Link>
         )}
-        {/* 4. Partnerek */}
+        {/* 4. Projektek */}
         <Link
-          to="/apps"
-          className="bg-gradient-to-r from-blue-500 to-blue-600 p-4 rounded-xl text-white text-left hover:from-blue-600 hover:to-blue-700 transition shadow-lg tile-click-animation"
+          to="/projects"
+          className="bg-gradient-to-r from-yellow-500 to-yellow-600 p-3 rounded-lg text-white text-left hover:from-yellow-600 hover:to-yellow-700 transition shadow-lg tile-click-animation"
+          aria-label="Ugrás a Projektek oldalra"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-2xl" aria-hidden="true">📋</span>
+            <div>
+              <h3 className="font-bold">Projektek</h3>
+            </div>
+          </div>
+        </Link>
+        {/* 5. Partnerek */}
+        <Link
+          to="/partners"
+          className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 rounded-lg text-white text-left hover:from-blue-600 hover:to-blue-700 transition shadow-lg tile-click-animation"
           aria-label="Ugrás a Partnerek oldalra"
         >
           <div className="flex items-center gap-3">
             <span className="text-2xl" aria-hidden="true">🤝</span>
             <div>
               <h3 className="font-bold">Partnerek</h3>
-              <p className="text-xs opacity-80">Partner regisztráció, kezelés</p>
             </div>
           </div>
         </Link>
@@ -600,14 +677,13 @@ const DashboardPage = () => {
         {canView('apartments') && (
           <Link
             to="/apartments"
-            className="bg-gradient-to-r from-emerald-500 to-emerald-600 p-4 rounded-xl text-white text-left hover:from-emerald-600 hover:to-emerald-700 transition shadow-lg tile-click-animation"
+            className="bg-gradient-to-r from-emerald-500 to-emerald-600 p-3 rounded-lg text-white text-left hover:from-emerald-600 hover:to-emerald-700 transition shadow-lg tile-click-animation"
             aria-label="Ugrás a Lakások kezelése oldalra"
           >
-            <div className="flex items-center gap-3">
-              <span className="text-2xl" aria-hidden="true">🏠</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xl" aria-hidden="true">🏠</span>
               <div>
-                <h3 className="font-bold">Lakások</h3>
-                <p className="text-xs opacity-80">Lakás kezelés, információk</p>
+                <h3 className="font-semibold text-sm">Lakások</h3>
               </div>
             </div>
           </Link>
@@ -616,14 +692,13 @@ const DashboardPage = () => {
         {canView('bookings') && (
           <Link
             to="/bookings"
-            className="bg-gradient-to-r from-cyan-500 to-cyan-600 p-4 rounded-xl text-white text-left hover:from-cyan-600 hover:to-cyan-700 transition shadow-lg tile-click-animation"
+            className="bg-gradient-to-r from-cyan-500 to-cyan-600 p-3 rounded-lg text-white text-left hover:from-cyan-600 hover:to-cyan-700 transition shadow-lg tile-click-animation"
             aria-label="Ugrás a Foglalások kezelése oldalra"
           >
-            <div className="flex items-center gap-3">
-              <span className="text-2xl" aria-hidden="true">📅</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xl" aria-hidden="true">📅</span>
               <div>
-                <h3 className="font-bold">Foglalások</h3>
-                <p className="text-xs opacity-80">Foglalás kezelés, naptár</p>
+                <h3 className="font-semibold text-sm">Foglalások</h3>
               </div>
             </div>
           </Link>
@@ -632,14 +707,13 @@ const DashboardPage = () => {
         {canView('cleaning') && (
           <Link
             to="/cleaning"
-            className="bg-gradient-to-r from-teal-500 to-teal-600 p-4 rounded-xl text-white text-left hover:from-teal-600 hover:to-teal-700 transition shadow-lg tile-click-animation"
+            className="bg-gradient-to-r from-teal-500 to-teal-600 p-3 rounded-lg text-white text-left hover:from-teal-600 hover:to-teal-700 transition shadow-lg tile-click-animation"
             aria-label="Ugrás a Takarítás kezelése oldalra"
           >
-            <div className="flex items-center gap-3">
-              <span className="text-2xl" aria-hidden="true">🧹</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xl" aria-hidden="true">🧹</span>
               <div>
-                <h3 className="font-bold">Takarítás</h3>
-                <p className="text-xs opacity-80">Takarítás kezelés, státuszok</p>
+                <h3 className="font-semibold text-sm">Takarítás</h3>
               </div>
             </div>
           </Link>
@@ -648,14 +722,13 @@ const DashboardPage = () => {
         {canView('maintenance') && (
           <Link
             to="/maintenance"
-            className="bg-gradient-to-r from-amber-500 to-amber-600 p-4 rounded-xl text-white text-left hover:from-amber-600 hover:to-amber-700 transition shadow-lg tile-click-animation"
+            className="bg-gradient-to-r from-amber-500 to-amber-600 p-3 rounded-lg text-white text-left hover:from-amber-600 hover:to-amber-700 transition shadow-lg tile-click-animation"
             aria-label="Ugrás a Karbantartás oldalra"
           >
-            <div className="flex items-center gap-3">
-              <span className="text-2xl" aria-hidden="true">🔧</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xl" aria-hidden="true">🔧</span>
               <div>
-                <h3 className="font-bold">Karbantartás</h3>
-                <p className="text-xs opacity-80">Karbantartás bejelentések</p>
+                <h3 className="font-semibold text-sm">Karbantartás</h3>
               </div>
             </div>
           </Link>
@@ -664,14 +737,13 @@ const DashboardPage = () => {
         {canView('finance') && (
           <Link
             to="/finance"
-            className="bg-gradient-to-r from-purple-500 to-purple-600 p-4 rounded-xl text-white text-left hover:from-purple-600 hover:to-purple-700 transition shadow-lg tile-click-animation"
+            className="bg-gradient-to-r from-purple-500 to-purple-600 p-3 rounded-lg text-white text-left hover:from-purple-600 hover:to-purple-700 transition shadow-lg tile-click-animation"
             aria-label="Ugrás a Pénzügy oldalra"
           >
-            <div className="flex items-center gap-3">
-              <span className="text-2xl" aria-hidden="true">💵</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xl" aria-hidden="true">💵</span>
               <div>
-                <h3 className="font-bold">Pénzügy</h3>
-                <p className="text-xs opacity-80">Bevételek, elszámolások</p>
+                <h3 className="font-semibold text-sm">Pénzügy</h3>
               </div>
             </div>
           </Link>
@@ -679,14 +751,13 @@ const DashboardPage = () => {
         {/* 10. Dokumentumok */}
         <Link
           to="/documents"
-          className="bg-gradient-to-r from-slate-500 to-slate-600 p-4 rounded-xl text-white text-left hover:from-slate-600 hover:to-slate-700 transition shadow-lg tile-click-animation"
+          className="bg-gradient-to-r from-slate-500 to-slate-600 p-3 rounded-lg text-white text-left hover:from-slate-600 hover:to-slate-700 transition shadow-lg tile-click-animation"
           aria-label="Ugrás a Dokumentumok oldalra"
         >
           <div className="flex items-center gap-3">
             <span className="text-2xl" aria-hidden="true">📄</span>
             <div>
               <h3 className="font-bold">Dokumentumok</h3>
-              <p className="text-xs opacity-80">Fájlok, szerződések, archívum</p>
             </div>
           </div>
         </Link>
@@ -694,14 +765,13 @@ const DashboardPage = () => {
         {canView('email') && (
           <Link
             to="/email"
-            className="bg-gradient-to-r from-violet-500 to-violet-600 dark:from-violet-600 dark:to-violet-700 p-4 rounded-xl text-white text-left hover:from-violet-600 hover:to-violet-700 dark:hover:from-violet-500 dark:hover:to-violet-600 transition shadow-lg tile-click-animation"
+            className="bg-gradient-to-r from-violet-500 to-violet-600 dark:from-violet-600 dark:to-violet-700 p-3 rounded-lg text-white text-left hover:from-violet-600 hover:to-violet-700 dark:hover:from-violet-500 dark:hover:to-violet-600 transition shadow-lg tile-click-animation"
             aria-label="Ugrás az Email / Levelező oldalra"
           >
-            <div className="flex items-center gap-3">
-              <span className="text-2xl" aria-hidden="true">📧</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xl" aria-hidden="true">📧</span>
               <div>
-                <h3 className="font-bold">Email</h3>
-                <p className="text-xs opacity-80">Levelezés, SMTP, sablonok</p>
+                <h3 className="font-semibold text-sm">Email</h3>
               </div>
             </div>
           </Link>
@@ -709,14 +779,13 @@ const DashboardPage = () => {
         {/* 12. Apps */}
         <Link
           to="/apps"
-          className="bg-gradient-to-r from-sky-500 to-sky-600 dark:from-sky-600 dark:to-sky-700 p-4 rounded-xl text-white text-left hover:from-sky-600 hover:to-sky-700 dark:hover:from-sky-500 dark:hover:to-sky-600 transition shadow-lg tile-click-animation"
+          className="bg-gradient-to-r from-sky-500 to-sky-600 dark:from-sky-600 dark:to-sky-700 p-3 rounded-lg text-white text-left hover:from-sky-600 hover:to-sky-700 dark:hover:from-sky-500 dark:hover:to-sky-600 transition shadow-lg tile-click-animation"
           aria-label="Ugrás az Apps oldalra"
         >
           <div className="flex items-center gap-3">
             <span className="text-2xl" aria-hidden="true">📱</span>
             <div>
               <h3 className="font-bold">Apps</h3>
-              <p className="text-xs opacity-80">Alkalmazások, eszközök</p>
             </div>
           </div>
         </Link>
@@ -729,7 +798,6 @@ const DashboardPage = () => {
           <div className="flex items-center gap-3">
             <div>
               <h3 className="font-bold">AI</h3>
-              <p className="text-xs opacity-80">Agentek, Tudástár</p>
             </div>
           </div>
         </Link>
@@ -737,14 +805,13 @@ const DashboardPage = () => {
         {canView('settings') && (
           <Link
             to="/settings"
-            className="bg-gradient-to-r from-gray-500 to-gray-600 p-4 rounded-xl text-white text-left hover:from-gray-600 hover:to-gray-700 transition shadow-lg tile-click-animation"
+            className="bg-gradient-to-r from-gray-500 to-gray-600 p-3 rounded-lg text-white text-left hover:from-gray-600 hover:to-gray-700 transition shadow-lg tile-click-animation"
             aria-label="Ugrás a Beállítások oldalra"
           >
-            <div className="flex items-center gap-3">
-              <span className="text-2xl" aria-hidden="true">⚙️</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xl" aria-hidden="true">⚙️</span>
               <div>
-                <h3 className="font-bold">Beállítások</h3>
-                <p className="text-xs opacity-80">Felhasználók, jogosultságok</p>
+                <h3 className="font-semibold text-sm">Beállítások</h3>
               </div>
             </div>
           </Link>
@@ -788,43 +855,87 @@ const DashboardPage = () => {
               </Button>
             </div>
           </div>
-          {/* 4 kis kártya: Bevétel Terv, Bevétel Tény, Költség Terv, Költség Tény */}
-          <div className="grid grid-cols-2 gap-3">
-            {/* Bevétel Terv */}
-            <div className="text-center p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
-              <div className="text-xs text-orange-700 dark:text-orange-400 mb-1 font-semibold">Bevétel Terv</div>
-              <div className="text-xl font-bold text-orange-600 dark:text-orange-500">
+          {/* 8 kártya: Bevétel, Költség, Lakás, Eredmény - Terv és Tény (4×2) */}
+          <div className="grid grid-cols-4 gap-3">
+            {/* Bevétel Terv - KÉK */}
+            <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div className="text-xs text-blue-700 dark:text-blue-400 mb-1 font-semibold">Bevétel Terv</div>
+              <div className="text-xl font-bold text-blue-600 dark:text-blue-500">
                 {formatCurrencyHUF(revenuePlanFact.plan, false)}
               </div>
             </div>
-            {/* Bevétel Tény */}
-            <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-              <div className="text-xs text-green-700 dark:text-green-400 mb-1 font-semibold">Bevétel Tény</div>
-              <div className="text-xl font-bold text-green-600 dark:text-green-500">
-                {formatCurrencyHUF(revenuePlanFact.fact, false)}
-              </div>
-            </div>
-            {/* Költség Terv */}
+            {/* Költség Terv - NARANCS */}
             <div className="text-center p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
               <div className="text-xs text-orange-700 dark:text-orange-400 mb-1 font-semibold">Költség Terv</div>
               <div className="text-xl font-bold text-orange-600 dark:text-orange-500">
                 {formatCurrencyHUF(revenuePlanFact.costPlan || 0, false)}
               </div>
             </div>
-            {/* Költség Tény */}
+            {/* Lakás Terv - ZÖLD */}
             <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-              <div className="text-xs text-green-700 dark:text-green-400 mb-1 font-semibold">Költség Tény</div>
+              <div className="text-xs text-green-700 dark:text-green-400 mb-1 font-semibold">Lakás Terv</div>
               <div className="text-xl font-bold text-green-600 dark:text-green-500">
+                {apartmentPlanFact.plan}
+              </div>
+            </div>
+            {/* Eredmény Terv - LILA */}
+            <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+              <div className="text-xs text-purple-700 dark:text-purple-400 mb-1 font-semibold">Eredmény Terv</div>
+              <div className="text-xl font-bold text-purple-600 dark:text-purple-500">
+                {formatCurrencyHUF((revenuePlanFact.plan || 0) - (revenuePlanFact.costPlan || 0), false)}
+              </div>
+            </div>
+            {/* Bevétel Tény - KÉK */}
+            <div className="relative text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div className={`absolute top-3 right-3 w-3 h-3 rounded-full ${getStatusBadgeColor(revenuePlanFact.fact, revenuePlanFact.plan)}`} />
+              <div className="text-xs text-blue-700 dark:text-blue-400 mb-1 font-semibold">Bevétel Tény</div>
+              <div className="text-xl font-bold text-blue-600 dark:text-blue-500">
+                {formatCurrencyHUF(revenuePlanFact.fact, false)}
+              </div>
+            </div>
+            {/* Költség Tény - NARANCS */}
+            <div className="relative text-center p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+              <div className={`absolute top-3 right-3 w-3 h-3 rounded-full ${getStatusBadgeColor(revenuePlanFact.costFact || 0, revenuePlanFact.costPlan, true)}`} />
+              <div className="text-xs text-orange-700 dark:text-orange-400 mb-1 font-semibold">Költség Tény</div>
+              <div className="text-xl font-bold text-orange-600 dark:text-orange-500">
                 {formatCurrencyHUF(revenuePlanFact.costFact || 0, false)}
               </div>
             </div>
+            {/* Lakás Tény - ZÖLD */}
+            <div className="relative text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+              <div className={`absolute top-3 right-3 w-3 h-3 rounded-full ${getStatusBadgeColor(apartmentPlanFact.fact, apartmentPlanFact.plan)}`} />
+              <div className="text-xs text-green-700 dark:text-green-400 mb-1 font-semibold">Lakás Tény</div>
+              <div className="text-xl font-bold text-green-600 dark:text-green-500">
+                {apartmentPlanFact.fact}
+              </div>
+            </div>
+            {/* Eredmény Tény - LILA */}
+            <div className="relative text-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+              <div className={`absolute top-3 right-3 w-3 h-3 rounded-full ${getStatusBadgeColor((revenuePlanFact.fact || 0) - (revenuePlanFact.costFact || 0), (revenuePlanFact.plan || 0) - (revenuePlanFact.costPlan || 0), false, true)}`} />
+              <div className="text-xs text-purple-700 dark:text-purple-400 mb-1 font-semibold">Eredmény Tény</div>
+              <div className="text-xl font-bold text-purple-600 dark:text-purple-500">
+                {formatCurrencyHUF((revenuePlanFact.fact || 0) - (revenuePlanFact.costFact || 0), false)}
+              </div>
+            </div>
           </div>
-          <div className="mt-4 flex items-center justify-center gap-2">
-            <div className={`w-3 h-3 rounded-full ${
-              revenuePlanFact.hasData ? 'bg-green-500' : 'bg-red-500'
-            }`} aria-label={revenuePlanFact.hasData ? 'Adatok megvannak' : 'Nincs adat'} />
+          {/* Státusz jelmagyarázat - pöttyök + százalékok */}
+          <div className="mt-4 flex items-center justify-center gap-8">
+            <div className="flex flex-col items-center gap-1">
+              <span className="w-3 h-3 rounded-full bg-green-500"></span>
+              <span className="text-xs text-gray-600 dark:text-gray-400">≥90%</span>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <span className="w-3 h-3 rounded-full bg-yellow-500"></span>
+              <span className="text-xs text-gray-600 dark:text-gray-400">60-89%</span>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <span className="w-3 h-3 rounded-full bg-red-500"></span>
+              <span className="text-xs text-gray-600 dark:text-gray-400">&lt;60%</span>
+            </div>
+          </div>
+          <div className="mt-3 flex items-center justify-center">
             <span className="text-sm text-gray-600 dark:text-gray-400">
-              {revenuePlanFact.hasData 
+              {revenuePlanFact.hasData
                 ? `Teljesítés: ${formatPercent(revenuePlanFact.completionRate, 1)}`
                 : 'Nincs adat'
               }

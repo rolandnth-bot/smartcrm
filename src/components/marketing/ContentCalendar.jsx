@@ -31,12 +31,12 @@ const ContentCalendar = memo(() => {
   ], []);
 
   const contentTypes = useMemo(() => [
-    { key: 'post', label: 'Poszt', icon: '📝' },
-    { key: 'story', label: 'Story', icon: '📸' },
-    { key: 'reel', label: 'Reel', icon: '🎬' },
-    { key: 'video', label: 'Videó', icon: '🎥' },
-    { key: 'email', label: 'Email', icon: '📧' },
-    { key: 'other', label: 'Egyéb', icon: '📌' }
+    { key: 'post', label: 'Poszt', icon: '' },
+    { key: 'story', label: 'Story', icon: '' },
+    { key: 'reel', label: 'Reel', icon: '' },
+    { key: 'video', label: 'Videó', icon: '' },
+    { key: 'email', label: 'Email', icon: '' },
+    { key: 'other', label: 'Egyéb', icon: '' }
   ], []);
 
   const channels = useMemo(() => [
@@ -71,7 +71,7 @@ const ContentCalendar = memo(() => {
 
   const days = useMemo(() => {
     const daysArray = [];
-    // Üres cellák az első nap előtt
+    // Üres cellák az els nap eltt
     for (let i = 0; i < firstDayOfMonth; i++) {
       daysArray.push(null);
     }
@@ -187,9 +187,9 @@ const ContentCalendar = memo(() => {
           onClick={handlePreviousMonth}
           variant="ghost"
           size="sm"
-          aria-label="Előző hónap"
+          aria-label="Elz hónap"
         >
-          ←
+          
         </Button>
         <h3 className={`text-xl font-bold ${textClass}`}>
           {monthNames[calendarMonth]} {calendarYear}
@@ -198,9 +198,9 @@ const ContentCalendar = memo(() => {
           onClick={handleNextMonth}
           variant="ghost"
           size="sm"
-          aria-label="Következő hónap"
+          aria-label="Következ hónap"
         >
-          →
+          
         </Button>
       </div>
 
@@ -257,7 +257,7 @@ const ContentCalendar = memo(() => {
                         className={`text-xs px-1 py-0.5 rounded truncate ${channel?.color || 'bg-gray-400'} text-white cursor-pointer hover:opacity-80`}
                         title={content.title}
                       >
-                        {type?.icon || '📌'} {content.title}
+                        {type?.icon || ''} {content.title}
                       </div>
                     );
                   })}
@@ -398,7 +398,7 @@ const ContentCalendar = memo(() => {
         </div>
       </Modal>
 
-      {/* Törlés megerősítés */}
+      {/* Törlés megersítés */}
       {deleteConfirm && (
         <Modal
           isOpen={!!deleteConfirm}

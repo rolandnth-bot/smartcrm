@@ -28,7 +28,7 @@ const SmartChatWidget = () => {
       aria-label="SmartChat megnyitása (külön ablak)"
       aria-current={isSmartChatPage ? 'page' : undefined}
     >
-      <span className="text-lg" aria-hidden>💬</span>
+      <span className="text-lg" aria-hidden></span>
       <span className="font-semibold">SmartChat</span>
     </motion.button>
   );

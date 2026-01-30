@@ -5,26 +5,26 @@ import { validateForm, validateEmail, validatePhone } from '../../utils/validati
 import useToastStore from '../../stores/toastStore';
 import { todayISO } from '../../utils/dateUtils';
 
-/** Importált adatok → Ingatlan információk űrlap értékek (ugyanaz a normalizálás mint a store Excel/CSV import). */
+/** Importált adatok  Ingatlan információk rlap értékek (ugyanaz a normalizálás mint a store Excel/CSV import). */
 function normalizeImportedToForm(importedData) {
   if (!importedData || typeof importedData !== 'object') return {};
   const out = {};
   const v = (k) => importedData[k];
-  // Van jelenleg kiadó ingatlanod → igen_van / hamarosan_lesz / nem
+  // Van jelenleg kiadó ingatlanod  igen_van / hamarosan_lesz / nem
   if (v('van_jelenleg_kiado_ingatlanod_vagy_hamarosan_lesz')) {
     const val = String(v('van_jelenleg_kiado_ingatlanod_vagy_hamarosan_lesz')).toLowerCase().replace(/[,_]/g, ' ');
     if (val.includes('igen') && val.includes('van')) out.hasProperty = 'igen_van';
     else if (val.includes('hamarosan')) out.hasProperty = 'hamarosan_lesz';
     else if (val.includes('nem')) out.hasProperty = 'nem';
   }
-  // Jelenleg milyen formában adod ki → airbnb_rövidtáv / hosszútáv / nincs_kiadva_még
+  // Jelenleg milyen formában adod ki  airbnb_rövidtáv / hosszútáv / nincs_kiadva_még
   if (v('jelenleg_milyen_formaban_adod_ki')) {
     const val = String(v('jelenleg_milyen_formaban_adod_ki')).toLowerCase().replace(/[/_\s]/g, ' ');
     if (val.includes('airbnb') && (val.includes('rövid') || val.includes('rovid') || val.includes('rovidtav'))) out.currentRentalType = 'airbnb_rövidtáv';
     else if (val.includes('hossz') || val.includes('hosszu')) out.currentRentalType = 'hosszútáv';
     else if (val.includes('nincs')) out.currentRentalType = 'nincs_kiadva_még';
   }
-  // Van most aktív üzemeltetőd → igen / nincs
+  // Van most aktív üzemeltetd  igen / nincs
   if (v('van_most_aktiv_uzemeltetod')) {
     const val = String(v('van_most_aktiv_uzemeltetod')).toLowerCase();
     out.hasOperator = val.includes('igen') ? 'igen' : 'nincs';
@@ -133,7 +133,7 @@ const LeadDetailModal = ({ isOpen, onClose, lead, onSave, onStartWizard, default
     const validation = validateForm(formData, validationRules);
     if (!validation.isValid) {
       setErrors(validation.errors);
-      useToastStore.getState().error('Kérjük, töltse ki a kötelező mezőket!');
+      useToastStore.getState().error('Kérjük, töltse ki a kötelez mezket!');
       return;
     }
 
@@ -335,7 +335,7 @@ const LeadDetailModal = ({ isOpen, onClose, lead, onSave, onStartWizard, default
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Van most aktív üzemeltetőd?
+                Van most aktív üzemeltetd?
               </label>
               <div className="flex gap-4">
                 <label className="flex items-center">
@@ -366,7 +366,7 @@ const LeadDetailModal = ({ isOpen, onClose, lead, onSave, onStartWizard, default
             {formData.hasOperator === 'igen' && (
               <div>
                 <label htmlFor="lead-why-change" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Miért szeretnél üzemeltetőt váltani?
+                  Miért szeretnél üzemeltett váltani?
                 </label>
                 <textarea
                   id="lead-why-change"
@@ -464,7 +464,7 @@ const LeadDetailModal = ({ isOpen, onClose, lead, onSave, onStartWizard, default
           </div>
         </div>
 
-        {/* Műveletek */}
+        {/* Mveletek */}
         <div className="flex gap-2 pt-4 border-t dark:border-gray-700">
           <Button
             onClick={handleSave}

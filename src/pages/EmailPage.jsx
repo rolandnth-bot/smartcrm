@@ -1,5 +1,5 @@
 /**
- * Email / Levelező Page
+ * Email / Levelez Page
  * Email kezelés, SMTP beállítások, sablonok, küldött emailek
  */
 
@@ -44,15 +44,15 @@ const EmailPage = () => {
   const [templates, setTemplates] = useState([
     { id: 1, name: 'Partner üdvözlés', subject: 'Üdvözöljük a SmartProperties csapatában!', body: 'Kedves Partner!\n\nÜdvözöljük a SmartProperties csapatában...' },
     { id: 2, name: 'Foglalás visszaigazolás', subject: 'Foglalás visszaigazolás', body: 'Kedves Vendég!\n\nKöszönjük a foglalását...' },
-    { id: 3, name: 'Számla emlékeztető', subject: 'Számla emlékeztető', body: 'Kedves Partner!\n\nEmlékeztetjük, hogy...' },
-    { id: 4, name: 'Lead followup', subject: 'Következő lépések', body: 'Kedves Érdeklődő!\n\nKöszönjük az érdeklődését...' },
+    { id: 3, name: 'Számla emlékeztet', subject: 'Számla emlékeztet', body: 'Kedves Partner!\n\nEmlékeztetjük, hogy...' },
+    { id: 4, name: 'Lead followup', subject: 'Következ lépések', body: 'Kedves Érdekld!\n\nKöszönjük az érdekldését...' },
   ]);
   const [editingTemplate, setEditingTemplate] = useState(null);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [templateForm, setTemplateForm] = useState({ name: '', subject: '', body: '' });
 
   useEffect(() => {
-    document.title = 'Email / Levelező - SmartCRM';
+    document.title = 'Email / Levelez - SmartCRM';
   }, []);
 
   useEffect(() => {
@@ -61,13 +61,13 @@ const EmailPage = () => {
 
   const handleSendEmail = async () => {
     const errors = {};
-    if (!quickEmail.to) errors.to = 'Címzett kötelező';
-    if (!quickEmail.subject) errors.subject = 'Tárgy kötelező';
-    if (!quickEmail.body) errors.body = 'Üzenet kötelező';
+    if (!quickEmail.to) errors.to = 'Címzett kötelez';
+    if (!quickEmail.subject) errors.subject = 'Tárgy kötelez';
+    if (!quickEmail.body) errors.body = 'Üzenet kötelez';
 
     if (Object.keys(errors).length > 0) {
       setQuickEmailErrors(errors);
-      error('Kérjük, töltse ki az összes kötelező mezőt!');
+      error('Kérjük, töltse ki az összes kötelez mezt!');
       return;
     }
 
@@ -124,7 +124,7 @@ const EmailPage = () => {
     if (!editingTemplate) return;
     const { name, subject, body } = templateForm;
     if (!name?.trim() || !subject?.trim() || !body?.trim()) {
-      error('Név, tárgy és üzenet kötelező.');
+      error('Név, tárgy és üzenet kötelez.');
       return;
     }
     setTemplates((prev) =>
@@ -204,12 +204,12 @@ const EmailPage = () => {
 
   const handleSaveServerSettings = () => {
     const errors = {};
-    if (!serverSettingsForm.smtpServer) errors.smtpServer = 'SMTP szerver kötelező';
-    if (!serverSettingsForm.smtpPort) errors.smtpPort = 'SMTP port kötelező';
-    if (!serverSettingsForm.imapServer) errors.imapServer = 'IMAP szerver kötelező';
-    if (!serverSettingsForm.imapPort) errors.imapPort = 'IMAP port kötelező';
-    if (!serverSettingsForm.pop3Server) errors.pop3Server = 'POP3 szerver kötelező';
-    if (!serverSettingsForm.pop3Port) errors.pop3Port = 'POP3 port kötelező';
+    if (!serverSettingsForm.smtpServer) errors.smtpServer = 'SMTP szerver kötelez';
+    if (!serverSettingsForm.smtpPort) errors.smtpPort = 'SMTP port kötelez';
+    if (!serverSettingsForm.imapServer) errors.imapServer = 'IMAP szerver kötelez';
+    if (!serverSettingsForm.imapPort) errors.imapPort = 'IMAP port kötelez';
+    if (!serverSettingsForm.pop3Server) errors.pop3Server = 'POP3 szerver kötelez';
+    if (!serverSettingsForm.pop3Port) errors.pop3Port = 'POP3 port kötelez';
 
     if (Object.keys(errors).length > 0) {
       setServerSettingsErrors(errors);
@@ -265,7 +265,7 @@ const EmailPage = () => {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Email / Levelező</h1>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Email / Levelez</h1>
       </div>
 
       {/* Fölül: emailfiók választó */}
@@ -295,7 +295,7 @@ const EmailPage = () => {
         </Button>
       </div>
 
-      {/* Levelező portál: mappák + üzenetlista */}
+      {/* Levelez portál: mappák + üzenetlista */}
       <Card className="p-4 min-h-[360px]">
         <div className="flex gap-4">
           <aside className="w-40 flex-shrink-0 space-y-1">
@@ -387,7 +387,7 @@ const EmailPage = () => {
                   )}
                 </div>
                 {currentFolder === 'inbox' && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400 py-8 text-center">Nincsenek bejövő üzenetek.</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 py-8 text-center">Nincsenek bejöv üzenetek.</p>
                 )}
                 {currentFolder === 'sent' && (
                   <div className="space-y-1 overflow-y-auto max-h-[280px]">
@@ -481,7 +481,7 @@ const EmailPage = () => {
         </div>
       </Card>
 
-      {/* Email sablonok – szerkeszthető */}
+      {/* Email sablonok  szerkeszthet */}
       <Card className="p-4">
         <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3">Email sablonok</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -498,7 +498,7 @@ const EmailPage = () => {
         </div>
       </Card>
 
-      {/* Szerver beállítások – legalul, kompakt */}
+      {/* Szerver beállítások  legalul, kompakt */}
       <Card className="p-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">Szerver beállítások</h3>
@@ -515,7 +515,7 @@ const EmailPage = () => {
           <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${
             isEmailConfigured() ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
           }`}>
-            {isEmailConfigured() ? '✓ Aktív' : '✗ Inaktív'}
+            {isEmailConfigured() ? ' Aktív' : ' Inaktív'}
           </span>
         </div>
       </Card>

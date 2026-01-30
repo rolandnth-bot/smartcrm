@@ -22,6 +22,7 @@ import EmptyState, { EmptyStateWithFilter } from '../components/common/EmptyStat
 import Tooltip from '../components/common/Tooltip';
 import { sendTemplatedEmail, isEmailConfigured } from '../services/emailService';
 import BookingsToolbar from '../components/bookings/BookingsToolbar';
+import OccupancyChart from '../components/bookings/OccupancyChart';
 
 // Platform színek és címkék (komponensen kívül, hogy ne jöjjön létre minden render során)
 const platformColors = {
@@ -233,7 +234,7 @@ const BookingsPage = () => {
 
   const handleAddBooking = useCallback(async () => {
     if (!newBooking.dateFrom || !newBooking.dateTo || !newBooking.apartmentId) {
-      useToastStore.getState().warning('Kérjük, töltse ki az összes kötelező mezőt!');
+      useToastStore.getState().warning('Kérjük, töltse ki az összes kötelez mezt!');
       return;
     }
     if (new Date(newBooking.dateTo) < new Date(newBooking.dateFrom)) {
@@ -245,7 +246,7 @@ const BookingsPage = () => {
       useToastStore.getState().error('Érvényes email cím szükséges');
       return;
     }
-    // Átfedő foglalások ellenőrzése
+    // Átfed foglalások ellenrzése
     const overlapCheck = checkOverlappingBookings(
       newBooking.dateFrom,
       newBooking.dateTo,
@@ -257,7 +258,7 @@ const BookingsPage = () => {
         .map((b) => b.guestName || 'Vendég')
         .join(', ');
       useToastStore.getState().error(
-        `Átfedő foglalás! A kiválasztott időszakban már van foglalás ugyanazon a lakáson (${overlappingNames}).`
+        `Átfed foglalás! A kiválasztott idszakban már van foglalás ugyanazon a lakáson (${overlappingNames}).`
       );
       return;
     }
@@ -275,14 +276,14 @@ const BookingsPage = () => {
             checkOut: formatDate(newBooking.dateTo)
           }, {
             to: newBooking.guestEmail,
-            subject: 'Foglalás megerősítése'
+            subject: 'Foglalás megersítése'
           });
-          useToastStore.getState().success('Megerősítő email elküldve a vendégnek.');
+          useToastStore.getState().success('Megersít email elküldve a vendégnek.');
         } catch (emailError) {
           if (import.meta.env.DEV) {
-            console.error('Hiba a megerősítő email küldésekor:', emailError);
+            console.error('Hiba a megersít email küldésekor:', emailError);
           }
-          useToastStore.getState().error('Hiba a megerősítő email küldésekor.');
+          useToastStore.getState().error('Hiba a megersít email küldésekor.');
         }
       }
       
@@ -347,7 +348,7 @@ const BookingsPage = () => {
       useToastStore.getState().error('Érvényes email cím szükséges');
       return;
     }
-    // Átfedő foglalások ellenőrzése (kizárva a jelenleg szerkesztett foglalást)
+    // Átfed foglalások ellenrzése (kizárva a jelenleg szerkesztett foglalást)
     const overlapCheck = checkOverlappingBookings(
       dateFrom,
       dateTo,
@@ -360,7 +361,7 @@ const BookingsPage = () => {
         .map((b) => b.guestName || 'Vendég')
         .join(', ');
       useToastStore.getState().error(
-        `Átfedő foglalás! A kiválasztott időszakban már van foglalás ugyanazon a lakáson (${overlappingNames}).`
+        `Átfed foglalás! A kiválasztott idszakban már van foglalás ugyanazon a lakáson (${overlappingNames}).`
       );
       return;
     }
@@ -496,7 +497,7 @@ const BookingsPage = () => {
   }, [getExportData, selectedBookings, bookingExportColumns]);
 
   const handlePrintPDF = useCallback(() => {
-    printToPDF('SmartCRM – Foglalások');
+    printToPDF('SmartCRM  Foglalások');
   }, []);
 
   const handleOpenBookingImport = useCallback(() => {
@@ -623,7 +624,7 @@ const BookingsPage = () => {
       
       if (importState.preview.fileType === 'csv') {
         // CSV esetén újra kell parse-olni csak az érvényes sorokat
-        // Egyszerűsített megoldás: JSON formátumban importáljuk az érvényes sorokat
+        // Egyszersített megoldás: JSON formátumban importáljuk az érvényes sorokat
         const jsonData = JSON.stringify(validBookings);
         result = await importBookingsFromJSON(jsonData);
       } else {
@@ -736,7 +737,7 @@ const BookingsPage = () => {
         <Card>
           <div className="text-center">
             <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.today}</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Ma érkező</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Ma érkez</div>
           </div>
         </Card>
         <Card>
@@ -755,10 +756,21 @@ const BookingsPage = () => {
         </Card>
       </div>
 
-      {/* Szűrők */}
+      {/* Foglalónaptár - felül, iCal beállításokkal */}
+      <Card>
+        <Calendar
+          onApartmentClick={(apt) => setIcalSettingsApartment(apt)}
+          onBookingClick={(booking) => handleEditBookingClick(booking)}
+        />
+      </Card>
+
+      {/* Foglaltságjelz diagram */}
+      <OccupancyChart bookings={bookings} apartments={apartments} />
+
+      {/* Szrk */}
       <Card>
         <div className="space-y-3">
-          {/* Kereső mező */}
+          {/* Keres mez */}
           <div>
             <label htmlFor="booking-search" className="sr-only">Keresés foglalások között</label>
             <input
@@ -771,12 +783,12 @@ const BookingsPage = () => {
               aria-label="Keresés foglalások között"
             />
           </div>
-          <div className="flex flex-wrap gap-2" role="group" aria-label="Foglalások szűrése">
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Foglalások szrése">
             <select
               value={apartmentFilter}
               onChange={(e) => handleApartmentFilterChange(e.target.value)}
               className="px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              aria-label="Lakás szerinti szűrés"
+              aria-label="Lakás szerinti szrés"
             >
               <option value="">Összes lakás</option>
               {apartments.map((apt) => (
@@ -790,7 +802,7 @@ const BookingsPage = () => {
             size="sm"
             onClick={handleFilterAll}
             aria-pressed={filter === 'all'}
-            aria-label="Szűrés: Minden foglalás"
+            aria-label="Szrés: Minden foglalás"
           >
             Mind
           </Button>
@@ -799,7 +811,7 @@ const BookingsPage = () => {
             size="sm"
             onClick={handleFilterToday}
             aria-pressed={filter === 'today'}
-            aria-label="Szűrés: Ma érkező foglalások"
+            aria-label="Szrés: Ma érkez foglalások"
           >
             Ma
           </Button>
@@ -808,7 +820,7 @@ const BookingsPage = () => {
             size="sm"
             onClick={handleFilterWeek}
             aria-pressed={filter === 'week'}
-            aria-label="Szűrés: Heti foglalások"
+            aria-label="Szrés: Heti foglalások"
           >
             Hét
           </Button>
@@ -817,7 +829,7 @@ const BookingsPage = () => {
             size="sm"
             onClick={handleFilterMonth}
             aria-pressed={filter === 'month'}
-            aria-label="Szűrés: Havi foglalások"
+            aria-label="Szrés: Havi foglalások"
           >
             Hónap
           </Button>
@@ -825,12 +837,8 @@ const BookingsPage = () => {
         </div>
       </Card>
 
-      {/* Foglalások nézet */}
-      {viewMode === 'calendar' ? (
-        <Card>
-          <Calendar onApartmentClick={(apt) => setIcalSettingsApartment(apt)} />
-        </Card>
-      ) : filteredBookings.length > 0 ? (
+      {/* Foglalások lista nézet */}
+      {filteredBookings.length > 0 ? (
         <div className="space-y-3">
           <div className="flex justify-between items-center mb-2">
             <h3 className="font-bold text-gray-800 dark:text-gray-200">Foglalások ({filteredBookings.length})</h3>
@@ -889,7 +897,7 @@ const BookingsPage = () => {
                 Rendezés:
               </span>
               <div className="flex gap-2 flex-wrap">
-                <Tooltip content={`Rendezés érkezési dátum szerint ${sortConfig.field === 'dateFrom' && sortConfig.direction === 'asc' ? 'növekvő' : 'csökkenő'}`}>
+                <Tooltip content={`Rendezés érkezési dátum szerint ${sortConfig.field === 'dateFrom' && sortConfig.direction === 'asc' ? 'növekv' : 'csökken'}`}>
                   <button
                     onClick={() => handleSort('dateFrom')}
                     className={`px-3 py-1 text-xs rounded border transition ${
@@ -897,12 +905,12 @@ const BookingsPage = () => {
                         ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300'
                         : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
                     }`}
-                    aria-label={`Rendezés érkezési dátum szerint ${sortConfig.field === 'dateFrom' && sortConfig.direction === 'asc' ? 'növekvő' : 'csökkenő'}`}
+                    aria-label={`Rendezés érkezési dátum szerint ${sortConfig.field === 'dateFrom' && sortConfig.direction === 'asc' ? 'növekv' : 'csökken'}`}
                   >
                     Érkezés {sortConfig.field === 'dateFrom' && (sortConfig.direction === 'asc' ? <ChevronUp /> : <ChevronDown />)}
                   </button>
                 </Tooltip>
-                <Tooltip content={`Rendezés vendég név szerint ${sortConfig.field === 'guestName' && sortConfig.direction === 'asc' ? 'növekvő' : 'csökkenő'}`}>
+                <Tooltip content={`Rendezés vendég név szerint ${sortConfig.field === 'guestName' && sortConfig.direction === 'asc' ? 'növekv' : 'csökken'}`}>
                   <button
                     onClick={() => handleSort('guestName')}
                     className={`px-3 py-1 text-xs rounded border transition ${
@@ -910,12 +918,12 @@ const BookingsPage = () => {
                         ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300'
                         : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
                     }`}
-                    aria-label={`Rendezés vendég név szerint ${sortConfig.field === 'guestName' && sortConfig.direction === 'asc' ? 'növekvő' : 'csökkenő'}`}
+                    aria-label={`Rendezés vendég név szerint ${sortConfig.field === 'guestName' && sortConfig.direction === 'asc' ? 'növekv' : 'csökken'}`}
                   >
                     Vendég {sortConfig.field === 'guestName' && (sortConfig.direction === 'asc' ? <ChevronUp /> : <ChevronDown />)}
                   </button>
                 </Tooltip>
-                <Tooltip content={`Rendezés platform szerint ${sortConfig.field === 'platform' && sortConfig.direction === 'asc' ? 'növekvő' : 'csökkenő'}`}>
+                <Tooltip content={`Rendezés platform szerint ${sortConfig.field === 'platform' && sortConfig.direction === 'asc' ? 'növekv' : 'csökken'}`}>
                   <button
                     onClick={() => handleSort('platform')}
                     className={`px-3 py-1 text-xs rounded border transition ${
@@ -923,12 +931,12 @@ const BookingsPage = () => {
                         ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300'
                         : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
                     }`}
-                    aria-label={`Rendezés platform szerint ${sortConfig.field === 'platform' && sortConfig.direction === 'asc' ? 'növekvő' : 'csökkenő'}`}
+                    aria-label={`Rendezés platform szerint ${sortConfig.field === 'platform' && sortConfig.direction === 'asc' ? 'növekv' : 'csökken'}`}
                   >
                     Platform {sortConfig.field === 'platform' && (sortConfig.direction === 'asc' ? <ChevronUp /> : <ChevronDown />)}
                   </button>
                 </Tooltip>
-                <Tooltip content={`Rendezés összeg szerint ${sortConfig.field === 'totalAmount' && sortConfig.direction === 'asc' ? 'növekvő' : 'csökkenő'}`}>
+                <Tooltip content={`Rendezés összeg szerint ${sortConfig.field === 'totalAmount' && sortConfig.direction === 'asc' ? 'növekv' : 'csökken'}`}>
                   <button
                     onClick={() => handleSort('totalAmount')}
                     className={`px-3 py-1 text-xs rounded border transition ${
@@ -936,7 +944,7 @@ const BookingsPage = () => {
                         ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300'
                         : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
                     }`}
-                    aria-label={`Rendezés összeg szerint ${sortConfig.field === 'totalAmount' && sortConfig.direction === 'asc' ? 'növekvő' : 'csökkenő'}`}
+                    aria-label={`Rendezés összeg szerint ${sortConfig.field === 'totalAmount' && sortConfig.direction === 'asc' ? 'növekv' : 'csökken'}`}
                   >
                     Összeg {sortConfig.field === 'totalAmount' && (sortConfig.direction === 'asc' ? <ChevronUp /> : <ChevronDown />)}
                   </button>
@@ -1035,7 +1043,7 @@ const BookingsPage = () => {
             {filter !== 'all' || apartmentFilter || searchQuery ? (
               <EmptyStateWithFilter
                 title="Nincsenek foglalások"
-                description="A kiválasztott szűrőkkel nem található foglalás. Próbáld meg módosítani a szűrőket vagy keresési feltételeket."
+                description="A kiválasztott szrkkel nem található foglalás. Próbáld meg módosítani a szrket vagy keresési feltételeket."
                 onClearFilter={() => {
                   setFilter('all');
                   setApartmentFilter('');
@@ -1178,7 +1186,7 @@ const BookingsPage = () => {
                 autoComplete="email"
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                {isEmailConfigured() ? 'Megerősítő email küldése automatikus' : 'Email service nincs beállítva'}
+                {isEmailConfigured() ? 'Megersít email küldése automatikus' : 'Email service nincs beállítva'}
               </p>
             </div>
             <div>
@@ -1319,7 +1327,7 @@ const BookingsPage = () => {
             }}
             className="space-y-4"
           >
-            {/* Platform színes fejléc – ugyanaz, mint naptárban kattintáskor */}
+            {/* Platform színes fejléc  ugyanaz, mint naptárban kattintáskor */}
             <div
               className={`p-4 rounded-lg text-white ${
                 selectedBooking.platform === 'airbnb' ? 'bg-pink-500' :
@@ -1426,7 +1434,7 @@ const BookingsPage = () => {
                   autoComplete="email"
                 />
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  {isEmailConfigured() ? 'Megerősítő email küldése automatikus' : 'Email service nincs beállítva'}
+                  {isEmailConfigured() ? 'Megersít email küldése automatikus' : 'Email service nincs beállítva'}
                 </p>
               </div>
               <div>
@@ -1467,7 +1475,7 @@ const BookingsPage = () => {
             <div className="border-t dark:border-gray-600 pt-4">
               <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
                 <span className="opacity-70" aria-hidden="true"><Edit2 /></span>
-                Bevétel bontás <span className="text-xs font-normal text-gray-500 dark:text-gray-400">(szerkeszthető)</span>
+                Bevétel bontás <span className="text-xs font-normal text-gray-500 dark:text-gray-400">(szerkeszthet)</span>
               </h4>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
@@ -1525,7 +1533,7 @@ const BookingsPage = () => {
                     const total = sum > 0 ? sum : (selectedBooking.payoutFt != null ? Number(selectedBooking.payoutFt) : 0);
                     if (total > 0) return formatCurrencyHUF(total);
                     if (selectedBooking.payoutEur != null && selectedBooking.payoutEur !== '') return `${selectedBooking.payoutEur} EUR`;
-                    return '–';
+                    return '';
                   })()}
                 </div>
               </div>
@@ -1574,7 +1582,7 @@ const BookingsPage = () => {
       </Modal>
       )}
 
-      {/* iCal beállítások modal – foglalások naptárból, lakás nevére kattintva */}
+      {/* iCal beállítások modal  foglalások naptárból, lakás nevére kattintva */}
       <IcalSettingsModal
         apartment={icalSettingsApartment}
         isOpen={!!icalSettingsApartment}
@@ -1606,7 +1614,7 @@ const BookingsPage = () => {
               }`}
             >
               <div className="space-y-2">
-                <div className="text-4xl">📁</div>
+                <div className="text-4xl"></div>
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   {importState.isDragOver ? 'Engedd el a fájlt itt' : 'Húzd ide a fájlt vagy kattints a kiválasztás gombra'}
                 </p>
@@ -1682,13 +1690,13 @@ const BookingsPage = () => {
                 <div className="flex justify-between items-center">
                   <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Oszlop mapping</h3>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    ✓ = Automatikusan felismert
+                     = Automatikusan felismert
                   </p>
                 </div>
 
                 <div className="bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
                   <p className="text-sm text-blue-800 dark:text-blue-200">
-                    A rendszer automatikusan felismerte az oszlopokat. Ellenőrizd és módosítsd szükség esetén.
+                    A rendszer automatikusan felismerte az oszlopokat. Ellenrizd és módosítsd szükség esetén.
                   </p>
                 </div>
 
@@ -1697,7 +1705,7 @@ const BookingsPage = () => {
                   <table className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-lg">
                     <thead className="bg-gray-50 dark:bg-gray-800">
                       <tr>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Mező</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Mez</th>
                         <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">CSV oszlop</th>
                         <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Státusz</th>
                       </tr>
@@ -1745,7 +1753,7 @@ const BookingsPage = () => {
                             <td className="px-3 py-2">
                               {isAutoDetected && (
                                 <span className="inline-flex items-center gap-1 text-green-600 dark:text-green-400 text-xs font-medium">
-                                  <span>✓</span> Auto-detect
+                                  <span></span> Auto-detect
                                 </span>
                               )}
                             </td>
@@ -1756,11 +1764,11 @@ const BookingsPage = () => {
                   </table>
                 </div>
 
-                {/* Minta adat preview (első 3-5 sor) */}
+                {/* Minta adat preview (els 3-5 sor) */}
                 {importState.csvSampleRows.length > 0 && (
                   <div className="mt-4">
                     <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Minta adatok (első {importState.csvSampleRows.length} sor)
+                      Minta adatok (els {importState.csvSampleRows.length} sor)
                     </h4>
                     <div className="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-lg">
                       <table className="w-full text-xs">
@@ -1809,13 +1817,13 @@ const BookingsPage = () => {
                       // CSV újraparse-olása a mapping alapján
                       // Jelenleg a previewBookingsFromCSV automatikusan felismeri az oszlopokat
                       // A teljes implementációhoz újra kellene parse-olni a fájlt a mapping alapján
-                      // Most csak továbblépünk az előnézethez
+                      // Most csak továbblépünk az elnézethez
                       setImportState((prev) => ({ ...prev, step: 'preview' }));
                     }}
                     variant="primary"
                     className="flex-1"
                   >
-                    Tovább az előnézethez
+                    Tovább az elnézethez
                   </Button>
                   <Button
                     onClick={handleCloseBookingImport}
@@ -1827,22 +1835,22 @@ const BookingsPage = () => {
               </div>
             )}
 
-            {/* Előnézet táblázat */}
+            {/* Elnézet táblázat */}
             {importState.step === 'preview' && importState.preview && (
               <div className="space-y-4 pt-4 border-t dark:border-gray-700">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Előnézet</h3>
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Elnézet</h3>
                   <div className="flex gap-2 text-sm">
                     <span className="text-green-600 dark:text-green-400 font-medium">
-                      ✓ Érvényes: {importState.preview.valid.length}
+                       Érvényes: {importState.preview.valid.length}
                     </span>
                     <span className="text-red-600 dark:text-red-400 font-medium">
-                      ✗ Hibás: {importState.preview.invalid.length}
+                       Hibás: {importState.preview.invalid.length}
                     </span>
                   </div>
                 </div>
 
-                {/* Szűrő gombok */}
+                {/* Szr gombok */}
                 {importState.preview.invalid.length > 0 && (
                   <div className="flex gap-2">
                     <Button
@@ -1897,7 +1905,7 @@ const BookingsPage = () => {
 
                 {importState.preview.valid.length > 0 && (
                   <div className="text-sm text-gray-600 dark:text-gray-400">
-                    <p className="mb-2">✓ {importState.preview.valid.length} érvényes foglalás készen áll az importálásra.</p>
+                    <p className="mb-2"> {importState.preview.valid.length} érvényes foglalás készen áll az importálásra.</p>
                   </div>
                 )}
 
@@ -1916,7 +1924,7 @@ const BookingsPage = () => {
                         aria-valuenow={importState.progress}
                         aria-valuemin="0"
                         aria-valuemax="100"
-                        aria-label="Importálás előrehaladása"
+                        aria-label="Importálás elrehaladása"
                       />
                     </div>
                   </div>
@@ -1963,7 +1971,7 @@ const BookingsPage = () => {
         </Modal>
       )}
 
-      {/* Törlés megerősítés - csak ha van edit jogosultság */}
+      {/* Törlés megersítés - csak ha van edit jogosultság */}
       {canEditBookings('bookings') && (
         <>
           <ConfirmDialog

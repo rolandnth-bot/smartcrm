@@ -10,7 +10,7 @@ import { sumBy } from '../utils/arrayUtils';
 import { contains } from '../utils/stringUtils';
 
 export const MAINTENANCE_PRIORITIES = [
-  { key: 'surgos', label: 'Sürgős', color: 'bg-red-500', dot: 'bg-red-500' },
+  { key: 'surgos', label: 'Sürgs', color: 'bg-red-500', dot: 'bg-red-500' },
   { key: 'normal', label: 'Normál', color: 'bg-amber-500', dot: 'bg-amber-500' },
   { key: 'alacsony', label: 'Alacsony', color: 'bg-gray-500', dot: 'bg-gray-500' }
 ];

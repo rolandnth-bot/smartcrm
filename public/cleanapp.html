@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CleanApp - Takarítás Menedzsment</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #fef3e2 0%, #fce7d0 50%, #fdf4ff 100%);
+      min-height: 100vh;
+    }
+    #root { min-height: 100vh; }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #fef3e2; }
+    ::-webkit-scrollbar-thumb { background: #fdba74; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // ============ IKONOK ============
+    const Icons = {
+      Plus: () => (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+        </svg>
+      ),
+      Trash: () => (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+      ),
+      Logout: () => (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+      ),
+    };
+
+    // ============ FŐ ALKALMAZÁS ============
+    function CleanApp() {
+      // Auth state
+      const [isLoggedIn, setIsLoggedIn] = useState(false);
+      const [currentUser, setCurrentUser] = useState(null);
+      const [pin, setPin] = useState(['', '', '', '']);
+      const [loginError, setLoginError] = useState('');
+      const VALID_PIN = '0000';
+
+      // Demo adatok
+      const [munkak, setMunkak] = useState([
+        {
+          id: '1',
+          lakasNev: 'D39, A57 Downtown',
+          datum: '2026. 01. 22.',
+          takaritasOra: 4,
+          takaritasDij: 8800,
+          mosasDij: 0,
+          mospiont: null
+        },
+        {
+          id: '2',
+          lakasNev: 'D16 Deluxe, A57 Downtown, Angyalföldi',
+          datum: '2026. 01. 20.',
+          takaritasOra: 6,
+          takaritasDij: 13200,
+          mosasDij: 3600,
+          mospiont: 'B20 Keleti',
+          mosasDb: 3,
+          mosasIdo: '14:00'
+        },
+        {
+          id: '3',
+          lakasNev: 'D16 Deluxe',
+          datum: '2026. 01. 20.',
+          takaritasOra: 2,
+          takaritasDij: 4400,
+          mosasDij: 3600,
+          mospiont: 'D16 Deluxe',
+          mosasDb: 3,
+          mosasIdo: '14:00'
+        },
+      ]);
+
+      const [cegesKoltsegek, setCegesKoltsegek] = useState([]);
+      const [karbantartasok, setKarbantartasok] = useState([]);
+      const [keszlet, setKeszlet] = useState([]);
+
+      // Modálok
+      const [showKoltsegModal, setShowKoltsegModal] = useState(false);
+      const [showKarbantartasModal, setShowKarbantartasModal] = useState(false);
+      const [newKoltseg, setNewKoltseg] = useState({ megnevezes: '', osszeg: '', datum: new Date().toISOString().split('T')[0] });
+      const [newKarbantartas, setNewKarbantartas] = useState({ lakas: '', leiras: '', prioritas: 'normal' });
+      const [newKeszletItem, setNewKeszletItem] = useState({ nev: '', mennyiseg: 1 });
+
+      // Összesítő számítások
+      const osszesites = {
+        osszes: munkak.reduce((sum, m) => sum + (m.takaritasDij || 0) + (m.mosasDij || 0), 0),
+        takaritas: munkak.reduce((sum, m) => sum + (m.takaritasDij || 0), 0),
+        mosas: munkak.reduce((sum, m) => sum + (m.mosasDij || 0), 0),
+        ceges: cegesKoltsegek.reduce((sum, k) => sum + (parseFloat(k.osszeg) || 0), 0)
+      };
+
+      // PIN input kezelés
+      const handlePinChange = (index, value) => {
+        if (value.length > 1) return;
+        if (value && !/^\d$/.test(value)) return;
+
+        const newPin = [...pin];
+        newPin[index] = value;
+        setPin(newPin);
+        setLoginError('');
+
+        // Auto-focus next input
+        if (value && index < 3) {
+          const nextInput = document.getElementById(`pin-${index + 1}`);
+          if (nextInput) nextInput.focus();
+        }
+
+        // Auto-submit when all filled
+        if (value && index === 3) {
+          const fullPin = newPin.join('');
+          if (fullPin === VALID_PIN) {
+            setCurrentUser({ name: 'Takarító' });
+            setIsLoggedIn(true);
+          } else {
+            setLoginError('Hibás PIN kód');
+            setPin(['', '', '', '']);
+            const firstInput = document.getElementById('pin-0');
+            if (firstInput) firstInput.focus();
+          }
+        }
+      };
+
+      // Backspace kezelés
+      const handlePinKeyDown = (index, e) => {
+        if (e.key === 'Backspace' && !pin[index] && index > 0) {
+          const prevInput = document.getElementById(`pin-${index - 1}`);
+          if (prevInput) prevInput.focus();
+        }
+      };
+
+      // Kijelentkezés
+      const handleLogout = () => {
+        setIsLoggedIn(false);
+        setCurrentUser(null);
+      };
+
+      // Költség hozzáadása
+      const addKoltseg = () => {
+        if (!newKoltseg.megnevezes || !newKoltseg.osszeg) return;
+
+        setCegesKoltsegek([
+          {
+            id: Date.now().toString(),
+            megnevezes: newKoltseg.megnevezes,
+            osszeg: parseFloat(newKoltseg.osszeg),
+            datum: newKoltseg.datum
+          },
+          ...cegesKoltsegek
+        ]);
+
+        setNewKoltseg({ megnevezes: '', osszeg: '', datum: new Date().toISOString().split('T')[0] });
+        setShowKoltsegModal(false);
+      };
+
+      // Karbantartás bejelentése
+      const addKarbantartas = () => {
+        if (!newKarbantartas.lakas || !newKarbantartas.leiras) return;
+
+        setKarbantartasok([
+          {
+            id: Date.now().toString(),
+            lakas: newKarbantartas.lakas,
+            leiras: newKarbantartas.leiras,
+            prioritas: newKarbantartas.prioritas,
+            status: 'bejelentve'
+          },
+          ...karbantartasok
+        ]);
+
+        setNewKarbantartas({ lakas: '', leiras: '', prioritas: 'normal' });
+        setShowKarbantartasModal(false);
+      };
+
+      // Készlet hozzáadása
+      const addKeszletItem = () => {
+        if (!newKeszletItem.nev) return;
+
+        setKeszlet([
+          ...keszlet,
+          {
+            id: Date.now().toString(),
+            nev: newKeszletItem.nev,
+            mennyiseg: parseInt(newKeszletItem.mennyiseg) || 1
+          }
+        ]);
+
+        setNewKeszletItem({ nev: '', mennyiseg: 1 });
+      };
+
+      // Készlet törlése
+      const deleteKeszletItem = (id) => {
+        setKeszlet(keszlet.filter(k => k.id !== id));
+      };
+
+      // Költség törlése
+      const deleteKoltseg = (id) => {
+        setCegesKoltsegek(cegesKoltsegek.filter(k => k.id !== id));
+      };
+
+      // Dátum formázás
+      const formatDate = (dateStr) => {
+        if (!dateStr) return '';
+        if (dateStr.includes('. ')) return dateStr; // már formázott
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('hu-HU', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\. /g, '. ');
+      };
+
+      // ============ LOGIN KÉPERNYŐ ============
+      if (!isLoggedIn) {
+        return (
+          <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #fef3e2 0%, #fce7d0 50%, #fdf4ff 100%)' }}>
+            <div className="bg-white rounded-3xl shadow-xl p-8 w-full max-w-sm">
+              <div className="text-center mb-8">
+                <div className="w-20 h-20 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <span className="text-4xl">🧹</span>
+                </div>
+                <h1 className="text-2xl font-bold text-gray-800">CleanApp</h1>
+                <p className="text-gray-500 mt-1">Add meg a PIN kódod</p>
+              </div>
+
+              <div className="flex justify-center gap-3 mb-6">
+                {[0, 1, 2, 3].map((index) => (
+                  <input
+                    key={index}
+                    id={`pin-${index}`}
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={pin[index]}
+                    onChange={(e) => handlePinChange(index, e.target.value)}
+                    onKeyDown={(e) => handlePinKeyDown(index, e)}
+                    className="w-14 h-14 text-center text-2xl font-bold border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                    autoFocus={index === 0}
+                  />
+                ))}
+              </div>
+
+              {loginError && (
+                <div className="bg-red-50 text-red-600 px-4 py-3 rounded-xl text-sm text-center mb-4">
+                  {loginError}
+                </div>
+              )}
+
+              <div className="text-center text-sm text-gray-400">
+                4 számjegyű PIN kód
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      // ============ FŐ DASHBOARD ============
+      return (
+        <div className="min-h-screen pb-8" style={{ background: 'linear-gradient(135deg, #fef3e2 0%, #fce7d0 50%, #fdf4ff 100%)' }}>
+          {/* Header */}
+          <div className="bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 text-white px-4 py-4 shadow-lg">
+            <div className="max-w-lg mx-auto flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
+                  <span className="text-xl">🧹</span>
+                </div>
+                <div>
+                  <h1 className="font-bold text-lg">CleanApp</h1>
+                  <p className="text-orange-100 text-xs">{currentUser?.name || currentUser?.email}</p>
+                </div>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                title="Kijelentkezés"
+              >
+                <Icons.Logout />
+              </button>
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
+
+            {/* Összesítő */}
+            <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+              <div className="p-5">
+                <h2 className="text-lg font-semibold text-gray-800 mb-4">Összesítő</h2>
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Összes */}
+                  <div className="bg-emerald-50 rounded-xl p-4 border-l-4 border-emerald-500">
+                    <p className="text-sm text-gray-600">Összes</p>
+                    <p className="text-2xl font-bold text-emerald-600">{osszesites.osszes.toLocaleString('hu-HU')} Ft</p>
+                  </div>
+
+                  {/* Takarítás */}
+                  <div className="bg-orange-50 rounded-xl p-4 border-l-4 border-orange-500">
+                    <p className="text-sm text-gray-600">Takarítás</p>
+                    <p className="text-2xl font-bold text-orange-600">{osszesites.takaritas.toLocaleString('hu-HU')} Ft</p>
+                  </div>
+
+                  {/* Mosás */}
+                  <div className="bg-violet-50 rounded-xl p-4 border-l-4 border-violet-500">
+                    <p className="text-sm text-gray-600">Mosás</p>
+                    <p className="text-2xl font-bold text-violet-600">{osszesites.mosas.toLocaleString('hu-HU')} Ft</p>
+                  </div>
+
+                  {/* Céges költségek */}
+                  <div className="bg-rose-50 rounded-xl p-4 border-l-4 border-rose-500">
+                    <p className="text-sm text-gray-600">Céges költségek</p>
+                    <p className="text-2xl font-bold text-rose-600">{osszesites.ceges.toLocaleString('hu-HU')} Ft</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Céges költségek */}
+            <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+              <div className="p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                    Céges költségek
+                  </h2>
+                  <button
+                    onClick={() => setShowKoltsegModal(true)}
+                    className="flex items-center gap-1 px-4 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-colors text-sm font-medium"
+                  >
+                    <Icons.Plus /> Költség hozzáadása
+                  </button>
+                </div>
+
+                {cegesKoltsegek.length === 0 ? (
+                  <p className="text-gray-400 text-center py-6">Még nincsenek céges költségek</p>
+                ) : (
+                  <div className="space-y-2">
+                    {cegesKoltsegek.map(k => (
+                      <div key={k.id} className="flex items-center justify-between bg-gray-50 rounded-xl p-3">
+                        <div>
+                          <p className="font-medium text-gray-800">{k.megnevezes}</p>
+                          <p className="text-sm text-gray-500">{formatDate(k.datum)}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-rose-600">{parseFloat(k.osszeg).toLocaleString('hu-HU')} Ft</span>
+                          <button
+                            onClick={() => deleteKoltseg(k.id)}
+                            className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          >
+                            <Icons.Trash />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Karbantartás bejelentés */}
+            <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+              <div className="p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                    Karbantartás bejelentés
+                  </h2>
+                  <button
+                    onClick={() => setShowKarbantartasModal(true)}
+                    className="flex items-center gap-1 px-4 py-2 bg-violet-500 text-white rounded-xl hover:bg-violet-600 transition-colors text-sm font-medium"
+                  >
+                    <Icons.Plus /> Bejelentés
+                  </button>
+                </div>
+
+                {karbantartasok.length === 0 ? (
+                  <p className="text-gray-400 text-center py-6">Még nincsenek bejelentések</p>
+                ) : (
+                  <div className="space-y-2">
+                    {karbantartasok.map(k => (
+                      <div key={k.id} className="bg-gray-50 rounded-xl p-3">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <p className="font-medium text-gray-800">{k.lakas}</p>
+                            <p className="text-sm text-gray-600">{k.leiras}</p>
+                          </div>
+                          <span className={`px-2 py-1 text-xs font-medium rounded-lg ${
+                            k.status === 'bejelentve' ? 'bg-yellow-100 text-yellow-700' :
+                            k.status === 'folyamatban' ? 'bg-blue-100 text-blue-700' :
+                            'bg-green-100 text-green-700'
+                          }`}>
+                            {k.status}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Munkáim */}
+            <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+              <div className="p-5">
+                <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4">
+                  Munkáim
+                </h2>
+
+                {munkak.length === 0 ? (
+                  <p className="text-gray-400 text-center py-6">Még nincsenek munkák</p>
+                ) : (
+                  <div className="space-y-3">
+                    {munkak.map(munka => (
+                      <div key={munka.id} className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <h3 className="font-semibold text-gray-800">{munka.lakasNev}</h3>
+                            <p className="text-sm text-blue-600">{munka.datum}</p>
+                            {munka.takaritasOra && (
+                              <p className="text-sm text-gray-500">Takarítás: {munka.takaritasOra} óra</p>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xl font-bold text-orange-600">
+                              {((munka.takaritasDij || 0) + (munka.mosasDij || 0)).toLocaleString('hu-HU')} Ft
+                            </p>
+                            {munka.takaritasDij > 0 && (
+                              <p className="text-xs text-gray-500">Takarítás: {munka.takaritasDij.toLocaleString('hu-HU')} Ft</p>
+                            )}
+                            {munka.mosasDij > 0 && (
+                              <p className="text-xs text-gray-500">Mosás: {munka.mosasDij.toLocaleString('hu-HU')} Ft</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Mosás információ */}
+                        {munka.mospiont && (
+                          <div className="mt-2 pt-2 border-t border-gray-100">
+                            <p className="text-sm text-violet-600 flex items-center gap-1">
+                              Mosás - {munka.mospiont}: {munka.mosasDb || 0} fő ({munka.mosasIdo || '14:00'})
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Nálam lévő készlet */}
+            <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+              <div className="p-5">
+                <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-1">
+                  Nálam lévő készlet
+                </h2>
+                <p className="text-sm text-violet-600 mb-4">Amit hazavittél / nálad van</p>
+
+                {keszlet.length === 0 ? (
+                  <p className="text-rose-400 text-center py-4">Nincs nálad rögzített készlet</p>
+                ) : (
+                  <div className="space-y-2 mb-4">
+                    {keszlet.map(item => (
+                      <div key={item.id} className="flex items-center justify-between bg-gray-50 rounded-xl p-3">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-gray-800">{item.nev}</span>
+                          <span className="text-sm text-gray-500">× {item.mennyiseg}</span>
+                        </div>
+                        <button
+                          onClick={() => deleteKeszletItem(item.id)}
+                          className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <Icons.Trash />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Új tétel hozzáadása */}
+                <div className="pt-4 border-t border-gray-100">
+                  <p className="text-sm font-medium text-gray-600 mb-2 flex items-center gap-1">
+                    <Icons.Plus /> Új tétel hozzáadása:
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newKeszletItem.nev}
+                      onChange={(e) => setNewKeszletItem({ ...newKeszletItem, nev: e.target.value })}
+                      placeholder="Tétel neve (pl. Porszívó, Paplan)..."
+                      className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-sm"
+                    />
+                    <input
+                      type="number"
+                      value={newKeszletItem.mennyiseg}
+                      onChange={(e) => setNewKeszletItem({ ...newKeszletItem, mennyiseg: e.target.value })}
+                      min="1"
+                      className="w-16 px-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none text-sm text-center"
+                    />
+                    <button
+                      onClick={addKeszletItem}
+                      className="flex items-center gap-1 px-4 py-2.5 bg-violet-500 text-white rounded-xl hover:bg-violet-600 transition-colors text-sm font-medium"
+                    >
+                      <Icons.Plus /> Hozzáad
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Költség Modal */}
+          {showKoltsegModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => setShowKoltsegModal(false)}>
+              <div className="bg-white rounded-2xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+                <h3 className="text-xl font-bold text-gray-800 mb-4">Új céges költség</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Megnevezés</label>
+                    <input
+                      type="text"
+                      value={newKoltseg.megnevezes}
+                      onChange={(e) => setNewKoltseg({ ...newKoltseg, megnevezes: e.target.value })}
+                      placeholder="pl. Tisztítószer, Üzemanyag..."
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Összeg (Ft)</label>
+                    <input
+                      type="number"
+                      value={newKoltseg.osszeg}
+                      onChange={(e) => setNewKoltseg({ ...newKoltseg, osszeg: e.target.value })}
+                      placeholder="0"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Dátum</label>
+                    <input
+                      type="date"
+                      value={newKoltseg.datum}
+                      onChange={(e) => setNewKoltseg({ ...newKoltseg, datum: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-3 mt-6">
+                  <button
+                    onClick={() => setShowKoltsegModal(false)}
+                    className="flex-1 py-3 border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+                  >
+                    Mégse
+                  </button>
+                  <button
+                    onClick={addKoltseg}
+                    className="flex-1 py-3 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-colors font-medium"
+                  >
+                    Mentés
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Karbantartás Modal */}
+          {showKarbantartasModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => setShowKarbantartasModal(false)}>
+              <div className="bg-white rounded-2xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+                <h3 className="text-xl font-bold text-gray-800 mb-4">Karbantartás bejelentés</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Lakás</label>
+                    <input
+                      type="text"
+                      value={newKarbantartas.lakas}
+                      onChange={(e) => setNewKarbantartas({ ...newKarbantartas, lakas: e.target.value })}
+                      placeholder="pl. D39, A57 Downtown..."
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Probléma leírása</label>
+                    <textarea
+                      value={newKarbantartas.leiras}
+                      onChange={(e) => setNewKarbantartas({ ...newKarbantartas, leiras: e.target.value })}
+                      placeholder="Mi a probléma?"
+                      rows={3}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none resize-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Prioritás</label>
+                    <select
+                      value={newKarbantartas.prioritas}
+                      onChange={(e) => setNewKarbantartas({ ...newKarbantartas, prioritas: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none"
+                    >
+                      <option value="alacsony">Alacsony</option>
+                      <option value="normal">Normál</option>
+                      <option value="magas">Magas</option>
+                      <option value="surgos">Sürgős</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex gap-3 mt-6">
+                  <button
+                    onClick={() => setShowKarbantartasModal(false)}
+                    className="flex-1 py-3 border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+                  >
+                    Mégse
+                  </button>
+                  <button
+                    onClick={addKarbantartas}
+                    className="flex-1 py-3 bg-violet-500 text-white rounded-xl hover:bg-violet-600 transition-colors font-medium"
+                  >
+                    Bejelentés
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Render
+    ReactDOM.render(<CleanApp />, document.getElementById('root'));
+  </script>
+</body>
+</html>

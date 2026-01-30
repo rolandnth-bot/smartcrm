@@ -34,7 +34,7 @@ export async function retry(fn, options = {}) {
         throw error;
       }
       
-      // Várunk a következő próbálkozás előtt (exponential backoff)
+      // Várunk a következ próbálkozás eltt (exponential backoff)
       const waitTime = delay * Math.pow(2, attempt);
       await new Promise(resolve => setTimeout(resolve, waitTime));
     }

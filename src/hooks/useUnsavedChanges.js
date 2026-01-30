@@ -7,8 +7,8 @@ import useToastStore from '../stores/toastStore';
  * Figyelmezteti a felhasználót, ha elhagyja az oldalt mentés nélkül
  * 
  * @param {boolean} hasUnsavedChanges - Van-e nem mentett változás
- * @param {string} message - Egyedi figyelmeztető üzenet (opcionális)
- * @param {boolean} showToast - Mutassa-e a toast üzenetet navigáció előtt (default: true)
+ * @param {string} message - Egyedi figyelmeztet üzenet (opcionális)
+ * @param {boolean} showToast - Mutassa-e a toast üzenetet navigáció eltt (default: true)
  */
 export function useUnsavedChanges(hasUnsavedChanges, message = null, showToast = true) {
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ export function useUnsavedChanges(hasUnsavedChanges, message = null, showToast =
 
     const handleBeforeUnload = (e) => {
       e.preventDefault();
-      // Modern böngészők nem engedik meg az egyedi üzenetet, de a default működik
+      // Modern böngészk nem engedik meg az egyedi üzenetet, de a default mködik
       e.returnValue = message || 'Nem mentett változások vannak. Biztosan elhagyja az oldalt?';
       return e.returnValue;
     };
@@ -37,7 +37,7 @@ export function useUnsavedChanges(hasUnsavedChanges, message = null, showToast =
     };
   }, [hasUnsavedChanges, message]);
 
-  // React Router navigáció figyelése (egyszerűbb megoldás, mert useBlocker csak data router-rel működik)
+  // React Router navigáció figyelése (egyszerbb megoldás, mert useBlocker csak data router-rel mködik)
   useEffect(() => {
     if (!hasUnsavedChanges) {
       isBlockedRef.current = false;

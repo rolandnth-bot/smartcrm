@@ -1,10 +1,10 @@
 /**
- * Form validation utility - automatikus piros keret kötelező mezőkhöz
+ * Form validation utility - automatikus piros keret kötelez mezkhöz
  */
 
 /**
- * Visszaadja a mező CSS osztályait validációs hibával
- * @param {boolean} hasError - Van-e hiba a mezőben
+ * Visszaadja a mez CSS osztályait validációs hibával
+ * @param {boolean} hasError - Van-e hiba a mezben
  * @param {string} baseClasses - Alap CSS osztályok
  * @returns {string} CSS osztályok string
  */
@@ -16,8 +16,8 @@ export function getFieldClasses(hasError, baseClasses = '') {
 }
 
 /**
- * Visszaadja a mező CSS osztályait validációs hibával (input/textarea/select)
- * @param {boolean} hasError - Van-e hiba a mezőben
+ * Visszaadja a mez CSS osztályait validációs hibával (input/textarea/select)
+ * @param {boolean} hasError - Van-e hiba a mezben
  * @param {string} defaultClasses - Alap CSS osztályok
  * @returns {string} CSS osztályok string
  */

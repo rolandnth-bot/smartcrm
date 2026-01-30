@@ -15,7 +15,7 @@ const Table = memo(({
   selectedRows = [],
   keyField = 'id',
   className = '',
-  emptyMessage = 'Nincs megjeleníthető adat',
+  emptyMessage = 'Nincs megjeleníthet adat',
   loading = false,
   ...props
 }) => {

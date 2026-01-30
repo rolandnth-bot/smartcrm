@@ -69,7 +69,7 @@ const Tooltip = memo(({
           left = triggerRect.left + scrollX + (triggerRect.width / 2) - (tooltipRect.width / 2);
       }
 
-      // Viewport ellenőrzés és korrekció
+      // Viewport ellenrzés és korrekció
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
 

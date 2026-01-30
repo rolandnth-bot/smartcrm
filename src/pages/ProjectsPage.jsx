@@ -51,11 +51,11 @@ const ProjectsPage = () => {
     const firstDay = getFirstDayOfMonth(currentDate);
     const lastDay = getLastDayOfMonth(currentDate);
     const daysInMonth = lastDay.getDate();
-    const firstDayOfWeek = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1; // Hétfővel kezdődik
+    const firstDayOfWeek = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1; // Hétfvel kezddik
 
     const days = [];
     
-    // Előző hónap utolsó napjai
+    // Elz hónap utolsó napjai
     const prevMonth = month === 0 ? 11 : month - 1;
     const prevYear = month === 0 ? year - 1 : year;
     const prevMonthLastDay = new Date(prevYear, prevMonth + 1, 0).getDate();
@@ -83,7 +83,7 @@ const ProjectsPage = () => {
       });
     }
 
-    // Következő hónap első napjai (42 nap összesen = 6 hét)
+    // Következ hónap els napjai (42 nap összesen = 6 hét)
     const totalDays = days.length;
     const remainingDays = 42 - totalDays;
     const nextMonth = month === 11 ? 0 : month + 1;
@@ -100,15 +100,15 @@ const ProjectsPage = () => {
     return days;
   }, [currentDate, tasks]);
 
-  // Teendők mentése localStorage-ba
+  // Feladatk mentése localStorage-ba
   useEffect(() => {
     localStorage.setItem('projectsTasks', JSON.stringify(tasks));
   }, [tasks]);
 
-  // Automatikus teendők generálása aláírt szerződésekhez és followup dátumokhoz
+  // Automatikus feladatk generálása aláírt szerzdésekhez és followup dátumokhoz
   useEffect(() => {
     activeProjects.forEach(project => {
-      // Lakásátvétel teendő generálása
+      // Lakásátvétel feladat generálása
       if (project.contract?.status === 'aláírva' && project.contract?.keyHandoverDate) {
         const handoverDate = new Date(project.contract.keyHandoverDate);
         const taskExists = tasks.some(task => 
@@ -123,10 +123,10 @@ const ProjectsPage = () => {
             leadId: project.id,
             leadName: project.name,
             type: 'lakasatvetel',
-            title: 'Lakásátvétel időpontegyeztetés',
+            title: 'Lakásátvétel idpontegyeztetés',
             dueDate: project.contract.keyHandoverDate,
             status: 'pending',
-            description: `Lakásátvétel időpontegyeztetés: ${project.name}`,
+            description: `Lakásátvétel idpontegyeztetés: ${project.name}`,
             apartmentId: project.apartmentId || '',
             partnerId: project.partnerId || '',
             notes: '',
@@ -136,7 +136,7 @@ const ProjectsPage = () => {
         }
       }
 
-      // Followup teendő generálása
+      // Followup feladat generálása
       if (project.followupDate) {
         const followupDate = new Date(project.followupDate);
         const taskExists = tasks.some(task => 
@@ -154,7 +154,7 @@ const ProjectsPage = () => {
             title: `Followup: ${project.name}`,
             dueDate: project.followupDate,
             status: 'pending',
-            description: `Followup teendő: ${project.name}`,
+            description: `Followup feladat: ${project.name}`,
             apartmentId: project.apartmentId || '',
             partnerId: project.partnerId || '',
             notes: project.followupNotes || '',
@@ -164,7 +164,7 @@ const ProjectsPage = () => {
         }
       }
 
-      // Szerződés aláírás dátum teendő generálása
+      // Szerzdés aláírás dátum feladat generálása
       if (project.contract?.signedDate) {
         const signedDate = new Date(project.contract.signedDate);
         const taskExists = tasks.some(task => 
@@ -179,10 +179,10 @@ const ProjectsPage = () => {
             leadId: project.id,
             leadName: project.name,
             type: 'egyeb',
-            title: 'Szerződés aláírás követés',
+            title: 'Szerzdés aláírás követés',
             dueDate: project.contract.signedDate,
             status: 'pending',
-            description: `Szerződés aláírás követés: ${project.name}`,
+            description: `Szerzdés aláírás követés: ${project.name}`,
             apartmentId: project.apartmentId || '',
             partnerId: project.partnerId || '',
             notes: '',
@@ -218,7 +218,7 @@ const ProjectsPage = () => {
   const handleSaveTask = (taskData) => {
     if (editingTask) {
       setTasks(prev => prev.map(t => t.id === editingTask.id ? { ...t, ...taskData } : t));
-      success('Teendő frissítve');
+      success('Feladat frissítve');
     } else {
       const newTask = {
         id: `task-${Date.now()}`,
@@ -227,7 +227,7 @@ const ProjectsPage = () => {
         createdAt: todayISO()
       };
       setTasks(prev => [...prev, newTask]);
-      success('Teendő létrehozva');
+      success('Feladat létrehozva');
     }
     setShowTaskModal(false);
     setEditingTask(null);
@@ -236,7 +236,7 @@ const ProjectsPage = () => {
 
   const handleDeleteTask = (taskId) => {
     setTasks(prev => prev.filter(t => t.id !== taskId));
-    success('Teendő törölve');
+    success('Feladat törölve');
   };
 
   const handleCompleteTask = (taskId) => {
@@ -263,14 +263,14 @@ const ProjectsPage = () => {
           setEditingTask(null);
           setShowTaskModal(true);
         }} variant="primary">
-          <Plus /> Új teendő
+          <Plus /> Új feladat
         </Button>
       </div>
 
-      {/* Mai teendők */}
+      {/* Mai feladatk */}
       {todayTasks.length > 0 && (
         <Card>
-          <h3 className="text-lg font-semibold mb-4 dark:text-gray-200">Mai teendők</h3>
+          <h3 className="text-lg font-semibold mb-4 dark:text-gray-200">Mai feladatk</h3>
           <div className="space-y-2">
             {todayTasks.map(task => (
               <div key={task.id} className="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-700">
@@ -310,13 +310,13 @@ const ProjectsPage = () => {
           </h3>
           <div className="flex gap-2">
             <Button onClick={handlePreviousMonth} variant="secondary" size="sm">
-              ‹ Előző
+               Elz
             </Button>
             <Button onClick={() => setCurrentDate(new Date())} variant="secondary" size="sm">
               Ma
             </Button>
             <Button onClick={handleNextMonth} variant="secondary" size="sm">
-              Következő ›
+              Következ 
             </Button>
           </div>
         </div>
@@ -415,7 +415,7 @@ const ProjectsPage = () => {
         </div>
       </Card>
 
-      {/* Teendő modal */}
+      {/* Feladat modal */}
       <TaskModal
         isOpen={showTaskModal}
         onClose={() => {
@@ -437,7 +437,7 @@ const ProjectsPage = () => {
   );
 };
 
-// Teendő modal komponens
+// Feladat modal komponens
 const TaskModal = ({ isOpen, onClose, task, selectedDate, leads, apartments, onSave, onDelete }) => {
   const [formData, setFormData] = useState({
     type: 'egyeb',
@@ -480,19 +480,19 @@ const TaskModal = ({ isOpen, onClose, task, selectedDate, leads, apartments, onS
   }, [task, selectedDate]);
 
   const taskTypes = [
-    { value: 'lakasatvetel', label: 'Lakásátvétel időpontegyeztetés' },
+    { value: 'lakasatvetel', label: 'Lakásátvétel idpontegyeztetés' },
     { value: 'fotozas', label: 'Fotózás' },
     { value: 'okoszar', label: 'Okoszár beszerelés' },
     { value: 'hirdetes', label: 'Hirdetés létrehozása' },
     { value: 'followup', label: 'Followup' },
-    { value: 'szerzodes_alairas', label: 'Szerződés aláírás követés' },
+    { value: 'szerzodes_alairas', label: 'Szerzdés aláírás követés' },
     { value: 'egyeb', label: 'Egyéb' }
   ];
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.title) {
-      useToastStore.getState().error('A cím kötelező');
+      useToastStore.getState().error('A cím kötelez');
       return;
     }
     onSave(formData);
@@ -502,7 +502,7 @@ const TaskModal = ({ isOpen, onClose, task, selectedDate, leads, apartments, onS
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={task ? 'Teendő szerkesztése' : 'Új teendő'}
+      title={task ? 'Feladat szerkesztése' : 'Új feladat'}
       size="lg"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -530,12 +530,12 @@ const TaskModal = ({ isOpen, onClose, task, selectedDate, leads, apartments, onS
             value={formData.title}
             onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg"
-            placeholder="pl. Lakásátvétel időpontegyeztetés"
+            placeholder="pl. Lakásátvétel idpontegyeztetés"
           />
         </FormField>
 
         <FormField
-          label="Határidő"
+          label="Határid"
           required
         >
           <input
@@ -596,7 +596,7 @@ const TaskModal = ({ isOpen, onClose, task, selectedDate, leads, apartments, onS
             onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg"
             rows="2"
-            placeholder="Belső megjegyzések..."
+            placeholder="Bels megjegyzések..."
           />
         </FormField>
 

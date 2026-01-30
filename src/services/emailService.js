@@ -1,7 +1,7 @@
 /**
  * Email service.
  * Támogatott szolgáltatók: SendGrid, Resend (opcionális, env változókon keresztül).
- * Ha nincs beállítva, placeholder módban működik (csak logolás).
+ * Ha nincs beállítva, placeholder módban mködik (csak logolás).
  */
 
 const SENDGRID_API_KEY = import.meta.env.VITE_SENDGRID_API_KEY;
@@ -12,10 +12,10 @@ const RACKHOST_SMTP_PASS = import.meta.env.VITE_RACKHOST_SMTP_PASS || 'Smartregi
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 /**
- * Ellenőrzi, hogy van-e beállítva email szolgáltató.
+ * Ellenrzi, hogy van-e beállítva email szolgáltató.
  */
 export function isEmailConfigured() {
-  // Rackhost SMTP mindig elérhető (default értékekkel), ha van API_BASE_URL vagy window.location.origin
+  // Rackhost SMTP mindig elérhet (default értékekkel), ha van API_BASE_URL vagy window.location.origin
   const hasApiUrl = API_BASE_URL || (typeof window !== 'undefined' && window.location.origin);
   return !!(SENDGRID_API_KEY || RESEND_API_KEY || (hasApiUrl && RACKHOST_SMTP_USER && RACKHOST_SMTP_PASS));
 }
@@ -264,12 +264,12 @@ export async function sendBulkEmails(recipients, subject, body, opts = {}) {
 /**
  * Sablon alapú email (placeholder).
  * @param {string} templateKey - pl. 'lead-welcome', 'booking-confirmation'
- * @param {Record<string, string>} data - helyettesítő adatok
+ * @param {Record<string, string>} data - helyettesít adatok
  * @param {{ to: string, subject?: string }} opts
  * @returns {Promise<{ success: boolean, messageId?: string, error?: string }>}
  */
 export async function sendTemplatedEmail(templateKey, data, { to, subject }) {
-  // Sablonok (később bővíthető)
+  // Sablonok (késbb bvíthet)
   const templates = {
     'lead-welcome': {
       subject: 'Üdvözöljük a SmartCRM-ben!',
@@ -277,14 +277,14 @@ export async function sendTemplatedEmail(templateKey, data, { to, subject }) {
       html: `<p>Kedves <strong>${data.name || 'Ügyfél'}</strong>!</p><p>Köszönjük, hogy csatlakozott hozzánk.</p>`
     },
     'booking-confirmation': {
-      subject: 'Foglalás megerősítése',
-      body: `Kedves ${data.guestName || 'Vendég'}!\n\nFoglalásod megerősítve: ${data.checkIn || ''} - ${data.checkOut || ''}`,
-      html: `<p>Kedves <strong>${data.guestName || 'Vendég'}</strong>!</p><p>Foglalásod megerősítve: <strong>${data.checkIn || ''} - ${data.checkOut || ''}</strong></p>`
+      subject: 'Foglalás megersítése',
+      body: `Kedves ${data.guestName || 'Vendég'}!\n\nFoglalásod megersítve: ${data.checkIn || ''} - ${data.checkOut || ''}`,
+      html: `<p>Kedves <strong>${data.guestName || 'Vendég'}</strong>!</p><p>Foglalásod megersítve: <strong>${data.checkIn || ''} - ${data.checkOut || ''}</strong></p>`
     }
   };
   
   const template = templates[templateKey] || {
-    subject: subject || 'Email a SmartCRM-ből',
+    subject: subject || 'Email a SmartCRM-bl',
     body: `Kedves ${data.name || 'Ügyfél'}!\n\n${JSON.stringify(data, null, 2)}`,
     html: `<p>Kedves <strong>${data.name || 'Ügyfél'}</strong>!</p><pre>${JSON.stringify(data, null, 2)}</pre>`
   };

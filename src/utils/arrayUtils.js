@@ -1,6 +1,6 @@
 /**
  * Array kezelési utility függvények
- * Tömb műveletek, szűrés, csoportosítás, stb.
+ * Tömb mveletek, szrés, csoportosítás, stb.
  */
 
 import { createLogger } from './logger';
@@ -11,7 +11,7 @@ const logger = createLogger('ArrayUtils');
  * Tömb egyedi elemekkel (duplikátumok eltávolítása)
  * @param {Array} array - A tömb
  * @param {Function} keyFn - Opcionális kulcs függvény (objektumok esetén)
- * @returns {Array} Egyedi elemekkel rendelkező tömb
+ * @returns {Array} Egyedi elemekkel rendelkez tömb
  */
 export function unique(array, keyFn = null) {
   if (!Array.isArray(array)) return [];
@@ -32,7 +32,7 @@ export function unique(array, keyFn = null) {
 /**
  * Tömb csoportosítása kulcs alapján
  * @param {Array} array - A tömb
- * @param {Function|string} keyFn - Kulcs függvény vagy mező név
+ * @param {Function|string} keyFn - Kulcs függvény vagy mez név
  * @returns {Object} Csoportosított objektum { key: [items] }
  */
 export function groupBy(array, keyFn) {
@@ -53,7 +53,7 @@ export function groupBy(array, keyFn) {
 }
 
 /**
- * Tömb rendezése több mező alapján, vagy (keyFn, order) egyszerű formával
+ * Tömb rendezése több mez alapján, vagy (keyFn, order) egyszer formával
  * @param {Array} array - A tömb
  * @param {Array|Function} sortKeysOrKeyFn - [{ key, order }] vagy keyFn
  * @param {string} [order] - 'asc'|'desc' (ha keyFn formátum)
@@ -144,7 +144,7 @@ export function chunk(array, size) {
  * Tömb elemeinek számolása feltétel alapján
  * @param {Array} array - A tömb
  * @param {Function} predicate - Feltétel függvény
- * @returns {number} Megfelelő elemek száma
+ * @returns {number} Megfelel elemek száma
  */
 export function countBy(array, predicate) {
   if (!Array.isArray(array)) return 0;
@@ -155,7 +155,7 @@ export function countBy(array, predicate) {
 /**
  * Tömb elemeinek összegzése
  * @param {Array} array - A tömb
- * @param {Function|string} keyFn - Kulcs függvény vagy mező név
+ * @param {Function|string} keyFn - Kulcs függvény vagy mez név
  * @returns {number} Összeg
  */
 export function sumBy(array, keyFn) {
@@ -174,7 +174,7 @@ export function sumBy(array, keyFn) {
 /**
  * Tömb elemeinek átlaga
  * @param {Array} array - A tömb
- * @param {Function|string} keyFn - Kulcs függvény vagy mező név
+ * @param {Function|string} keyFn - Kulcs függvény vagy mez név
  * @returns {number} Átlag
  */
 export function averageBy(array, keyFn) {
@@ -187,7 +187,7 @@ export function averageBy(array, keyFn) {
 /**
  * Tömb elemeinek maximuma
  * @param {Array} array - A tömb
- * @param {Function|string} keyFn - Kulcs függvény vagy mező név
+ * @param {Function|string} keyFn - Kulcs függvény vagy mez név
  * @returns {number|null} Maximum érték vagy null
  */
 export function maxBy(array, keyFn) {
@@ -206,7 +206,7 @@ export function maxBy(array, keyFn) {
 /**
  * Tömb elemeinek minimuma
  * @param {Array} array - A tömb
- * @param {Function|string} keyFn - Kulcs függvény vagy mező név
+ * @param {Function|string} keyFn - Kulcs függvény vagy mez név
  * @returns {number|null} Minimum érték vagy null
  */
 export function minBy(array, keyFn) {
@@ -223,10 +223,10 @@ export function minBy(array, keyFn) {
 }
 
 /**
- * Tömb elemeinek véletlenszerű kiválasztása
+ * Tömb elemeinek véletlenszer kiválasztása
  * @param {Array} array - A tömb
  * @param {number} count - Kiválasztandó elemek száma (default: 1)
- * @returns {Array} Véletlenszerűen kiválasztott elemek
+ * @returns {Array} Véletlenszeren kiválasztott elemek
  */
 export function sample(array, count = 1) {
   if (!Array.isArray(array) || array.length === 0) return [];
@@ -300,10 +300,10 @@ export function replaceAt(array, index, item) {
 }
 
 /**
- * Tömb szűrése kulcs alapján
+ * Tömb szrése kulcs alapján
  * @param {Array} array - A tömb
- * @param {Function|string|Object} predicate - Feltétel függvény, mező név, vagy objektum
- * @returns {Array} Szűrt tömb
+ * @param {Function|string|Object} predicate - Feltétel függvény, mez név, vagy objektum
+ * @returns {Array} Szrt tömb
  */
 export function filterBy(array, predicate) {
   if (!Array.isArray(array)) return [];

@@ -1,5 +1,5 @@
 /**
- * Karbantartás (Maintenance) – bejelentések kezelése
+ * Karbantartás (Maintenance)  bejelentések kezelése
  * Dátum, lakás, összeg, leírás, megjegyzés, prioritás. Naptár. Lokális store (localStorage).
  */
 
@@ -171,13 +171,13 @@ const MaintenancePage = () => {
   }, [getExportData]);
 
   const handlePrintPDF = useCallback(() => {
-    printToPDF('SmartCRM – Karbantartás');
+    printToPDF('SmartCRM  Karbantartás');
   }, []);
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">🔧 Karbantartás</h2>
+        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200"> Karbantartás</h2>
         <div className="flex gap-2 flex-wrap">
           <Button onClick={handleExportCSV} variant="outline" aria-label="CSV export">
             CSV export
@@ -226,7 +226,7 @@ const MaintenancePage = () => {
         <div className="flex flex-wrap gap-2 mb-4">
           <input
             type="text"
-            placeholder="Keresés (leírás, lakás, megjegyzés…)"
+            placeholder="Keresés (leírás, lakás, megjegyzés)"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg w-64"
@@ -236,7 +236,7 @@ const MaintenancePage = () => {
             value={filter.apartmentId || ''}
             onChange={(e) => setFilter({ apartmentId: e.target.value || '' })}
             className="px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg"
-            aria-label="Lakás szűrő"
+            aria-label="Lakás szr"
           >
             <option value="">Minden lakás</option>
             {apartments.map((a) => (
@@ -247,7 +247,7 @@ const MaintenancePage = () => {
             value={filter.priority || ''}
             onChange={(e) => setFilter({ priority: e.target.value || '' })}
             className="px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg"
-            aria-label="Prioritás szűrő"
+            aria-label="Prioritás szr"
           >
             <option value="">Minden prioritás</option>
             {MAINTENANCE_PRIORITIES.map((p) => (
@@ -258,7 +258,7 @@ const MaintenancePage = () => {
             value={filter.year || ''}
             onChange={(e) => setFilter({ year: e.target.value ? parseInt(e.target.value, 10) : null })}
             className="px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg"
-            aria-label="Év szűrő"
+            aria-label="Év szr"
           >
             <option value="">Minden év</option>
             {years.map((y) => (
@@ -269,7 +269,7 @@ const MaintenancePage = () => {
             value={filter.month || ''}
             onChange={(e) => setFilter({ month: e.target.value ? parseInt(e.target.value, 10) : null })}
             className="px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg"
-            aria-label="Hónap szűrő"
+            aria-label="Hónap szr"
           >
             <option value="">Minden hónap</option>
             {[1,2,3,4,5,6,7,8,9,10,11,12].map((m) => (
@@ -283,7 +283,7 @@ const MaintenancePage = () => {
         {filtered.length === 0 ? (
           <EmptyState
             title="Nincs karbantartás bejelentés"
-            message="Új bejelentés a „Bejelentés” gombbal."
+            message="Új bejelentés a Bejelentés gombbal."
           />
         ) : (
           <div className="space-y-2">
@@ -302,7 +302,7 @@ const MaintenancePage = () => {
                       <p className="font-semibold text-gray-800 dark:text-gray-200">{m.description}</p>
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {formatDate(m.date)} · {m.apartmentName ? `📌 ${m.apartmentName}` : '—'}
+                      {formatDate(m.date)} · {m.apartmentName ? ` ${m.apartmentName}` : ''}
                     </p>
                     {m.notes && (
                       <p className="text-sm text-gray-500 dark:text-gray-500 mt-1 italic">{m.notes}</p>
@@ -368,7 +368,7 @@ const MaintenancePage = () => {
                   onChange={(e) => setNewEntry((p) => ({ ...p, apartmentId: e.target.value }))}
                   className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg"
                 >
-                  <option value="">— Nincs —</option>
+                  <option value=""> Nincs </option>
                   {apartments.map((a) => (
                     <option key={a.id} value={a.id}>{a.name}</option>
                   ))}

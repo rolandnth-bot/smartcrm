@@ -48,7 +48,7 @@ export const EmptyStateWithFilter = memo(({
       )}
       {onClearFilter && (
         <Button onClick={onClearFilter} variant="outline">
-          Szűrők törlése
+          Szrk törlése
         </Button>
       )}
     </div>

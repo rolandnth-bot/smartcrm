@@ -53,7 +53,7 @@ const QuickSearchModal = memo(({ isOpen, onClose }) => {
         title: lead.name,
         subtitle: lead.email || lead.phone || '',
         route: '/leads',
-        icon: '📊'
+        icon: ''
       });
     });
 
@@ -69,7 +69,7 @@ const QuickSearchModal = memo(({ isOpen, onClose }) => {
         title: booking.guestName || 'Vendég',
         subtitle: booking.apartmentName || '',
         route: '/bookings',
-        icon: '📅'
+        icon: ''
       });
     });
 
@@ -86,7 +86,7 @@ const QuickSearchModal = memo(({ isOpen, onClose }) => {
         title: apartment.name,
         subtitle: apartment.address || apartment.city || '',
         route: '/apartments',
-        icon: '🏠'
+        icon: ''
       });
     });
 

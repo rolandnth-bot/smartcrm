@@ -12,17 +12,17 @@ const DocumentsPage = () => {
   }, []);
 
   const categories = [
-    { id: 'all', label: 'Összes', icon: '📁' },
-    { id: 'contracts', label: 'Szerződések', icon: '📝' },
-    { id: 'invoices', label: 'Számlák', icon: '🧾' },
-    { id: 'reports', label: 'Jelentések', icon: '📊' },
-    { id: 'legal', label: 'Jogi dokumentumok', icon: '⚖️' },
-    { id: 'other', label: 'Egyéb', icon: '📄' }
+    { id: 'all', label: 'Összes', icon: '' },
+    { id: 'contracts', label: 'Szerzdések', icon: '' },
+    { id: 'invoices', label: 'Számlák', icon: '' },
+    { id: 'reports', label: 'Jelentések', icon: '' },
+    { id: 'legal', label: 'Jogi dokumentumok', icon: '' },
+    { id: 'other', label: 'Egyéb', icon: '' }
   ];
 
-  // Mock dokumentumok (később API-ból jönnek)
+  // Mock dokumentumok (késbb API-ból jönnek)
   const documents = [
-    { id: 1, name: 'Bérleti szerződés - Bogdáni 3', category: 'contracts', date: '2025-01-15', size: '2.3 MB', type: 'pdf' },
+    { id: 1, name: 'Bérleti szerzdés - Bogdáni 3', category: 'contracts', date: '2025-01-15', size: '2.3 MB', type: 'pdf' },
     { id: 2, name: 'Számla 2025-01', category: 'invoices', date: '2025-01-20', size: '456 KB', type: 'pdf' },
     { id: 3, name: 'Havi jelentés - Január', category: 'reports', date: '2025-01-31', size: '1.2 MB', type: 'xlsx' },
   ];
@@ -38,7 +38,7 @@ const DocumentsPage = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Dokumentumok</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">Fájlok, szerződések, archívum</p>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Fájlok, szerzdések, archívum</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" className="flex items-center gap-2">
@@ -50,7 +50,7 @@ const DocumentsPage = () => {
         </div>
       </div>
 
-      {/* Keresés és szűrés */}
+      {/* Keresés és szrés */}
       <Card>
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
@@ -96,12 +96,12 @@ const DocumentsPage = () => {
               >
                 <div className="flex items-center gap-4 flex-1">
                   <div className="text-3xl">
-                    {doc.type === 'pdf' ? '📄' : doc.type === 'xlsx' ? '📊' : '📁'}
+                    {doc.type === 'pdf' ? '' : doc.type === 'xlsx' ? '' : ''}
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-gray-800 dark:text-gray-200">{doc.name}</h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {doc.date} • {doc.size}
+                      {doc.date}  {doc.size}
                     </p>
                   </div>
                 </div>

@@ -51,8 +51,8 @@ export function deepMerge(target, ...sources) {
 }
 
 /**
- * Ellenőrzi, hogy egy érték objektum-e
- * @param {*} item - Az ellenőrizendő érték
+ * Ellenrzi, hogy egy érték objektum-e
+ * @param {*} item - Az ellenrizend érték
  * @returns {boolean} True, ha objektum
  */
 function isObject(item) {
@@ -60,7 +60,7 @@ function isObject(item) {
 }
 
 /**
- * Kiválasztott kulcsokkal rendelkező objektum létrehozása
+ * Kiválasztott kulcsokkal rendelkez objektum létrehozása
  * @param {Object} obj - Forrás objektum
  * @param {Array<string>} keys - Kiválasztandó kulcsok
  * @returns {Object} Új objektum csak a kiválasztott kulcsokkal
@@ -112,7 +112,7 @@ export function renameKeys(obj, keyMap) {
 }
 
 /**
- * Objektum összes értékének null/undefined ellenőrzése
+ * Objektum összes értékének null/undefined ellenrzése
  * @param {Object} obj - Az objektum
  * @returns {boolean} True, ha minden érték null vagy undefined
  */
@@ -122,7 +122,7 @@ export function isEmpty(obj) {
 }
 
 /**
- * Objektum összes értékének null/undefined ellenőrzése (mély ellenőrzés)
+ * Objektum összes értékének null/undefined ellenrzése (mély ellenrzés)
  * @param {Object} obj - Az objektum
  * @returns {boolean} True, ha minden érték null, undefined vagy üres
  */
@@ -145,9 +145,9 @@ export function isDeepEmpty(obj) {
 
 /**
  * Objektum összehasonlítása (mély összehasonlítás)
- * @param {Object} obj1 - Első objektum
+ * @param {Object} obj1 - Els objektum
  * @param {Object} obj2 - Második objektum
- * @returns {boolean} True, ha egyenlőek
+ * @returns {boolean} True, ha egyenlek
  */
 export function isEqual(obj1, obj2) {
   if (obj1 === obj2) return true;
@@ -172,10 +172,10 @@ export function isEqual(obj1, obj2) {
 }
 
 /**
- * Objektum szűrése predikátum alapján
+ * Objektum szrése predikátum alapján
  * @param {Object} obj - Az objektum
- * @param {Function} predicate - Szűrő függvény (key, value) => boolean
- * @returns {Object} Szűrt objektum
+ * @param {Function} predicate - Szr függvény (key, value) => boolean
+ * @returns {Object} Szrt objektum
  */
 export function filterObject(obj, predicate) {
   if (!obj || typeof obj !== 'object') return {};

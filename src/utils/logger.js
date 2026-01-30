@@ -54,7 +54,7 @@ class Logger {
   error(message, error = null, ...args) {
     console.error(`[${this.context}]`, message, error, ...args);
     
-    // Error tracking integráció lehetősége (pl. Sentry)
+    // Error tracking integráció lehetsége (pl. Sentry)
     if (error && error.stack) {
       console.error('Stack trace:', error.stack);
     }

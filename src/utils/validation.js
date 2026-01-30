@@ -12,7 +12,7 @@ export function validateEmail(email) {
 }
 
 /**
- * Kötelező mező validáció
+ * Kötelez mez validáció
  */
 export function validateRequired(value) {
   if (value === null || value === undefined) return false;
@@ -56,12 +56,12 @@ export function validateDateRange(dateFrom, dateTo) {
 }
 
 /**
- * Átfedő foglalások ellenőrzése
- * Ellenőrzi, hogy az új foglalás dátumai átfednek-e más foglalásokkal ugyanazon a lakáson
+ * Átfed foglalások ellenrzése
+ * Ellenrzi, hogy az új foglalás dátumai átfednek-e más foglalásokkal ugyanazon a lakáson
  * @param {string} dateFrom - Érkezés dátuma (ISO string)
  * @param {string} dateTo - Távozás dátuma (ISO string)
  * @param {string} apartmentId - Lakás ID
- * @param {Array} existingBookings - Meglévő foglalások tömbje
+ * @param {Array} existingBookings - Meglév foglalások tömbje
  * @param {string} excludeBookingId - Kizárni kívánt foglalás ID (szerkesztés esetén)
  * @returns {Object} { hasOverlap: boolean, overlappingBookings: Array }
  */
@@ -79,7 +79,7 @@ export function checkOverlappingBookings(dateFrom, dateTo, apartmentId, existing
       return false;
     }
 
-    // Csak ugyanazon a lakáson ellenőrizzük
+    // Csak ugyanazon a lakáson ellenrizzük
     if (booking.apartmentId !== apartmentId) {
       return false;
     }
@@ -87,13 +87,13 @@ export function checkOverlappingBookings(dateFrom, dateTo, apartmentId, existing
     const bookingCheckIn = new Date(booking.dateFrom || booking.checkIn);
     const bookingCheckOut = new Date(booking.dateTo || booking.checkOut);
 
-    // Ellenőrizzük, hogy a dátumok érvényesek-e
+    // Ellenrizzük, hogy a dátumok érvényesek-e
     if (isNaN(bookingCheckIn.getTime()) || isNaN(bookingCheckOut.getTime())) {
       return false;
     }
 
-    // Átfedés ellenőrzése: az új foglalás check-in-je a meglévő check-out előtt van,
-    // és az új foglalás check-out-ja a meglévő check-in után van
+    // Átfedés ellenrzése: az új foglalás check-in-je a meglév check-out eltt van,
+    // és az új foglalás check-out-ja a meglév check-in után van
     return !(newCheckOut <= bookingCheckIn || newCheckIn >= bookingCheckOut);
   });
 
@@ -126,17 +126,17 @@ export function validateURL(url) {
 }
 
 /**
- * iCal URL validáció (https kötelező, .ics fájl vagy ical URL pattern)
+ * iCal URL validáció (https kötelez, .ics fájl vagy ical URL pattern)
  */
 export function validateIcalURL(url) {
   if (!url || typeof url !== 'string') return false;
   try {
     const urlObj = new URL(url);
-    // HTTPS kötelező iCal URL-ekhez
+    // HTTPS kötelez iCal URL-ekhez
     if (urlObj.protocol !== 'https:') {
       return false;
     }
-    // Ellenőrizzük, hogy .ics fájl vagy tartalmazza az 'ical' vagy 'calendar' szót
+    // Ellenrizzük, hogy .ics fájl vagy tartalmazza az 'ical' vagy 'calendar' szót
     const pathname = urlObj.pathname.toLowerCase();
     const hostname = urlObj.hostname.toLowerCase();
     return pathname.endsWith('.ics') || 
@@ -150,13 +150,13 @@ export function validateIcalURL(url) {
 }
 
 /**
- * Telefonszám validáció (egyszerűsített)
+ * Telefonszám validáció (egyszersített)
  */
 export function validatePhone(phone) {
   if (!phone || typeof phone !== 'string') return false;
-  // Eltávolítjuk a szóközöket, kötőjeleket, zárójeleket
+  // Eltávolítjuk a szóközöket, kötjeleket, zárójeleket
   const cleaned = phone.replace(/[\s\-\(\)]/g, '');
-  // Ellenőrizzük, hogy csak számok és + jel van benne
+  // Ellenrizzük, hogy csak számok és + jel van benne
   return /^\+?[0-9]{7,15}$/.test(cleaned);
 }
 
@@ -169,7 +169,7 @@ export function validatePercentage(value) {
 }
 
 /**
- * Form validáció helper - több mező együttes validálása
+ * Form validáció helper - több mez együttes validálása
  */
 export function validateForm(fields, rules) {
   const errors = {};
@@ -179,7 +179,7 @@ export function validateForm(fields, rules) {
     
     for (const rule of fieldRules) {
       if (rule === 'required' && !validateRequired(value)) {
-        errors[fieldName] = 'Ez a mező kötelező';
+        errors[fieldName] = 'Ez a mez kötelez';
         break;
       }
       
@@ -220,11 +220,11 @@ export function validateForm(fields, rules) {
       
       // Custom length rule: { type: 'length', min: 3, max: 50 }
       if (typeof rule === 'object' && rule.type === 'length') {
-        // Ha min és max is 0, akkor skip (opcionális mező, nincs length validáció)
+        // Ha min és max is 0, akkor skip (opcionális mez, nincs length validáció)
         if (rule.min === 0 && rule.max === 0) {
           // Skip this rule
         } else if (value && !validateLength(value, rule.min, rule.max)) {
-          errors[fieldName] = `A mező hossza ${rule.min}-${rule.max} karakter között kell legyen`;
+          errors[fieldName] = `A mez hossza ${rule.min}-${rule.max} karakter között kell legyen`;
           break;
         }
       }

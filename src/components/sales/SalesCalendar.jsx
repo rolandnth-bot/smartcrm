@@ -14,7 +14,7 @@ const EVENT_TYPES = {
   followup: { label: 'Follow-up', color: 'bg-orange-500', dot: 'bg-orange-500' }
 };
 const DAY_ITEM_TYPES = {
-  feladat: { label: 'Következő feladat', color: 'bg-slate-500', dot: 'bg-slate-500' },
+  feladat: { label: 'Következ feladat', color: 'bg-slate-500', dot: 'bg-slate-500' },
   megjegyzes: { label: 'Megjegyzés', color: 'bg-amber-500', dot: 'bg-amber-500' }
 };
 
@@ -179,16 +179,16 @@ const SalesCalendar = ({ onLeadClick, onAddLead }) => {
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
       <h3 className="font-bold text-orange-800 dark:text-orange-300 mb-3">Munkanaptár</h3>
       <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-        Lead időpontokkal szinkronban (jelentkezés, felmérés, találkozó, follow-up)
+        Lead idpontokkal szinkronban (jelentkezés, felmérés, találkozó, follow-up)
       </p>
 
       <div className="flex items-center justify-between mb-3">
-        <Button onClick={prevMonth} variant="ghost" size="sm" aria-label="Előző hónap">
-          ←
+        <Button onClick={prevMonth} variant="ghost" size="sm" aria-label="Elz hónap">
+          
         </Button>
         <span className="text-lg font-semibold dark:text-gray-200">{monthLabel}</span>
-        <Button onClick={nextMonth} variant="ghost" size="sm" aria-label="Következő hónap">
-          →
+        <Button onClick={nextMonth} variant="ghost" size="sm" aria-label="Következ hónap">
+          
         </Button>
       </div>
 
@@ -267,16 +267,16 @@ const SalesCalendar = ({ onLeadClick, onAddLead }) => {
       <Modal
         isOpen={showDayModal}
         onClose={handleCloseDayModal}
-        title={selectedDate ? `${formatDisplayDate(selectedDate)} – Feladatok, megjegyzések, leadek` : ''}
+        title={selectedDate ? `${formatDisplayDate(selectedDate)}  Feladatok, megjegyzések, leadek` : ''}
         size="lg"
       >
         {selectedDate && (
           <div className="space-y-4">
-            {/* Lead időpontok */}
+            {/* Lead idpontok */}
             <section>
-              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Lead időpontok</h4>
+              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Lead idpontok</h4>
               {uniqueSelectedLeads.length === 0 ? (
-                <p className="text-gray-500 dark:text-gray-400 text-sm">Ezen a napon nincs lead időpont.</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">Ezen a napon nincs lead idpont.</p>
               ) : (
                 <div className="space-y-2">
                   {uniqueSelectedLeads.map((ev, i) => (
@@ -347,7 +347,7 @@ const SalesCalendar = ({ onLeadClick, onAddLead }) => {
                     type="text"
                     value={newFeladat}
                     onChange={(e) => setNewFeladat(e.target.value)}
-                    placeholder="Következő feladat…"
+                    placeholder="Következ feladat"
                     className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   />
                   <Button variant="primary" size="sm" onClick={handleAddFeladat} disabled={!newFeladat.trim()}>
@@ -358,7 +358,7 @@ const SalesCalendar = ({ onLeadClick, onAddLead }) => {
                   <textarea
                     value={newMegjegyzes}
                     onChange={(e) => setNewMegjegyzes(e.target.value)}
-                    placeholder="Megjegyzés…"
+                    placeholder="Megjegyzés"
                     rows={2}
                     className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none"
                   />

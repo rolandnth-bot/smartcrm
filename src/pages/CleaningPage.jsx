@@ -234,7 +234,7 @@ const CleaningPage = () => {
     // Users betöltése (takarító hozzárendeléshez)
     if (api.isConfigured()) {
       setIsLoadingUsers(true);
-      // Először próbáljuk a workers API-t, ha nincs, akkor usersList-et használunk
+      // Elször próbáljuk a workers API-t, ha nincs, akkor usersList-et használunk
       Promise.all([
         workersList().catch(() => null),
         usersList({ role: 'worker' }).catch(() => null)
@@ -444,12 +444,12 @@ const CleaningPage = () => {
 
     const amount = 0;
     
-    // Dátum validáció (nem lehet a jövőben túl messze)
+    // Dátum validáció (nem lehet a jövben túl messze)
     const selectedDate = new Date(newCleaning.date);
     const maxDate = new Date();
     maxDate.setFullYear(maxDate.getFullYear() + 1);
     if (selectedDate > maxDate) {
-      useToastStore.getState().error('A dátum nem lehet több mint 1 évvel a jövőben!');
+      useToastStore.getState().error('A dátum nem lehet több mint 1 évvel a jövben!');
       return;
     }
     setIsSubmitting(true);
@@ -508,12 +508,12 @@ const CleaningPage = () => {
 
     const amount = Number(selectedCleaning.amount) || 0;
     
-    // Dátum validáció (nem lehet a jövőben túl messze)
+    // Dátum validáció (nem lehet a jövben túl messze)
     const selectedDate = new Date(selectedCleaning.date);
     const maxDate = new Date();
     maxDate.setFullYear(maxDate.getFullYear() + 1);
     if (selectedDate > maxDate) {
-      useToastStore.getState().error('A dátum nem lehet több mint 1 évvel a jövőben!');
+      useToastStore.getState().error('A dátum nem lehet több mint 1 évvel a jövben!');
       return;
     }
     setIsSubmitting(true);
@@ -733,7 +733,7 @@ const CleaningPage = () => {
   return (
     <div className="p-6">
       <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">🧹 Takarítás kezelése</h1>
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200"> Takarítás kezelése</h1>
         <div className="flex gap-2 flex-wrap">
           <Button
             onClick={() => {
@@ -760,7 +760,7 @@ const CleaningPage = () => {
           {canEditCleaning('cleaning') && (
             <>
               <Button onClick={() => setShowGenerateModal(true)} variant="outline">
-                ⚡ Generálás
+                 Generálás
               </Button>
               <Button onClick={handleOpenAddCleaning}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -804,10 +804,10 @@ const CleaningPage = () => {
         </div>
       )}
 
-      {/* Szűrők */}
+      {/* Szrk */}
       <Card className="mb-6">
         <div className="space-y-4">
-          {/* Kereső mező */}
+          {/* Keres mez */}
           <div>
             <label htmlFor="cleaning-search" className="sr-only">Keresés takarítások között</label>
             <input
@@ -905,7 +905,7 @@ const CleaningPage = () => {
           {filter.apartmentId || filter.status || filter.assigneeUserId || searchQuery ? (
             <EmptyStateWithFilter
               title="Nincsenek takarítások"
-              description="A kiválasztott szűrőkkel nem található takarítás. Próbáld meg módosítani a szűrőket vagy keresési feltételeket."
+              description="A kiválasztott szrkkel nem található takarítás. Próbáld meg módosítani a szrket vagy keresési feltételeket."
               onClearFilter={() => {
                 setFilter({
                   apartmentId: '',
@@ -996,7 +996,7 @@ const CleaningPage = () => {
                       ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300'
                       : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
                   }`}
-                  aria-label={`Rendezés dátum szerint ${sortConfig.field === 'date' && sortConfig.direction === 'asc' ? 'növekvő' : 'csökkenő'}`}
+                  aria-label={`Rendezés dátum szerint ${sortConfig.field === 'date' && sortConfig.direction === 'asc' ? 'növekv' : 'csökken'}`}
                 >
                   Dátum {sortConfig.field === 'date' && (sortConfig.direction === 'asc' ? <ChevronUp /> : <ChevronDown />)}
                 </button>
@@ -1007,7 +1007,7 @@ const CleaningPage = () => {
                       ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300'
                       : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
                   }`}
-                  aria-label={`Rendezés státusz szerint ${sortConfig.field === 'status' && sortConfig.direction === 'asc' ? 'növekvő' : 'csökkenő'}`}
+                  aria-label={`Rendezés státusz szerint ${sortConfig.field === 'status' && sortConfig.direction === 'asc' ? 'növekv' : 'csökken'}`}
                 >
                   Státusz {sortConfig.field === 'status' && (sortConfig.direction === 'asc' ? <ChevronUp /> : <ChevronDown />)}
                 </button>
@@ -1045,27 +1045,27 @@ const CleaningPage = () => {
                       )}
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                      <div>📅 Dátum: {new Date(cleaning.date).toLocaleDateString('hu-HU')}</div>
+                      <div> Dátum: {new Date(cleaning.date).toLocaleDateString('hu-HU')}</div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">
-                        🕐 Érkezés: {cleaning.checkinTime ?? '15:00'} – Távozás: {cleaning.checkoutTime ?? '11:00'}
+                         Érkezés: {cleaning.checkinTime ?? '15:00'}  Távozás: {cleaning.checkoutTime ?? '11:00'}
                       </div>
                       {(cleaning.cleaningHours != null && cleaning.cleaningHours > 0) && (
-                        <div className="text-sm text-gray-600 dark:text-gray-400">⏱ Óra: {cleaning.cleaningHours} h</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400"> Óra: {cleaning.cleaningHours} h</div>
                       )}
                       {cleaning.hasTextile && (cleaning.textileEarnings || 0) > 0 && (
-                        <div className="text-sm text-gray-600 dark:text-gray-400">👕 Textil: {Number(cleaning.textileEarnings).toLocaleString('hu-HU')} Ft</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400"> Textil: {Number(cleaning.textileEarnings).toLocaleString('hu-HU')} Ft</div>
                       )}
                       {(cleaning.expenses || 0) > 0 && (
-                        <div className="text-sm text-amber-600 dark:text-amber-400">📦 Kiadás: {Number(cleaning.expenses).toLocaleString('hu-HU')} Ft{cleaning.expenseNote ? ` (${cleaning.expenseNote})` : ''}</div>
+                        <div className="text-sm text-amber-600 dark:text-amber-400"> Kiadás: {Number(cleaning.expenses).toLocaleString('hu-HU')} Ft{cleaning.expenseNote ? ` (${cleaning.expenseNote})` : ''}</div>
                       )}
                       {cleaning.assigneeName && (
-                        <div>👤 Hozzárendelt: {cleaning.assigneeName}</div>
+                        <div> Hozzárendelt: {cleaning.assigneeName}</div>
                       )}
                       {cleaning.booking && (
-                        <div>🏠 Foglalás: {cleaning.booking.guestName} ({cleaning.booking.checkIn} {cleaning.checkinTime ?? '15:00'} – {cleaning.booking.checkOut} {cleaning.checkoutTime ?? '11:00'})</div>
+                        <div> Foglalás: {cleaning.booking.guestName} ({cleaning.booking.checkIn} {cleaning.checkinTime ?? '15:00'}  {cleaning.booking.checkOut} {cleaning.checkoutTime ?? '11:00'})</div>
                       )}
                       {cleaning.notes && (
-                        <div>📝 {cleaning.notes}</div>
+                        <div> {cleaning.notes}</div>
                       )}
                     </div>
                   </div>
@@ -1275,7 +1275,7 @@ const CleaningPage = () => {
                   <div className="flex items-center gap-2 mb-1">
                     <label htmlFor="new-cleaning-textile-earnings" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Textil díj (Ft)</label>
                     <Tooltip content={`Alapértelmezett textil díj: ${defaultTextileRate} Ft. Az érték automatikusan beállításra kerül, de módosítható.`} position="top">
-                      <span className="text-xs text-gray-400 dark:text-gray-500 cursor-help" aria-label="Segítség">ℹ️</span>
+                      <span className="text-xs text-gray-400 dark:text-gray-500 cursor-help" aria-label="Segítség"></span>
                     </Tooltip>
                   </div>
                   <input
@@ -1504,7 +1504,7 @@ const CleaningPage = () => {
                     <div className="flex items-center gap-2 mb-1">
                       <label htmlFor="edit-cleaning-textile-earnings" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Textil díj (Ft)</label>
                       <Tooltip content={`Alapértelmezett textil díj: ${defaultTextileRate} Ft. Az érték automatikusan beállításra kerül, de módosítható.`} position="top">
-                        <span className="text-xs text-gray-400 dark:text-gray-500 cursor-help" aria-label="Segítség">ℹ️</span>
+                        <span className="text-xs text-gray-400 dark:text-gray-500 cursor-help" aria-label="Segítség"></span>
                       </Tooltip>
                     </div>
                     <input
@@ -1559,7 +1559,7 @@ const CleaningPage = () => {
       </Modal>
       )}
 
-      {/* Törlés megerősítés - csak ha van edit jogosultság */}
+      {/* Törlés megersítés - csak ha van edit jogosultság */}
       {canEditCleaning('cleaning') && (
         <>
           <ConfirmDialog
@@ -1652,7 +1652,7 @@ const CleaningPage = () => {
               className="w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:bg-gray-700"
             />
             <label htmlFor="generate-skip-existing" className="text-sm text-gray-700 dark:text-gray-300">
-              Meglévő takarítások kihagyása
+              Meglév takarítások kihagyása
             </label>
           </div>
           <div className="flex justify-end gap-2 pt-4">

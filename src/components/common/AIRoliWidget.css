@@ -1,14 +1,17 @@
-/* AI Roli Widget - Kék színséma */
+/* AI Roli Widget - Rózsaszín Neon színséma */
 
 :root {
-  --airoli-bg: #0f172a;
-  --airoli-header: #1e40af;
-  --airoli-header-gradient: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-  --airoli-input-border: #3b82f6;
-  --airoli-text: #f8fafc;
-  --airoli-text-muted: #94a3b8;
+  --airoli-bg: #0a0415;
+  --airoli-header: #ff006e;
+  --airoli-header-gradient: linear-gradient(135deg, #ff006e 0%, #ff0a78 50%, #ff1493 100%);
+  --airoli-input-border: #ff0a78;
+  --airoli-text: #fef7ff;
+  --airoli-text-muted: #d8b4fe;
   --airoli-online: #22c55e;
-  --airoli-message-bg: #1e293b;
+  --airoli-message-bg: #1a0b2e;
+  --airoli-neon-pink: #ff006e;
+  --airoli-neon-glow: rgba(255, 0, 110, 0.6);
+  --airoli-neon-bright: #ff66b2;
 }
 
 /* Minimized FAB */
@@ -24,17 +27,23 @@
   color: white;
   font-size: 24px;
   cursor: pointer;
-  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+  box-shadow:
+    0 0 20px var(--airoli-neon-glow),
+    0 0 40px var(--airoli-neon-glow),
+    0 10px 25px rgba(255, 0, 110, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s, box-shadow 0.3s;
 }
 
 .airoli-fab:hover {
   transform: scale(1.1);
-  box-shadow: 0 15px 35px rgba(59, 130, 246, 0.5);
+  box-shadow:
+    0 0 30px var(--airoli-neon-glow),
+    0 0 60px var(--airoli-neon-glow),
+    0 15px 35px rgba(255, 0, 110, 0.6);
 }
 
 .airoli-fab:active {
@@ -44,17 +53,33 @@
 /* Chat Window */
 .airoli-chat-window {
   background: var(--airoli-bg);
-  border-radius: 16px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border-radius: 20px;
+  box-shadow:
+    0 0 30px var(--airoli-neon-glow),
+    0 0 60px rgba(255, 0, 110, 0.4),
+    0 25px 50px -12px rgba(0, 0, 0, 0.8);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid #334155;
+  border: 2px solid var(--airoli-neon-pink);
   min-width: 300px;
   min-height: 350px;
   max-width: 500px;
   max-height: 600px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  position: relative;
+}
+
+/* Outer neon glow effect */
+.airoli-chat-window::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, var(--airoli-neon-pink), var(--airoli-neon-bright));
+  opacity: 0.3;
+  z-index: -1;
+  filter: blur(8px);
 }
 
 /* Header */
@@ -93,7 +118,8 @@
   height: 10px;
   background: var(--airoli-online);
   border-radius: 50%;
-  border: 2px solid #1e40af;
+  border: 2px solid var(--airoli-neon-pink);
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.8);
 }
 
 .airoli-info {
@@ -173,12 +199,14 @@
 }
 
 .airoli-messages::-webkit-scrollbar-thumb {
-  background: #3b82f6;
+  background: var(--airoli-neon-pink);
   border-radius: 10px;
+  box-shadow: 0 0 10px var(--airoli-neon-glow);
 }
 
 .airoli-messages::-webkit-scrollbar-thumb:hover {
-  background: #60a5fa;
+  background: var(--airoli-neon-bright);
+  box-shadow: 0 0 15px var(--airoli-neon-glow);
 }
 
 /* Message Bubbles */
@@ -196,13 +224,16 @@
   color: var(--airoli-text);
   align-self: flex-start;
   border-bottom-left-radius: 4px;
+  border: 1px solid rgba(255, 0, 110, 0.2);
+  box-shadow: 0 2px 10px rgba(255, 0, 110, 0.1);
 }
 
 .message.user {
-  background: #3b82f6;
+  background: linear-gradient(135deg, var(--airoli-neon-pink) 0%, var(--airoli-neon-bright) 100%);
   color: white;
   align-self: flex-end;
   border-bottom-right-radius: 4px;
+  box-shadow: 0 4px 15px rgba(255, 0, 110, 0.3);
 }
 
 .message-text {
@@ -220,15 +251,16 @@
 .typing-dot {
   width: 8px;
   height: 8px;
-  background: #3b82f6;
+  background: var(--airoli-neon-pink);
   border-radius: 50%;
   display: inline-block;
+  box-shadow: 0 0 8px var(--airoli-neon-glow);
 }
 
 /* Input Area */
 .airoli-input-area {
   padding: 16px;
-  border-top: 1px solid #334155;
+  border-top: 1px solid rgba(255, 0, 110, 0.3);
   display: flex;
   gap: 8px;
   background: var(--airoli-bg);
@@ -244,16 +276,18 @@
   color: var(--airoli-text);
   font-size: 14px;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
 .airoli-input-area input::placeholder {
-  color: #64748b;
+  color: #8b5cf6;
 }
 
 .airoli-input-area input:focus {
-  border-color: #60a5fa;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  border-color: var(--airoli-neon-bright);
+  box-shadow:
+    0 0 0 3px rgba(255, 0, 110, 0.2),
+    0 0 20px rgba(255, 0, 110, 0.3);
 }
 
 .airoli-input-area input:disabled {
@@ -262,23 +296,26 @@
 }
 
 .send-button {
-  background: #3b82f6;
+  background: var(--airoli-header-gradient);
   color: white;
   border: none;
   padding: 12px 20px;
   border-radius: 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s;
   white-space: nowrap;
+  box-shadow: 0 0 15px rgba(255, 0, 110, 0.4);
 }
 
 .send-button:hover:not(:disabled) {
-  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px var(--airoli-neon-glow);
 }
 
 .send-button:active:not(:disabled) {
-  background: #1d4ed8;
+  transform: translateY(0);
+  box-shadow: 0 0 15px rgba(255, 0, 110, 0.4);
 }
 
 .send-button:disabled {
@@ -294,12 +331,13 @@
   width: 20px;
   height: 20px;
   cursor: nwse-resize;
-  background: linear-gradient(135deg, transparent 0%, transparent 40%, rgba(59, 130, 246, 0.3) 40%, rgba(59, 130, 246, 0.3) 60%, transparent 60%);
+  background: linear-gradient(135deg, transparent 0%, transparent 40%, var(--airoli-neon-glow) 40%, var(--airoli-neon-glow) 60%, transparent 60%);
   z-index: 10;
 }
 
 .resize-handle:hover {
-  background: linear-gradient(135deg, transparent 0%, transparent 40%, rgba(59, 130, 246, 0.5) 40%, rgba(59, 130, 246, 0.5) 60%, transparent 60%);
+  background: linear-gradient(135deg, transparent 0%, transparent 40%, var(--airoli-neon-pink) 40%, var(--airoli-neon-pink) 60%, transparent 60%);
+  box-shadow: 0 0 10px var(--airoli-neon-glow);
 }
 
 /* Responsive */

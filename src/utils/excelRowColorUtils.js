@@ -1,10 +1,10 @@
 /**
- * Excel sor háttérszín (ARGB) → lead szín megfeleltetés.
- * zöld = meleg, piros = Később, szürke = Nem aktuális, fekete = elveszett.
+ * Excel sor háttérszín (ARGB)  lead szín megfeleltetés.
+ * zöld = meleg, piros = Késbb, szürke = Nem aktuális, fekete = elveszett.
  */
 
 /**
- * ARGB hex string (pl. 'FF92D050' vagy '92D050') → R,G,B 0–255.
+ * ARGB hex string (pl. 'FF92D050' vagy '92D050')  R,G,B 0255.
  * @param {string} argb
  * @returns {{ r: number, g: number, b: number } | null}
  */
@@ -20,8 +20,8 @@ function parseArgb(argb) {
 }
 
 /**
- * Excel cell fill (ExcelJS) → 'zöld' | 'piros' | 'szürke' | 'fekete' | null.
- * Prioritás: fekete → szürke → zöld/piros.
+ * Excel cell fill (ExcelJS)  'zöld' | 'piros' | 'szürke' | 'fekete' | null.
+ * Prioritás: fekete  szürke  zöld/piros.
  * @param {object} fill - cell.fill (fgColor/bgColor, argb)
  * @returns {string | null}
  */

@@ -48,7 +48,7 @@ const useToastStore = create((set, get) => ({
       const updatedToasts = (state.toasts || []).filter((t) => t.id !== id);
       const queue = state.queue || [];
       
-      // Ha van hely és van várakozó toast, akkor megjelenítjük a következőt
+      // Ha van hely és van várakozó toast, akkor megjelenítjük a következt
       if (updatedToasts.length < MAX_VISIBLE_TOASTS && queue.length > 0) {
         const nextToast = queue[0];
         const remainingQueue = queue.slice(1);

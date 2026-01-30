@@ -1,11 +1,14 @@
 /**
  * SmartCRM Backend API client (smartcrm-cpanel).
  * Base URL: VITE_API_BASE_URL (pl. https://smartcrm.hu/api vagy http://localhost/smartcrm-cpanel/api)
+ * OFFLINE MODE: Ha nincs API URL beállítva, localStorage-t használ
  */
 
 import { retry } from '../utils/retry';
 
+// OFFLINE MODE: Ha nincs API beállítva, nem hívunk meg semmi API-t
 const baseURL = import.meta.env.VITE_API_BASE_URL || '';
+const isOfflineMode = !baseURL;
 
 function buildUrl(path, params = {}) {
   const p = path.replace(/^\//, '');
@@ -61,14 +64,14 @@ async function request(method, path, { params, body, token, timeout = 30000, ret
       
       // Network error kezelés
       if (error.name === 'AbortError') {
-        const timeoutErr = new Error('A kérés túllépte az időkorlátot. Kérjük, próbálja újra.');
+        const timeoutErr = new Error('A kérés túllépte az idkorlátot. Kérjük, próbálja újra.');
         timeoutErr.status = 408;
         timeoutErr.isTimeout = true;
         throw timeoutErr;
       }
       
       if (error instanceof TypeError && error.message.includes('fetch')) {
-        const networkErr = new Error('Hálózati hiba. Ellenőrizze az internetkapcsolatot.');
+        const networkErr = new Error('Hálózati hiba. Ellenrizze az internetkapcsolatot.');
         networkErr.status = 0;
         networkErr.isNetworkError = true;
         throw networkErr;
@@ -99,19 +102,39 @@ async function request(method, path, { params, body, token, timeout = 30000, ret
 }
 
 export const api = {
-  isConfigured: () => !!baseURL,
+  isConfigured: () => !isOfflineMode,
 
-  get: (path, params, opts) =>
-    request('GET', path, { ...opts, params }),
+  get: (path, params, opts) => {
+    if (isOfflineMode) {
+      // Offline mode: return empty data, app uses localStorage
+      return Promise.resolve([]);
+    }
+    return request('GET', path, { ...opts, params });
+  },
 
-  post: (path, body, opts) =>
-    request('POST', path, { ...opts, body }),
+  post: (path, body, opts) => {
+    if (isOfflineMode) {
+      // Offline mode: don't make API calls
+      return Promise.resolve({ success: true });
+    }
+    return request('POST', path, { ...opts, body });
+  },
 
-  put: (path, body, opts) =>
-    request('PUT', path, { ...opts, body }),
+  put: (path, body, opts) => {
+    if (isOfflineMode) {
+      // Offline mode: don't make API calls
+      return Promise.resolve({ success: true });
+    }
+    return request('PUT', path, { ...opts, body });
+  },
 
-  delete: (path, opts) =>
-    request('DELETE', path, opts)
+  delete: (path, opts) => {
+    if (isOfflineMode) {
+      // Offline mode: don't make API calls
+      return Promise.resolve({ success: true });
+    }
+    return request('DELETE', path, opts);
+  }
 };
 
 /** Auth */
@@ -229,7 +252,7 @@ export async function campaignsDelete(id) {
   return api.delete(`campaigns/${id}`);
 }
 
-/** Mappers: API (snake_case) ↔ frontend (camelCase) */
+/** Mappers: API (snake_case)  frontend (camelCase) */
 export function apartmentFromApi(a) {
   if (!a) return null;
   return {
@@ -385,7 +408,7 @@ export function bookingToApi(b, forUpdate = false) {
   return out;
 }
 
-/** Lead mappers: API (snake_case) ↔ frontend (camelCase) */
+/** Lead mappers: API (snake_case)  frontend (camelCase) */
 export function leadFromApi(l) {
   if (!l) return null;
   return {
@@ -427,7 +450,7 @@ export function leadToApi(l) {
   };
 }
 
-/** Campaign mappers: API (snake_case) ↔ frontend (camelCase) */
+/** Campaign mappers: API (snake_case)  frontend (camelCase) */
 export function campaignFromApi(c) {
   if (!c) return null;
   return {
@@ -624,7 +647,7 @@ export function laundryToApi(l) {
   };
 }
 
-/** Cleaning mappers: API (snake_case) ↔ frontend (camelCase) */
+/** Cleaning mappers: API (snake_case)  frontend (camelCase) */
 export function cleaningFromApi(c) {
   if (!c) return null;
   return {
@@ -722,7 +745,7 @@ export async function sendVoiceInput(body) {
   try {
     return await api.post('voice', body);
   } catch (error) {
-    // Ha az API nem elérhető (fejlesztési környezetben), mock válasszal térünk vissza
+    // Ha az API nem elérhet (fejlesztési környezetben), mock válasszal térünk vissza
     if (import.meta.env.DEV && (error.isNetworkError || error.status === 0 || error.status >= 500)) {
       console.log('Voice API not available, returning mock response');
       return {

@@ -25,7 +25,7 @@ const AppsPage = () => {
       id: 'cleanapp',
       name: 'CleanApp',
       description: 'Takarítók appja',
-      icon: '🧹',
+      icon: '',
       colorClass: 'from-teal-500 to-teal-600 dark:from-teal-600 dark:to-teal-700',
       hoverClass: 'hover:from-teal-600 hover:to-teal-700 dark:hover:from-teal-500 dark:hover:to-teal-600',
     },
@@ -33,15 +33,15 @@ const AppsPage = () => {
       id: 'partner',
       name: 'SmartPartner',
       description: 'Partner platform',
-      icon: '🏠',
+      icon: '',
       colorClass: 'from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700',
       hoverClass: 'hover:from-blue-600 hover:to-blue-700 dark:hover:from-blue-500 dark:hover:to-blue-600',
     },
     {
       id: 'registration',
       name: 'Partner Regisztráció',
-      description: 'Regisztráció és szerződés',
-      icon: '📝',
+      description: 'Regisztráció és szerzdés',
+      icon: '',
       colorClass: 'from-green-500 to-green-600 dark:from-green-600 dark:to-green-700',
       hoverClass: 'hover:from-green-600 hover:to-green-700 dark:hover:from-green-500 dark:hover:to-green-600',
     },
@@ -49,7 +49,7 @@ const AppsPage = () => {
       id: 'pricing',
       name: 'SmartPricing',
       description: 'Árazás és díjszabás',
-      icon: '💰',
+      icon: '',
       colorClass: 'from-yellow-500 to-yellow-600 dark:from-yellow-600 dark:to-yellow-700',
       hoverClass: 'hover:from-yellow-600 hover:to-yellow-700 dark:hover:from-yellow-500 dark:hover:to-yellow-600',
     },
@@ -57,7 +57,7 @@ const AppsPage = () => {
       id: 'sales',
       name: 'SmartSales',
       description: 'Értékesítés és értékesítés',
-      icon: '📊',
+      icon: '',
       colorClass: 'from-orange-500 to-orange-600 dark:from-orange-600 dark:to-orange-700',
       hoverClass: 'hover:from-orange-600 hover:to-orange-700 dark:hover:from-orange-500 dark:hover:to-orange-600',
     },
@@ -65,7 +65,7 @@ const AppsPage = () => {
       id: 'bookkeeper',
       name: 'SmartBookkeeper',
       description: 'Könyvelés és számlázás',
-      icon: '📚',
+      icon: '',
       colorClass: 'from-indigo-500 to-indigo-600 dark:from-indigo-600 dark:to-indigo-700',
       hoverClass: 'hover:from-indigo-600 hover:to-indigo-700 dark:hover:from-indigo-500 dark:hover:to-indigo-600',
     },
@@ -79,7 +79,7 @@ const AppsPage = () => {
     setSelectedApp(null);
   };
 
-  // Ha van kiválasztott app → az app funkcióinak renderelése
+  // Ha van kiválasztott app  az app funkcióinak renderelése
   if (selectedApp === 'cleanapp') {
     return <CleanAppFeatures onBack={handleBack} />;
   }
@@ -132,11 +132,9 @@ const AppsPage = () => {
 
 // CleanApp funkciók - integrálva (CleaningPage funkciók)
 const CleanAppFeatures = ({ onBack }) => {
-  const navigate = useNavigate();
-  
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
+    <div className="h-screen flex flex-col">
+      <div className="flex items-center gap-4 bg-white dark:bg-gray-800 p-4 shadow-sm">
         <Button
           onClick={onBack}
           variant="ghost"
@@ -147,22 +145,18 @@ const CleanAppFeatures = ({ onBack }) => {
           <span>Vissza</span>
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">CleanApp</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">Takarítók appja</p>
+          <h1 className="text-xl font-bold text-gray-800 dark:text-gray-200">CleanApp</h1>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Takarítók appja</p>
         </div>
       </div>
 
-      <Card className="p-6">
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Munkák kezelése</h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            A CleanApp funkciói a <strong>Takarítás</strong> oldalon érhetők el.
-          </p>
-          <Button onClick={() => navigate('/cleaning')} className="mt-4">
-            Ugrás a Takarítás oldalra →
-          </Button>
-        </div>
-      </Card>
+      <div className="flex-1">
+        <iframe
+          src="/cleanapp.html"
+          className="w-full h-full border-0"
+          title="CleanApp"
+        />
+      </div>
     </div>
   );
 };
@@ -172,7 +166,7 @@ const SmartPartnerFeatures = ({ onBack }) => {
   const navigate = useNavigate();
   const { apartments } = useApartmentsStore();
   
-  // Partner lista összegyűjtése a lakásokból
+  // Partner lista összegyjtése a lakásokból
   const partners = useMemo(() => {
     const partnerMap = new Map();
     apartments.forEach(apt => {
@@ -216,7 +210,7 @@ const SmartPartnerFeatures = ({ onBack }) => {
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Partnerek</h2>
             <Button onClick={() => navigate('/apartments')} variant="primary">
-              Lakások kezelése →
+              Lakások kezelése 
             </Button>
           </div>
           
@@ -246,7 +240,7 @@ const SmartPartnerFeatures = ({ onBack }) => {
                       variant="ghost"
                       size="sm"
                     >
-                      Megtekintés →
+                      Megtekintés 
                     </Button>
                   </div>
                 </div>
@@ -282,7 +276,7 @@ const PartnerRegFeatures = ({ onBack }) => {
         </Button>
         <div>
           <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Partner Regisztráció</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">Partner regisztráció és szerződés aláírás</p>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Partner regisztráció és szerzdés aláírás</p>
         </div>
       </div>
 
@@ -331,7 +325,7 @@ const SmartPricingFeatures = ({ onBack }) => {
     { id: 4, name: 'Apartment C', collapsible: true },
   ];
 
-  // Példa árak (véletlenszerű)
+  // Példa árak (véletlenszer)
   const getPrices = () => {
     const basePrice = Math.floor(Math.random() * 50) + 20;
     return {
@@ -467,8 +461,8 @@ const SmartPricingFeatures = ({ onBack }) => {
                     className="flex-1 p-3 border-r border-gray-200 dark:border-gray-700 last:border-r-0 relative"
                   >
                     <div className="flex flex-col gap-1">
-                      <div className="text-xs text-gray-600 dark:text-gray-400">€{prices.min}</div>
-                      <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">€{prices.max}</div>
+                      <div className="text-xs text-gray-600 dark:text-gray-400">{prices.min}</div>
+                      <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">{prices.max}</div>
                     </div>
                     {prices.hasSettings && (
                       <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
@@ -513,7 +507,7 @@ const SmartSalesFeatures = ({ onBack }) => {
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Értékesítési funkciók</h2>
           <p className="text-gray-600 dark:text-gray-400">
-            A SmartSales funkciói hamarosan elérhetőek lesznek.
+            A SmartSales funkciói hamarosan elérhetek lesznek.
           </p>
         </div>
       </Card>
@@ -545,7 +539,7 @@ const SmartBookkeeperFeatures = ({ onBack }) => {
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Könyvelési funkciók</h2>
           <p className="text-gray-600 dark:text-gray-400">
-            A SmartBookkeeper funkciói hamarosan elérhetőek lesznek.
+            A SmartBookkeeper funkciói hamarosan elérhetek lesznek.
           </p>
         </div>
       </Card>

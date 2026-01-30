@@ -99,7 +99,7 @@ export async function readFromClipboard() {
 }
 
 /**
- * Clipboard API támogatás ellenőrzése
+ * Clipboard API támogatás ellenrzése
  * @returns {boolean} Támogatott-e
  */
 export function isClipboardSupported() {
@@ -110,7 +110,7 @@ export function isClipboardSupported() {
 }
 
 /**
- * Clipboard írási jogosultság ellenőrzése (Permission API)
+ * Clipboard írási jogosultság ellenrzése (Permission API)
  * @returns {Promise<string>} 'granted', 'denied', vagy 'prompt'
  */
 export async function checkClipboardPermission() {

@@ -61,7 +61,7 @@ const useIcalSyncStore = create((set, get) => ({
       }
     }));
 
-    // Progress szimuláció (optimistic UI) - változó deklaráció a try blokk előtt
+    // Progress szimuláció (optimistic UI) - változó deklaráció a try blokk eltt
     let progressInterval = null;
     if (!api.isConfigured()) {
       // Mock mode: progress szimuláció
@@ -119,7 +119,7 @@ const useIcalSyncStore = create((set, get) => ({
 
         // Optimistic UI: frissítjük a foglalásokat (ha van bookings store)
         // Megjegyzés: A bookings store frissítése opcionális, hogy elkerüljük a circular dependency-t
-        // A frontend komponensek automatikusan frissülnek, amikor újra renderelődnek
+        // A frontend komponensek automatikusan frissülnek, amikor újra rendereldnek
 
         // Auto-clear success status after 3 seconds
         setTimeout(() => {

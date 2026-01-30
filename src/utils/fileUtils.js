@@ -10,7 +10,7 @@ import useToastStore from '../stores/toastStore';
 const logger = createLogger('FileUtils');
 
 /**
- * Fájl méret formázása (bytes → KB, MB, GB)
+ * Fájl méret formázása (bytes  KB, MB, GB)
  * @param {number} bytes - Fájl méret byte-ban
  * @param {number} decimals - Tizedesjegyek száma (default: 2)
  * @returns {string} Formázott méret
@@ -28,7 +28,7 @@ export function formatFileSize(bytes, decimals = 2) {
 }
 
 /**
- * Fájl típus ellenőrzése
+ * Fájl típus ellenrzése
  * @param {File} file - A fájl
  * @param {string[]} allowedTypes - Engedélyezett MIME típusok vagy kiterjesztések
  * @returns {boolean} Érvényes-e
@@ -40,21 +40,21 @@ export function validateFileType(file, allowedTypes = []) {
   const fileMimeType = file.type;
 
   return allowedTypes.some((type) => {
-    // MIME type ellenőrzés
+    // MIME type ellenrzés
     if (type.includes('/')) {
       return fileMimeType === type || fileMimeType.startsWith(type.split('/')[0] + '/');
     }
-    // Extension ellenőrzés
+    // Extension ellenrzés
     if (type.startsWith('.')) {
       return fileExtension === type.toLowerCase();
     }
-    // Extension ellenőrzés (pont nélkül)
+    // Extension ellenrzés (pont nélkül)
     return fileExtension === '.' + type.toLowerCase();
   });
 }
 
 /**
- * Fájl méret ellenőrzése
+ * Fájl méret ellenrzése
  * @param {File} file - A fájl
  * @param {number} maxSize - Maximum méret byte-ban (default: APP_CONFIG.upload.maxFileSize)
  * @returns {boolean} Érvényes-e
@@ -90,7 +90,7 @@ export function validateFile(file, options = {}) {
     return { isValid: false, error };
   }
 
-  // Típus ellenőrzés
+  // Típus ellenrzés
   if (allowedTypes.length > 0 && !validateFileType(file, allowedTypes)) {
     const error = `A fájl típusa nem támogatott. Engedélyezett típusok: ${allowedTypes.join(', ')}`;
     if (showToast) {
@@ -99,7 +99,7 @@ export function validateFile(file, options = {}) {
     return { isValid: false, error };
   }
 
-  // Méret ellenőrzés
+  // Méret ellenrzés
   const max = maxSize || APP_CONFIG.upload.maxFileSize;
   if (!validateFileSize(file, max)) {
     const error = `A fájl mérete túl nagy. Maximum méret: ${formatFileSize(max)}`;
@@ -256,7 +256,7 @@ export function getMimeType(filename) {
 }
 
 /**
- * Fájl előnézet URL létrehozása (kép esetén)
+ * Fájl elnézet URL létrehozása (kép esetén)
  * @param {File} file - A fájl
  * @returns {Promise<string>} Preview URL vagy null
  */

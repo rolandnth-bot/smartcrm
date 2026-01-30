@@ -39,7 +39,7 @@ const Pagination = memo(({
     }
   };
 
-  // Számítsuk ki a megjelenítendő oldal számokat
+  // Számítsuk ki a megjelenítend oldal számokat
   const visiblePages = useMemo(() => {
     const pages = [];
     const maxVisible = 5;
@@ -84,13 +84,13 @@ const Pagination = memo(({
       )}
 
       <div className="flex items-center gap-2">
-        {/* Előző oldal gomb */}
+        {/* Elz oldal gomb */}
         <Button
           variant="outline"
           size="sm"
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          aria-label="Előző oldal"
+          aria-label="Elz oldal"
         >
           <ChevronLeft />
         </Button>
@@ -103,7 +103,7 @@ const Pagination = memo(({
                 variant="outline"
                 size="sm"
                 onClick={() => handlePageChange(1)}
-                aria-label="Első oldal"
+                aria-label="Els oldal"
               >
                 1
               </Button>
@@ -143,13 +143,13 @@ const Pagination = memo(({
           )}
         </div>
 
-        {/* Következő oldal gomb */}
+        {/* Következ oldal gomb */}
         <Button
           variant="outline"
           size="sm"
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          aria-label="Következő oldal"
+          aria-label="Következ oldal"
         >
           <ChevronRight />
         </Button>

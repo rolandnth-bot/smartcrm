@@ -1,7 +1,7 @@
 import { memo } from 'react';
 
 /**
- * Újrahasznosítható form mező komponens
+ * Újrahasznosítható form mez komponens
  * Támogatja a label-t, error üzeneteket, required jelölést, és help text-et
  */
 const FormField = memo(({
@@ -24,7 +24,7 @@ const FormField = memo(({
         >
           {label}
           {required && (
-            <span className="text-red-500 ml-1" aria-label="kötelező mező">
+            <span className="text-red-500 ml-1" aria-label="kötelez mez">
               *
             </span>
           )}

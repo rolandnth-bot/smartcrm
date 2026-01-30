@@ -78,7 +78,7 @@ export const storage = {
   },
 
   /**
-   * Kulcs létezésének ellenőrzése
+   * Kulcs létezésének ellenrzése
    * @param {string} key - Kulcs
    * @returns {boolean} Létezik-e
    */
@@ -175,7 +175,7 @@ export const sessionStorage = {
   },
 
   /**
-   * Kulcs létezésének ellenőrzése
+   * Kulcs létezésének ellenrzése
    * @param {string} key - Kulcs
    * @returns {boolean} Létezik-e
    */
@@ -190,7 +190,7 @@ export const sessionStorage = {
 };
 
 /**
- * Storage támogatás ellenőrzése
+ * Storage támogatás ellenrzése
  * @returns {boolean} Támogatott-e localStorage/sessionStorage
  */
 export function isStorageSupported() {
@@ -205,7 +205,7 @@ export function isStorageSupported() {
 }
 
 /**
- * Storage quota ellenőrzése (ha támogatott)
+ * Storage quota ellenrzése (ha támogatott)
  * @returns {Object|null} {quota, usage, available} vagy null
  */
 export function getStorageInfo() {

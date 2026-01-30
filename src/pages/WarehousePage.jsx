@@ -1,5 +1,5 @@
 /**
- * Raktárak (Warehouse) – Mosoda, Dolgozói készlet, Lakások készlete
+ * Raktárak (Warehouse)  Mosoda, Dolgozói készlet, Lakások készlete
  * Központi készletkezelés
  */
 
@@ -16,9 +16,9 @@ import useToastStore from '../stores/toastStore';
 import EmptyState from '../components/common/EmptyState';
 import { SkeletonListItem } from '../components/common/Skeleton';
 
-// Textilkészlet szerkesztő komponens - részletes struktúra
+// Textilkészlet szerkeszt komponens - részletes struktúra
 const TextileInventoryEditor = ({ inventory = [], onChange }) => {
-  // Ágynemű típusok
+  // Ágynem típusok
   const [bedding, setBedding] = useState({
     paplan: { quantity: 0, brand: 'IKEA' },
     parna: { quantity: 0, brand: 'IKEA' },
@@ -26,7 +26,7 @@ const TextileInventoryEditor = ({ inventory = [], onChange }) => {
     agynemusett: { quantity: 0, brand: 'IKEA' }
   });
 
-  // Törölközők
+  // Törölközk
   const [towels, setTowels] = useState({
     nagyTorolkozo: 0,
     kozepesTorolkozo: 0,
@@ -38,7 +38,7 @@ const TextileInventoryEditor = ({ inventory = [], onChange }) => {
   // Egyéb készletek
   const [otherItems, setOtherItems] = useState([]);
 
-  // Betöltés inventory-ból - csak egyszer, amikor a komponens betöltődik
+  // Betöltés inventory-ból - csak egyszer, amikor a komponens betöltdik
   const [isInitialized, setIsInitialized] = useState(false);
   
   useEffect(() => {
@@ -57,17 +57,17 @@ const TextileInventoryEditor = ({ inventory = [], onChange }) => {
           beddingData.paplan = { quantity: item.quantity || 0, brand: item.brand || 'IKEA' };
         } else if (lowerType.includes('párna')) {
           beddingData.parna = { quantity: item.quantity || 0, brand: item.brand || 'IKEA' };
-        } else if (lowerType.includes('lepedő') || lowerType.includes('lepedo')) {
+        } else if (lowerType.includes('leped') || lowerType.includes('lepedo')) {
           beddingData.lepedo = { quantity: item.quantity || 0, size: item.itemSize || '140x200', brand: item.brand || 'IKEA' };
         } else if (lowerType.includes('szett') || (lowerType.includes('ágy') && lowerType.includes('szett'))) {
           beddingData.agynemusett = { quantity: item.quantity || 0, brand: item.brand || 'IKEA' };
-        } else if (lowerType.includes('nagy') && lowerType.includes('törölköző')) {
+        } else if (lowerType.includes('nagy') && lowerType.includes('törölköz')) {
           towelsData.nagyTorolkozo = item.quantity || 0;
-        } else if (lowerType.includes('közepes') && lowerType.includes('törölköző')) {
+        } else if (lowerType.includes('közepes') && lowerType.includes('törölköz')) {
           towelsData.kozepesTorolkozo = item.quantity || 0;
-        } else if (lowerType.includes('kéztörlő') || lowerType.includes('keztorlo')) {
+        } else if (lowerType.includes('kéztörl') || lowerType.includes('keztorlo')) {
           towelsData.keztorlo = item.quantity || 0;
-        } else if (lowerType.includes('kádkilépő') || lowerType.includes('kadkilepo')) {
+        } else if (lowerType.includes('kádkilép') || lowerType.includes('kadkilepo')) {
           towelsData.kadkilepo = item.quantity || 0;
         } else if (lowerType.includes('konyharuha')) {
           towelsData.konyharuha = item.quantity || 0;
@@ -85,11 +85,11 @@ const TextileInventoryEditor = ({ inventory = [], onChange }) => {
 
   // Változások mentése - csak akkor, ha már inicializálva van
   useEffect(() => {
-    if (!isInitialized) return; // Ne hívjuk meg az onChange-t inicializálás előtt
+    if (!isInitialized) return; // Ne hívjuk meg az onChange-t inicializálás eltt
     
     const allItems = [];
     
-    // Ágynemű
+    // Ágynem
     if (bedding.paplan.quantity > 0) {
       allItems.push({ itemType: 'Paplan', itemSize: '', quantity: bedding.paplan.quantity, brand: bedding.paplan.brand, notes: '' });
     }
@@ -97,24 +97,24 @@ const TextileInventoryEditor = ({ inventory = [], onChange }) => {
       allItems.push({ itemType: 'Párna', itemSize: '', quantity: bedding.parna.quantity, brand: bedding.parna.brand, notes: '' });
     }
     if (bedding.lepedo.quantity > 0) {
-      allItems.push({ itemType: 'Lepedő', itemSize: bedding.lepedo.size, quantity: bedding.lepedo.quantity, brand: bedding.lepedo.brand, notes: '' });
+      allItems.push({ itemType: 'Leped', itemSize: bedding.lepedo.size, quantity: bedding.lepedo.quantity, brand: bedding.lepedo.brand, notes: '' });
     }
     if (bedding.agynemusett.quantity > 0) {
-      allItems.push({ itemType: 'Ágynemű szett', itemSize: '', quantity: bedding.agynemusett.quantity, brand: bedding.agynemusett.brand, notes: '' });
+      allItems.push({ itemType: 'Ágynem szett', itemSize: '', quantity: bedding.agynemusett.quantity, brand: bedding.agynemusett.brand, notes: '' });
     }
 
-    // Törölközők
+    // Törölközk
     if (towels.nagyTorolkozo > 0) {
-      allItems.push({ itemType: 'Nagy törölköző', itemSize: '', quantity: towels.nagyTorolkozo, brand: '', notes: '' });
+      allItems.push({ itemType: 'Nagy törölköz', itemSize: '', quantity: towels.nagyTorolkozo, brand: '', notes: '' });
     }
     if (towels.kozepesTorolkozo > 0) {
-      allItems.push({ itemType: 'Közepes törölköző', itemSize: '', quantity: towels.kozepesTorolkozo, brand: '', notes: '' });
+      allItems.push({ itemType: 'Közepes törölköz', itemSize: '', quantity: towels.kozepesTorolkozo, brand: '', notes: '' });
     }
     if (towels.keztorlo > 0) {
-      allItems.push({ itemType: 'Kéztörlő', itemSize: '', quantity: towels.keztorlo, brand: '', notes: '' });
+      allItems.push({ itemType: 'Kéztörl', itemSize: '', quantity: towels.keztorlo, brand: '', notes: '' });
     }
     if (towels.kadkilepo > 0) {
-      allItems.push({ itemType: 'Kádkilépő', itemSize: '', quantity: towels.kadkilepo, brand: '', notes: '' });
+      allItems.push({ itemType: 'Kádkilép', itemSize: '', quantity: towels.kadkilepo, brand: '', notes: '' });
     }
     if (towels.konyharuha > 0) {
       allItems.push({ itemType: 'Konyharuha', itemSize: '', quantity: towels.konyharuha, brand: '', notes: '' });
@@ -145,9 +145,9 @@ const TextileInventoryEditor = ({ inventory = [], onChange }) => {
 
   return (
     <div className="space-y-6 max-h-[70vh] overflow-y-auto">
-      {/* Ágynemű szekció */}
+      {/* Ágynem szekció */}
       <div className="border-b dark:border-gray-700 pb-4">
-        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">🧺 Ágynemű</h4>
+        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3"> Ágynem</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Paplan (db)</label>
@@ -188,7 +188,7 @@ const TextileInventoryEditor = ({ inventory = [], onChange }) => {
             </div>
           </div>
           <div>
-            <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Lepedő (db)</label>
+            <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Leped (db)</label>
             <div className="flex gap-2">
               <input
                 type="number"
@@ -214,7 +214,7 @@ const TextileInventoryEditor = ({ inventory = [], onChange }) => {
             </div>
           </div>
           <div>
-            <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Ágynemű szett (db)</label>
+            <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Ágynem szett (db)</label>
             <div className="flex gap-2">
               <input
                 type="number"
@@ -235,12 +235,12 @@ const TextileInventoryEditor = ({ inventory = [], onChange }) => {
         </div>
       </div>
 
-      {/* Törölközők szekció */}
+      {/* Törölközk szekció */}
       <div className="border-b dark:border-gray-700 pb-4">
-        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Törölközők</h4>
+        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Törölközk</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Nagy törölköző</label>
+            <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Nagy törölköz</label>
             <input
               type="number"
               min="0"
@@ -250,7 +250,7 @@ const TextileInventoryEditor = ({ inventory = [], onChange }) => {
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Közepes törölköző</label>
+            <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Közepes törölköz</label>
             <input
               type="number"
               min="0"
@@ -260,7 +260,7 @@ const TextileInventoryEditor = ({ inventory = [], onChange }) => {
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Kéztörlő</label>
+            <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Kéztörl</label>
             <input
               type="number"
               min="0"
@@ -270,7 +270,7 @@ const TextileInventoryEditor = ({ inventory = [], onChange }) => {
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Kádkilépő</label>
+            <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Kádkilép</label>
             <input
               type="number"
               min="0"
@@ -433,7 +433,7 @@ const WarehousePage = () => {
           fetchApartments(); // Frissítjük a listát
         }
       } else if (editingInventory.type === 'worker') {
-        // Dolgozói készlet - jelenleg csak toast (később implementálható)
+        // Dolgozói készlet - jelenleg csak toast (késbb implementálható)
         useToastStore.getState().info('Dolgozói készlet kezelése fejlesztés alatt');
         setShowInventoryModal(false);
         setEditingInventory(null);
@@ -769,7 +769,7 @@ const WarehousePage = () => {
         )}
       </div>
 
-      {/* Készlet szerkesztő modal */}
+      {/* Készlet szerkeszt modal */}
       {showInventoryModal && editingInventory && (
         <Modal
           isOpen={showInventoryModal}

@@ -1,5 +1,5 @@
 /**
- * Pénzügy (Finance) – Bevételek, Elszámolások
+ * Pénzügy (Finance)  Bevételek, Elszámolások
  * Foglalások alapján payout/jutalék, karbantartási költségek.
  */
 
@@ -17,6 +17,7 @@ import { formatCurrencyHUF, formatPercent, formatNumber } from '../utils/numberU
 import { formatDate, todayISO, getFirstDayOfMonth, getLastDayOfMonth } from '../utils/dateUtils';
 import { PLATFORM_LABELS } from '../config/constants';
 import { exportToCSV, exportToExcel, printToPDF } from '../utils/exportUtils';
+import SettlementImportModal from '../components/finance/SettlementImportModal';
 
 const FINANCE_FILTERS = [
   { key: 'today', label: 'Ma' },
@@ -46,10 +47,26 @@ const FinancePage = () => {
 
   const [financeFilter, setFinanceFilter] = useState('month');
   const [financeApartmentFilter, setFinanceApartmentFilter] = useState('');
-  const [financeSubTab, setFinanceSubTab] = useState('overview'); // 'overview' | 'settlements' | 'accounting'
+  const [financeSubTab, setFinanceSubTab] = useState('osszesito'); // 'osszesito' | 'forgalom' | 'szamlazas'
   const [financeYear, setFinanceYear] = useState(new Date().getFullYear());
   const [financeMonth, setFinanceMonth] = useState(new Date().getMonth());
+  const [forgalomIrany, setForgalomIrany] = useState('osszes'); // 'osszes', 'bevetel', 'kiadas'
+  const [osszesitoYear, setOsszesitoYear] = useState(2026);
   const [settlementApartment, setSettlementApartment] = useState('');
+  const [showSettlementImport, setShowSettlementImport] = useState(false);
+  const [importedSettlements, setImportedSettlements] = useState([]);
+
+  // Összesítő szűrők
+  const [osszesitoDateRange, setOsszesitoDateRange] = useState({
+    start: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-01`,
+    end: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0]
+  });
+  const [osszesitoKategoria, setOsszesitoKategoria] = useState('osszes');
+  const [osszesitoPartner, setOsszesitoPartner] = useState('osszes');
+  const [osszesitoRendezettseg, setOsszesitoRendezettseg] = useState('osszes');
+  const [osszesitoIrany, setOsszesitoIrany] = useState('osszes');
+  const [bankBalanceFilter, setBankBalanceFilter] = useState('osszes'); // 'osszes', 'pozitiv', 'negativ', 'nulla'
+  const [showAddBankAccount, setShowAddBankAccount] = useState(false);
   // Extra tételek localStorage-ból betöltése
   const loadSettlementExtraItems = useCallback(() => {
     try {
@@ -188,7 +205,7 @@ const FinancePage = () => {
     return [y, y - 1, y - 2];
   }, []);
 
-  // Elszámolások: foglalások a kiválasztott hónapban (mindegyik lakás) – lakás nélkül is látszik
+  // Elszámolások: foglalások a kiválasztott hónapban (mindegyik lakás)  lakás nélkül is látszik
   const settlementPeriodBookings = useMemo(() => {
     const startOfMonth = new Date(financeYear, financeMonth, 1);
     const endOfMonth = new Date(financeYear, financeMonth + 1, 0);
@@ -262,7 +279,7 @@ const FinancePage = () => {
   }, [filteredBookings, apartments]);
 
   const handlePrintPDF = useCallback(() => {
-    printToPDF('SmartCRM – Pénzügy');
+    printToPDF('SmartCRM  Pénzügy');
   }, []);
 
   // Értékesítési célok kezelése
@@ -376,10 +393,21 @@ const FinancePage = () => {
     };
   }, [unitPlanPeriod, salesTargets, getTotalStats]);
 
+  const handleImportSuccess = useCallback((settlementData) => {
+    setImportedSettlements((prev) => [...prev, settlementData]);
+    setShowSettlementImport(false);
+    // Opcionálisan válthatunk az importált lakásra
+    if (settlementData.apartmentId) {
+      setSettlementApartment(settlementData.apartmentId);
+      setFinanceMonth(settlementData.month);
+      setFinanceYear(settlementData.year);
+    }
+  }, []);
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">💰 Pénzügy</h2>
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200"> Pénzügy</h2>
         <div className="flex gap-2 flex-wrap">
           <Button onClick={handleExportCSV} variant="outline" aria-label="CSV export">
             CSV export
@@ -394,39 +422,27 @@ const FinancePage = () => {
       </div>
 
       <div className="flex flex-wrap gap-1.5 mb-4">
-        <button
-          type="button"
-          onClick={() => setFinanceSubTab('overview')}
-          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
-            financeSubTab === 'overview'
-              ? 'bg-purple-600 text-white'
-              : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200'
-          }`}
+        <Button
+          variant={financeSubTab === 'osszesito' ? 'primary' : 'outline'}
+          size="sm"
+          onClick={() => setFinanceSubTab('osszesito')}
         >
-          Bevételek
-        </button>
-        <button
-          type="button"
-          onClick={() => setFinanceSubTab('settlements')}
-          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
-            financeSubTab === 'settlements'
-              ? 'bg-purple-600 text-white'
-              : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200'
-          }`}
+          Összesítő
+        </Button>
+        <Button
+          variant={financeSubTab === 'forgalom' ? 'primary' : 'outline'}
+          size="sm"
+          onClick={() => setFinanceSubTab('forgalom')}
         >
-          Elszámolások
-        </button>
-        <button
-          type="button"
-          onClick={() => setFinanceSubTab('accounting')}
-          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
-            financeSubTab === 'accounting'
-              ? 'bg-purple-600 text-white'
-              : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200'
-          }`}
+          Forgalom
+        </Button>
+        <Button
+          variant={financeSubTab === 'szamlazas' ? 'primary' : 'outline'}
+          size="sm"
+          onClick={() => setFinanceSubTab('szamlazas')}
         >
-          Könyvelés
-        </button>
+          Számlázás
+        </Button>
       </div>
 
       <div className="flex flex-wrap gap-1.5 mb-4">
@@ -434,7 +450,7 @@ const FinancePage = () => {
           value={financeApartmentFilter}
           onChange={(e) => setFinanceApartmentFilter(e.target.value)}
           className="px-2.5 py-1.5 border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg text-sm"
-          aria-label="Lakás szűrő"
+          aria-label="Lakás szr"
         >
           <option value="">Összes lakás</option>
           {apartments.map((apt) => (
@@ -491,9 +507,9 @@ const FinancePage = () => {
             value={customRange.start}
             onChange={(e) => setCustomRange((p) => ({ ...p, start: e.target.value }))}
             className="px-2.5 py-1.5 border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg text-sm"
-            aria-label="Kezdő dátum"
+            aria-label="Kezd dátum"
           />
-          <span className="text-gray-500 text-sm">–</span>
+          <span className="text-gray-500 text-sm"></span>
           <input
             type="date"
             value={customRange.end}
@@ -504,219 +520,269 @@ const FinancePage = () => {
         </div>
       )}
 
-      {financeSubTab === 'overview' && (
+      {financeSubTab === 'osszesito' && (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            <Card className="p-3 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 border border-amber-400 dark:border-amber-600">
-              <div className="text-xs text-amber-800 dark:text-amber-200 mb-0.5">Összes Payout (Ft)</div>
-              <div className="text-lg font-bold text-amber-900 dark:text-amber-100">
-                {formatCurrencyHUF(payoutSum)}
+          {/* Szűrősáv */}
+          <Card className="p-4 mb-4">
+            <div className="flex flex-wrap gap-4">
+              {/* Időszak */}
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Időszak:</label>
+                <input
+                  type="date"
+                  value={osszesitoDateRange.start}
+                  onChange={(e) => setOsszesitoDateRange(prev => ({ ...prev, start: e.target.value }))}
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-md text-sm"
+                />
+                <span className="text-gray-500">-</span>
+                <input
+                  type="date"
+                  value={osszesitoDateRange.end}
+                  onChange={(e) => setOsszesitoDateRange(prev => ({ ...prev, end: e.target.value }))}
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-md text-sm"
+                />
               </div>
-              <div className="text-xs text-amber-600 dark:text-amber-300 mt-0.5">
-                {filteredBookings.length} foglalás
-              </div>
-            </Card>
-            <Card className="p-3 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border border-purple-400 dark:border-purple-600">
-              <div className="text-xs text-purple-800 dark:text-purple-200 mb-0.5">Karbantartás / Eszközpótlás</div>
-              <div className="text-lg font-bold text-purple-900 dark:text-purple-100">
-                {formatCurrencyHUF(maintenanceForPeriod.total)}
-              </div>
-              <div className="text-xs text-purple-700 dark:text-purple-300 mt-0.5">
-                {maintenanceForPeriod.list.length} bejelentés
-              </div>
-            </Card>
-          </div>
 
-          <Card className="p-4">
-            <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-3">Foglalások a kiválasztott időszakban</h3>
-            {filteredBookings.length === 0 ? (
-              <p className="text-gray-500 dark:text-gray-400 py-4">Nincs foglalás.</p>
-            ) : (
+              {/* Kategória */}
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Kategória:</label>
+                <select
+                  value={osszesitoKategoria}
+                  onChange={(e) => setOsszesitoKategoria(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-md text-sm min-w-[180px]"
+                >
+                  <option value="osszes">✓ Összes</option>
+                  <optgroup label="Kiadás kategóriák">
+                    <option value="berleti_dij">Bérleti díj</option>
+                    <option value="egyeb_kiadas">Egyéb</option>
+                    <option value="ertekesites_szoftver">Értékesítés-Szoftver</option>
+                    <option value="housekeeping_kiadas">Housekeeping</option>
+                    <option value="marketing">Marketing</option>
+                    <option value="munkaber">Munkabér</option>
+                    <option value="szamvitel">Számvitel</option>
+                  </optgroup>
+                  <optgroup label="Bevétel kategóriák">
+                    <option value="egyeb_bevetel">Egyéb</option>
+                    <option value="housekeeping_bevetel">Housekeeping</option>
+                    <option value="management_dij">Management díj</option>
+                    <option value="onboarding">Onboarding</option>
+                  </optgroup>
+                </select>
+              </div>
+
+              {/* Partner */}
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Partner:</label>
+                <select
+                  value={osszesitoPartner}
+                  onChange={(e) => setOsszesitoPartner(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-md text-sm min-w-[150px]"
+                >
+                  <option value="osszes">✓ Összes</option>
+                  <option value="partner1">Partner 1</option>
+                  <option value="partner2">Partner 2</option>
+                </select>
+              </div>
+
+              {/* Rendezettség */}
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Rendezettség:</label>
+                <select
+                  value={osszesitoRendezettseg}
+                  onChange={(e) => setOsszesitoRendezettseg(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-md text-sm min-w-[150px]"
+                >
+                  <option value="osszes">✓ Összes</option>
+                  <option value="rendezett">Rendezett</option>
+                  <option value="rendezetlen">Rendezetlen</option>
+                </select>
+              </div>
+
+              {/* Irány */}
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Irány:</label>
+                <select
+                  value={osszesitoIrany}
+                  onChange={(e) => setOsszesitoIrany(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-md text-sm min-w-[130px]"
+                >
+                  <option value="osszes">✓ Összes</option>
+                  <option value="bevetel">Bevétel</option>
+                  <option value="kiadas">Kiadás</option>
+                </select>
+              </div>
+            </div>
+          </Card>
+
+          {/* Éves összesítő és Bankszámlák egymás mellett (50-50%) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Éves összesítő táblázat */}
+            <Card className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">Éves összesítő</h3>
+                <select
+                  value={osszesitoYear}
+                  onChange={(e) => setOsszesitoYear(Number(e.target.value))}
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-md text-sm"
+                >
+                  <option value={2024}>2024</option>
+                  <option value={2025}>2025</option>
+                  <option value={2026}>2026</option>
+                  <option value={2027}>2027</option>
+                </select>
+              </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left">
+                <table className="w-full text-sm border-collapse">
                   <thead>
-                    <tr className="border-b dark:border-gray-600">
-                      <th className="py-2 pr-4 text-gray-600 dark:text-gray-400">Dátum</th>
-                      <th className="py-2 pr-4 text-gray-600 dark:text-gray-400">Lakás</th>
-                      <th className="py-2 pr-4 text-gray-600 dark:text-gray-400">Vendég</th>
-                      <th className="py-2 pr-4 text-gray-600 dark:text-gray-400">Platform</th>
-                      <th className="py-2 pr-4 text-gray-600 dark:text-gray-400">Bevétel (Ft)</th>
+                    <tr className="bg-gray-100 dark:bg-gray-700">
+                      <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">Hónap</th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right font-semibold text-gray-700 dark:text-gray-300">Bevétel</th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right font-semibold text-gray-700 dark:text-gray-300">Kiadás</th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right font-semibold text-gray-700 dark:text-gray-300">Eredmény</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredBookings.map((b) => {
-                      const apt = apartments.find((a) => a.id === b.apartmentId || a.id === parseInt(b.apartmentId));
-                      return (
-                        <tr key={b.id} className="border-b dark:border-gray-600">
-                          <td className="py-2 pr-4">{formatDate(b.dateFrom || b.checkIn)} – {formatDate(b.dateTo || b.checkOut)}</td>
-                          <td className="py-2 pr-4">{apt?.name || b.apartmentName || `Lakás #${b.apartmentId}`}</td>
-                          <td className="py-2 pr-4">{b.guestName || '-'}</td>
-                          <td className="py-2 pr-4">{PLATFORM_LABELS[b.platform] || b.platform}</td>
-                          <td className="py-2 pr-4 font-medium">
-                            {formatCurrencyHUF(b.payoutFt || b.netRevenue || 0)}
-                          </td>
-                        </tr>
-                      );
-                    })}
+                    <tr>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-700 dark:text-gray-300">Január</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right text-gray-700 dark:text-gray-300">0 Ft</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right text-gray-700 dark:text-gray-300">771,510 Ft</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right text-red-600 dark:text-red-400 font-semibold">-771,510 Ft</td>
+                    </tr>
+                    <tr className="bg-gray-50 dark:bg-gray-800/50">
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-700 dark:text-gray-300">Február</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right text-gray-700 dark:text-gray-300">0 Ft</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right text-gray-700 dark:text-gray-300">28,538 Ft</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right text-red-600 dark:text-red-400 font-semibold">-28,538 Ft</td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
-            )}
-          </Card>
+            </Card>
 
-          {/* Lakás egység terv/tény – fele akkora csempékkel */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            {/* Bankszámlák */}
             <Card className="p-4">
-              <div className="mb-3">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">Lakás egység terv/tény</h3>
-                  <div className="flex gap-1">
-                    <button
-                      type="button"
-                      onClick={() => setUnitPlanPeriod('year')}
-                      className={`px-2 py-1 text-xs rounded ${
-                        unitPlanPeriod === 'year' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                      }`}
-                    >
-                      Éves
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setUnitPlanPeriod('month')}
-                      className={`px-2 py-1 text-xs rounded ${
-                        unitPlanPeriod === 'month' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                      }`}
-                    >
-                      Havi
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setUnitPlanPeriod('week')}
-                      className={`px-2 py-1 text-xs rounded ${
-                        unitPlanPeriod === 'week' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                      }`}
-                    >
-                      Heti
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setUnitPlanPeriod('day')}
-                      className={`px-2 py-1 text-xs rounded ${
-                        unitPlanPeriod === 'day' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                      }`}
-                    >
-                      Napi
-                    </button>
-                  </div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">Bankszámlák</h3>
+                <div className="flex gap-2">
+                  <select
+                    value={bankBalanceFilter}
+                    onChange={(e) => setBankBalanceFilter(e.target.value)}
+                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-md text-sm"
+                  >
+                    <option value="osszes">✓ Összes</option>
+                    <option value="pozitiv">Csak pozitív</option>
+                    <option value="negativ">Csak negatív</option>
+                    <option value="nulla">Csak nullás</option>
+                  </select>
+                  <button
+                    onClick={() => setShowAddBankAccount(true)}
+                    className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition"
+                  >
+                    + Új számla
+                  </button>
                 </div>
-                {/* 2 kis kártya: Egység Terv, Egység Tény - fele akkora */}
-                <div className="grid grid-cols-2 gap-2">
-                  {/* Egység Terv */}
-                  <div className="text-center p-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
-                    <div className="text-xs text-orange-700 dark:text-orange-400 mb-1 font-semibold">Egység Terv</div>
-                    <div className="text-lg font-bold text-orange-600 dark:text-orange-500">
-                      {formatNumber(unitPlanFact.plan)}
-                    </div>
-                  </div>
-                  {/* Egység Tény */}
-                  <div className="text-center p-2 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                    <div className="text-xs text-green-700 dark:text-green-400 mb-1 font-semibold">Egység Tény</div>
-                    <div className="text-lg font-bold text-green-600 dark:text-green-500">
-                      {formatNumber(unitPlanFact.fact)}
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-2 flex items-center justify-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${
-                    unitPlanFact.hasData ? 'bg-green-500' : 'bg-red-500'
-                  }`} aria-label={unitPlanFact.hasData ? 'Adatok megvannak' : 'Nincs adat'} />
-                  <span className="text-xs text-gray-600 dark:text-gray-400">
-                    {unitPlanFact.hasData 
-                      ? `Teljesítés: ${unitPlanFact.completionRate.toFixed(1)}%`
-                      : 'Nincs adat'
-                    }
-                  </span>
-                </div>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm border-collapse">
+                  <thead>
+                    <tr className="bg-gray-100 dark:bg-gray-700">
+                      <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">Számla</th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right font-semibold text-gray-700 dark:text-gray-300">Egyenleg</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-700 dark:text-gray-300">Wise 9482</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right text-gray-700 dark:text-gray-300">-</td>
+                    </tr>
+                    <tr className="bg-gray-50 dark:bg-gray-800/50">
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-700 dark:text-gray-300">Revolut</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right text-gray-700 dark:text-gray-300">-</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-700 dark:text-gray-300">OTP 5370</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right text-gray-700 dark:text-gray-300">-</td>
+                    </tr>
+                    <tr className="bg-blue-100 dark:bg-blue-900/30 font-bold">
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-800 dark:text-gray-200">Összesen</td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right text-gray-800 dark:text-gray-200">6,016,984 Ft</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </Card>
           </div>
 
-          {/* Értékesítési célok – főoldalon, minden fülön látható */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold dark:text-gray-200">Értékesítési célok</h2>
-              <div className="flex gap-2 items-center">
-                <label htmlFor="finance-year-select" className="sr-only">
-                  Év kiválasztása
-                </label>
-                <select
-                  id="finance-year-select"
-                  value={selectedYear}
-                  onChange={(e) => handleYearChange(parseInt(e.target.value))}
-                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-gray-200 text-sm"
-                  aria-label="Év kiválasztása"
-                >
-                  {availableYears.map((year) => (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
-                  ))}
-                </select>
-                {canEditSales('sales') && (
-                  <Button onClick={handleOpenSalesTargetEdit} variant="primary" aria-label="Értékesítési célok szerkesztése">
-                    <Edit2 /> Szerkesztés
-                  </Button>
-                )}
-              </div>
-            </div>
+          {/* Bevételek és Kiadások egymás mellett */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Bevételek */}
+            {(osszesitoIrany === 'osszes' || osszesitoIrany === 'bevetel') && (
+              <Card className="p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">Bevételek</h3>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    {osszesitoDateRange.start} - {osszesitoDateRange.end}
+                  </span>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg border border-gray-300 dark:border-gray-600">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                    Nincs bevétel ebben az időszakban
+                  </p>
+                </div>
+              </Card>
+            )}
 
-            {/* Növekedési stratégia üzenet */}
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-4 bg-blue-50 dark:bg-blue-900 p-3 rounded">
-              <span aria-hidden="true">📈</span> Stratégia: Évente +50 egység/hónap | {selectedYear}: +{(selectedYear - 2026) * 50} egység a 2026-os bázishoz képest
-            </div>
-
-            {/* Célok táblázat */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <caption className="sr-only">Értékesítési célok táblázata {selectedYear} évre</caption>
-                <thead>
-                  <tr className="bg-gray-100 dark:bg-gray-700">
-                    <th scope="col" className="px-4 py-2 text-left text-gray-800 dark:text-gray-200">Hónap</th>
-                    <th scope="col" className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">Tervezett egység</th>
-                    <th scope="col" className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">Átlagár (Ft)</th>
-                    <th scope="col" className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">Tervezett bevétel (Ft)</th>
-                    <th scope="col" className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">Tényleges egység</th>
-                    <th scope="col" className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">Tényleges bevétel (Ft)</th>
-                    <th scope="col" className="px-4 py-2 text-right text-gray-800 dark:text-gray-200">Teljesítés</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {localTargets.map((target, index) => {
-                    const completionRate = target.planUnits > 0 ? (target.actualUnits / target.planUnits) * 100 : 0;
-                    return (
-                      <tr key={index} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <th scope="row" className="px-4 py-2 font-medium dark:text-gray-200">{target.month}</th>
-                        <td className="px-4 py-2 text-right dark:text-gray-200">{formatNumber(target.planUnits)}</td>
-                        <td className="px-4 py-2 text-right dark:text-gray-200">{formatCurrencyHUF(target.planAvgPrice)}</td>
-                        <td className="px-4 py-2 text-right dark:text-gray-200">{formatCurrencyHUF(target.planRevenue)}</td>
-                        <td className="px-4 py-2 text-right dark:text-gray-200">{formatNumber(target.actualUnits)}</td>
-                        <td className="px-4 py-2 text-right dark:text-gray-200">{formatCurrencyHUF(target.actualRevenue)}</td>
-                        <td className="px-4 py-2 text-right">
-                          <span className={`font-bold ${completionRate >= 100 ? 'text-green-600 dark:text-green-400' : completionRate >= 50 ? 'text-orange-600 dark:text-orange-400' : 'text-red-600 dark:text-red-400'}`}>
-                            {formatPercent(completionRate, 1)}
-                          </span>
-                        </td>
+            {/* Kiadások */}
+            {(osszesitoIrany === 'osszes' || osszesitoIrany === 'kiadas') && (
+              <Card className="p-4">
+                <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">Kiadások</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm border-collapse">
+                    <thead>
+                      <tr className="bg-gray-100 dark:bg-gray-700">
+                        <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">Kategória</th>
+                        <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right font-semibold text-gray-700 dark:text-gray-300">Összeg</th>
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-700 dark:text-gray-300">Bérleti díj</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right text-gray-700 dark:text-gray-300">-</td>
+                      </tr>
+                      <tr className="bg-gray-50 dark:bg-gray-800/50">
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-700 dark:text-gray-300">Egyéb</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right text-gray-700 dark:text-gray-300">-</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-700 dark:text-gray-300">Értékesítés-Szoftver</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right text-gray-700 dark:text-gray-300">-</td>
+                      </tr>
+                      <tr className="bg-gray-50 dark:bg-gray-800/50">
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-700 dark:text-gray-300">Housekeeping</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right text-gray-700 dark:text-gray-300">-</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-700 dark:text-gray-300">Marketing</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right text-gray-700 dark:text-gray-300">-</td>
+                      </tr>
+                      <tr className="bg-gray-50 dark:bg-gray-800/50">
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-700 dark:text-gray-300">Munkabér</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right text-gray-700 dark:text-gray-300">-</td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-700 dark:text-gray-300">Számvitel</td>
+                        <td className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-right text-gray-700 dark:text-gray-300">-</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            )}
           </div>
         </>
       )}
 
-      {financeSubTab === 'settlements' && (
+      {financeSubTab === 'forgalom' && (
         <>
           <div className="flex flex-wrap gap-1.5 mb-4">
             <select
@@ -730,6 +796,14 @@ const FinancePage = () => {
                 <option key={apt.id} value={apt.id}>{apt.name}</option>
               ))}
             </select>
+            <Button
+              onClick={() => setShowSettlementImport(true)}
+              variant="primary"
+              size="sm"
+              className="ml-2"
+            >
+              📊 Import
+            </Button>
             {months.map((m, idx) => (
               <button
                 key={m}
@@ -754,10 +828,133 @@ const FinancePage = () => {
             </select>
           </div>
 
+          {/* Importált elszámolás megjelenítése */}
+          {settlementApartment && (() => {
+            const importedSettlement = importedSettlements.find((s) =>
+              String(s.apartmentId) === String(settlementApartment) &&
+              s.month === financeMonth &&
+              s.year === financeYear
+            );
+
+            if (importedSettlement) {
+              const apt = apartments.find((a) => String(a.id) === String(settlementApartment));
+
+              return (
+                <div className="space-y-4">
+                  <Card className="p-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
+                    <h3 className="text-xl font-bold">{apt?.name || 'Lakás'} - Importált elszámolás</h3>
+                    <p className="text-purple-100">
+                      {months[financeMonth]} {financeYear} - {importedSettlement.platform} - {importedSettlement.currency}
+                    </p>
+                  </Card>
+
+                  {/* Foglalások táblázat */}
+                  <Card className="p-4">
+                    <h4 className="font-bold text-lg mb-3 flex items-center gap-2">
+                      <span>📊</span> Foglalások ({importedSettlement.bookings.length} db)
+                    </h4>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm border-collapse">
+                        <thead>
+                          <tr className={`${
+                            importedSettlement.platform === 'airbnb' ? 'bg-green-100 dark:bg-green-900/30' :
+                            importedSettlement.platform === 'booking' ? 'bg-blue-100 dark:bg-blue-900/30' :
+                            'bg-red-100 dark:bg-red-900/30'
+                          }`}>
+                            <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left font-semibold">Vendég</th>
+                            <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-center font-semibold">Fő</th>
+                            <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-center font-semibold">Check In</th>
+                            <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-center font-semibold">Check Out</th>
+                            <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right font-semibold">Jutalék</th>
+                            <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right font-semibold">Nettó bérleti díj</th>
+                            <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right font-semibold">IFA</th>
+                            <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right font-semibold">Takarítás</th>
+                            <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right font-semibold">Kifizetés</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {importedSettlement.bookings.map((booking, idx) => (
+                            <tr key={idx} className={idx % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-800/50'}>
+                              <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-gray-700 dark:text-gray-300">{booking.guestName}</td>
+                              <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-center text-gray-700 dark:text-gray-300">{booking.guestNumber}</td>
+                              <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-center text-gray-700 dark:text-gray-300">{booking.checkIn}</td>
+                              <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-center text-gray-700 dark:text-gray-300">{booking.checkOut}</td>
+                              <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-gray-700 dark:text-gray-300">{formatCurrencyHUF(booking.commission)}</td>
+                              <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-gray-700 dark:text-gray-300">{formatCurrencyHUF(booking.netRentFee)}</td>
+                              <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-gray-700 dark:text-gray-300">{formatCurrencyHUF(booking.cityTax)}</td>
+                              <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-gray-700 dark:text-gray-300">{formatCurrencyHUF(booking.cleaning)}</td>
+                              <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right font-bold text-gray-700 dark:text-gray-300">{formatCurrencyHUF(booking.payout)}</td>
+                            </tr>
+                          ))}
+                          {/* Összesítő sor */}
+                          <tr className="bg-gray-200 dark:bg-gray-700 font-bold">
+                            <td colSpan="4" className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-gray-800 dark:text-gray-200">Összesen</td>
+                            <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-gray-800 dark:text-gray-200">{formatCurrencyHUF(importedSettlement.totals.totalCommission)}</td>
+                            <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-gray-800 dark:text-gray-200">{formatCurrencyHUF(importedSettlement.totals.totalNetRentFee)}</td>
+                            <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-gray-800 dark:text-gray-200">{formatCurrencyHUF(importedSettlement.totals.totalCityTax)}</td>
+                            <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-gray-800 dark:text-gray-200">{formatCurrencyHUF(importedSettlement.totals.totalCleaning)}</td>
+                            <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-gray-800 dark:text-gray-200">{formatCurrencyHUF(importedSettlement.totals.totalPayout)}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </Card>
+
+                  {/* Co-host Payout szakasz */}
+                  <Card className="p-4 bg-orange-50 dark:bg-orange-900/20 border-2 border-orange-300 dark:border-orange-600">
+                    <h4 className="font-bold text-lg mb-3 flex items-center gap-2 text-orange-800 dark:text-orange-200">
+                      <span>💰</span> Co-host Payout
+                    </h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center p-2 bg-white dark:bg-gray-800 rounded-lg">
+                        <span>Takarítás összesen:</span>
+                        <span className="font-bold">{formatCurrencyHUF(importedSettlement.totals.totalCleaning)}</span>
+                      </div>
+                      <div className="flex justify-between items-center p-2 bg-white dark:bg-gray-800 rounded-lg">
+                        <span>Fogyóeszközök & egyéb:</span>
+                        <span className="font-bold">{formatCurrencyHUF(0)}</span>
+                      </div>
+                      <div className="flex justify-between items-center p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg font-bold">
+                        <span>Co-host Payout összesen:</span>
+                        <span className="text-orange-700 dark:text-orange-400">{formatCurrencyHUF(importedSettlement.totals.totalCleaning)}</span>
+                      </div>
+                    </div>
+                  </Card>
+
+                  {/* Management & Partner payout */}
+                  <Card className="p-4 border-2 border-green-300 dark:border-green-600 bg-green-50 dark:bg-green-900/20">
+                    <h4 className="font-bold text-lg mb-3 flex items-center gap-2 text-green-800 dark:text-green-200">
+                      <span>💼</span> Elszámolás
+                    </h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center p-2 bg-white dark:bg-gray-800 rounded-lg">
+                        <span>Összes kifizetés:</span>
+                        <span className="font-bold">{formatCurrencyHUF(importedSettlement.totals.totalPayout)}</span>
+                      </div>
+                      <div className="flex justify-between items-center p-2 bg-pink-100 dark:bg-pink-900/30 rounded-lg">
+                        <span>Management jutalék (20%):</span>
+                        <span className="font-bold text-pink-700 dark:text-pink-400">{formatCurrencyHUF(importedSettlement.totals.managementCommission)}</span>
+                      </div>
+                      <div className="flex justify-between items-center p-2 bg-white dark:bg-gray-800 rounded-lg">
+                        <span>Takarítás levonva:</span>
+                        <span className="font-bold">-{formatCurrencyHUF(importedSettlement.totals.totalCleaning)}</span>
+                      </div>
+                      <div className="flex justify-between items-center p-3 bg-green-200 dark:bg-green-800 rounded-lg font-bold text-lg border-2 border-green-400 dark:border-green-600">
+                        <span className="text-green-900 dark:text-green-100">Partner kifizetés:</span>
+                        <span className="text-green-700 dark:text-green-300">{formatCurrencyHUF(importedSettlement.totals.partnerPayout)}</span>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+              );
+            }
+            return null;
+          })()}
+
           {!settlementApartment && (
             <Card className="p-4">
               <h4 className="font-bold text-lg mb-3 flex items-center gap-2">
-                <span>📅</span> Foglalások a kiválasztott időszakban ({months[financeMonth]} {financeYear})
+                <span></span> Foglalások a kiválasztott idszakban ({months[financeMonth]} {financeYear})
               </h4>
               {settlementPeriodBookings.length === 0 ? (
                 <p className="text-gray-500 dark:text-gray-400 py-4 text-center">Nincs foglalás ebben a hónapban</p>
@@ -777,7 +974,7 @@ const FinancePage = () => {
                           {getApartmentName(b.apartmentId)}
                         </span>
                         <div className="text-sm text-gray-600 dark:text-gray-400">
-                          <span>{formatDate(b.dateFrom || b.checkIn)} – {formatDate(b.dateTo || b.checkOut)}</span>
+                          <span>{formatDate(b.dateFrom || b.checkIn)}  {formatDate(b.dateTo || b.checkOut)}</span>
                           {b.guestName && <span className="ml-2">{b.guestName}</span>}
                         </div>
                       </div>
@@ -793,7 +990,7 @@ const FinancePage = () => {
                 </div>
               )}
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-4 text-center">
-                Válassz ki egy lakást a részletes elszámolás (díjbekérő) megtekintéséhez
+                Válassz ki egy lakást a részletes elszámolás (díjbekér) megtekintéséhez
               </p>
             </Card>
           )}
@@ -803,7 +1000,7 @@ const FinancePage = () => {
             const startOfMonth = new Date(financeYear, financeMonth, 1);
             const endOfMonth = new Date(financeYear, financeMonth + 1, 0);
 
-            // Foglalások szűrése: Booking.com = távozó, egyéb = érkező
+            // Foglalások szrése: Booking.com = távozó, egyéb = érkez
             const aptBookings = bookings.filter((b) => {
               if (String(b.apartmentId) !== String(settlementApartment)) return false;
               const dateFrom = new Date(b.dateFrom || b.checkIn);
@@ -855,7 +1052,7 @@ const FinancePage = () => {
 
                 <Card className="p-4">
                   <h4 className="font-bold text-lg mb-3 flex items-center gap-2">
-                    <span>📅</span> Foglalások ({aptBookings.length} db)
+                    <span></span> Foglalások ({aptBookings.length} db)
                   </h4>
                   {aptBookings.length === 0 ? (
                     <p className="text-gray-500 dark:text-gray-400 py-4 text-center">Nincs foglalás ebben a hónapban</p>
@@ -872,7 +1069,7 @@ const FinancePage = () => {
                               {PLATFORM_LABELS[b.platform] || b.platform}
                             </span>
                             <div>
-                              <span className="font-medium">{formatDate(b.dateFrom || b.checkIn)} – {formatDate(b.dateTo || b.checkOut)}</span>
+                              <span className="font-medium">{formatDate(b.dateFrom || b.checkIn)}  {formatDate(b.dateTo || b.checkOut)}</span>
                               {b.guestName && <span className="text-gray-500 dark:text-gray-400 ml-2">{b.guestName}</span>}
                             </div>
                           </div>
@@ -891,7 +1088,7 @@ const FinancePage = () => {
 
                 <Card className="p-4 border-2 border-green-300 dark:border-green-600 bg-green-50 dark:bg-green-900/20">
                   <h4 className="font-bold text-lg mb-3 flex items-center gap-2 text-green-800 dark:text-green-200">
-                    <span>💰</span> Díjbekérő
+                    <span></span> Díjbekér
                   </h4>
                   <div className="space-y-2">
                     <div className="flex justify-between items-center p-2 bg-white dark:bg-gray-800 rounded-lg">
@@ -933,7 +1130,7 @@ const FinancePage = () => {
                             className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded text-xs"
                             aria-label={`Szerkesztés: ${item.name}`}
                           >
-                            ✏
+                            
                           </button>
                           <button
                             type="button"
@@ -943,7 +1140,7 @@ const FinancePage = () => {
                             className="p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded text-xs text-red-600"
                             aria-label={`Törlés: ${item.name}`}
                           >
-                            🗑
+                            
                           </button>
                         </div>
                       </div>
@@ -1155,14 +1352,22 @@ const FinancePage = () => {
         </Modal>
       )}
 
-      {financeSubTab === 'accounting' && (
+      {financeSubTab === 'szamlazas' && (
         <Card className="p-6">
-          <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200 mb-2">📒 Könyvelés</h3>
+          <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200 mb-2">Számlázás</h3>
           <p className="text-gray-600 dark:text-gray-400 text-sm">
-            Könyvelési funkciók hamarosan elérhetők.
+            Számlázás modul - hamarosan
           </p>
         </Card>
       )}
+
+      {/* Settlement Import Modal */}
+      <SettlementImportModal
+        isOpen={showSettlementImport}
+        onClose={() => setShowSettlementImport(false)}
+        onImportSuccess={handleImportSuccess}
+        apartments={apartments}
+      />
     </div>
   );
 };

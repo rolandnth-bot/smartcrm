@@ -83,18 +83,18 @@ const PartnerRegistrationPage = () => {
     tourismTaxType: 'percent', // 'percent' | 'fixed'
     tourismTaxPercent: 4,
     tourismTaxFixed: 0,
-    // 10. Összegzés (nincs mező, csak megjelenítés)
+    // 10. Összegzés (nincs mez, csak megjelenítés)
     // 11. Piactér
     marketplaceAgreement: false
   });
 
   useEffect(() => {
-    document.title = `Partner regisztráció - ${currentStep}. lépés a ${TOTAL_STEPS}-ből - SmartCRM`;
+    document.title = `Partner regisztráció - ${currentStep}. lépés a ${TOTAL_STEPS}-bl - SmartCRM`;
   }, [currentStep]);
 
   const handleInputChange = useCallback((field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Töröljük a hibaüzenetet, ha a mezőt kitöltik
+    // Töröljük a hibaüzenetet, ha a mezt kitöltik
     if (fieldErrors[field]) {
       setFieldErrors((prev) => {
         const newErrors = { ...prev };
@@ -161,7 +161,7 @@ const PartnerRegistrationPage = () => {
       setFieldErrors({});
     } else if (currentStep === 11) {
       if (!formData.marketplaceAgreement) {
-        useToastStore.getState().error('Az Általános Szerződési Feltételek elfogadása kötelező!');
+        useToastStore.getState().error('Az Általános Szerzdési Feltételek elfogadása kötelez!');
         return;
       }
     }
@@ -180,7 +180,7 @@ const PartnerRegistrationPage = () => {
   const handleSubmit = useCallback(async () => {
     // Utolsó validáció
     if (!formData.marketplaceAgreement) {
-      useToastStore.getState().error('Az Általános Szerződési Feltételek elfogadása kötelező!');
+      useToastStore.getState().error('Az Általános Szerzdési Feltételek elfogadása kötelez!');
       return;
     }
 
@@ -299,7 +299,7 @@ SmartCRM csapat
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
-                <span>👤</span> Személyes adatok
+                <span></span> Személyes adatok
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -448,7 +448,7 @@ SmartCRM csapat
               {/* Lakcím */}
               <div className="mt-6">
                 <h4 className="text-md font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
-                  <span>📍</span> Lakcím
+                  <span></span> Lakcím
                 </h4>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -545,7 +545,7 @@ SmartCRM csapat
               {/* Számlázási adatok */}
               <div className="mt-6">
                 <h4 className="text-md font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
-                  <span>🧾</span> Számlázási adatok
+                  <span></span> Számlázási adatok
                 </h4>
                 
                 <div className="mb-4">
@@ -682,7 +682,7 @@ SmartCRM csapat
         return (
           <div className="space-y-6">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
-              <span>🏠</span> Lakás adatai
+              <span></span> Lakás adatai
             </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -801,7 +801,7 @@ SmartCRM csapat
         return (
           <div className="space-y-6">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
-              <span>📋</span> IFA
+              <span></span> IFA
             </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -842,7 +842,7 @@ SmartCRM csapat
         return (
           <div className="space-y-6">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
-              <span>📢</span> Kiadásra hirdetett lakás
+              <span></span> Kiadásra hirdetett lakás
             </h3>
             
             <div>
@@ -865,7 +865,7 @@ SmartCRM csapat
         return (
           <div className="space-y-6">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
-              <span>🛏️</span> Ágyak
+              <span></span> Ágyak
             </h3>
             
             <div className="space-y-4">
@@ -912,7 +912,7 @@ SmartCRM csapat
         return (
           <div className="space-y-6">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
-              <span>🌐</span> Platformok
+              <span></span> Platformok
             </h3>
             
             <div className="space-y-4">
@@ -922,10 +922,10 @@ SmartCRM csapat
               
               <div className="space-y-2">
                 {[
-                  { id: 'airbnb', label: 'Airbnb', icon: '🏠' },
-                  { id: 'booking', label: 'Booking.com', icon: '📅' },
-                  { id: 'szallas', label: 'Szallas.hu', icon: '🏨' },
-                  { id: 'other', label: 'Egyéb', icon: '🔗' }
+                  { id: 'airbnb', label: 'Airbnb', icon: '' },
+                  { id: 'booking', label: 'Booking.com', icon: '' },
+                  { id: 'szallas', label: 'Szallas.hu', icon: '' },
+                  { id: 'other', label: 'Egyéb', icon: '' }
                 ].map((platform) => (
                   <label key={platform.id} className="flex items-center gap-2 cursor-pointer p-3 border dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
                     <input
@@ -954,7 +954,7 @@ SmartCRM csapat
         return (
           <div className="space-y-6">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
-              <span>📶</span> WiFi
+              <span></span> WiFi
             </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -982,7 +982,7 @@ SmartCRM csapat
                   value={formData.wifiPassword}
                   onChange={(e) => handleInputChange('wifiPassword', e.target.value)}
                   className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="••••••••"
+                  placeholder=""
                 />
               </div>
             </div>
@@ -993,7 +993,7 @@ SmartCRM csapat
         return (
           <div className="space-y-6">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
-              <span>📦</span> Csomag
+              <span></span> Csomag
             </h3>
             
             <div className="space-y-4">
@@ -1003,7 +1003,7 @@ SmartCRM csapat
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
-                  { id: 'basic', label: 'Alap', price: 'Ingyenes', features: ['Alapvető funkciók', '1 lakás'] },
+                  { id: 'basic', label: 'Alap', price: 'Ingyenes', features: ['Alapvet funkciók', '1 lakás'] },
                   { id: 'premium', label: 'Prémium', price: '9,990 Ft/hó', features: ['Összes funkció', '5 lakás', 'Prioritás támogatás'] },
                   { id: 'enterprise', label: 'Enterprise', price: 'Egyedi ár', features: ['Összes funkció', 'Korlátlan lakás', 'Dedikált támogatás'] }
                 ].map((pkg) => (
@@ -1027,7 +1027,7 @@ SmartCRM csapat
                     <div className="text-sm text-gray-600 dark:text-gray-400 mb-3">{pkg.price}</div>
                     <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
                       {pkg.features.map((feature, idx) => (
-                        <li key={idx}>• {feature}</li>
+                        <li key={idx}> {feature}</li>
                       ))}
                     </ul>
                   </label>
@@ -1041,7 +1041,7 @@ SmartCRM csapat
         return (
           <div className="space-y-6">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
-              <span>💰</span> Díjak
+              <span></span> Díjak
             </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1149,7 +1149,7 @@ SmartCRM csapat
         return (
           <div className="space-y-6">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
-              <span>📄</span> Összegzés
+              <span></span> Összegzés
             </h3>
             
             <div className="space-y-4">
@@ -1200,12 +1200,12 @@ SmartCRM csapat
         return (
           <div className="space-y-6">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
-              <span>🛒</span> Piactér
+              <span></span> Piactér
             </h3>
             
             <div className="space-y-4">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                A regisztráció befejezéséhez kérjük, fogadja el az Általános Szerződési Feltételeket és az Adatvédelmi Szabályzatot.
+                A regisztráció befejezéséhez kérjük, fogadja el az Általános Szerzdési Feltételeket és az Adatvédelmi Szabályzatot.
               </p>
               
               <div>
@@ -1218,7 +1218,7 @@ SmartCRM csapat
                     required
                   />
                   <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Elfogadom az <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">Általános Szerződési Feltételeket</a> és az <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">Adatvédelmi Szabályzatot</a> *
+                    Elfogadom az <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">Általános Szerzdési Feltételeket</a> és az <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">Adatvédelmi Szabályzatot</a> *
                   </span>
                 </label>
               </div>
@@ -1230,7 +1230,7 @@ SmartCRM csapat
         return (
           <div className="text-center py-12">
             <p className="text-gray-600 dark:text-gray-400">
-              {stepTitles[currentStep]} lépés - hamarosan elérhető
+              {stepTitles[currentStep]} lépés - hamarosan elérhet
             </p>
           </div>
         );
@@ -1247,7 +1247,7 @@ SmartCRM csapat
               Új lakás regisztrálása
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              {currentStep}. lépés a {TOTAL_STEPS}-ből
+              {currentStep}. lépés a {TOTAL_STEPS}-bl
             </p>
           </div>
           
@@ -1299,7 +1299,7 @@ SmartCRM csapat
               variant="secondary"
               disabled={currentStep === 1}
             >
-              ← Vissza
+               Vissza
             </Button>
             
             {currentStep < TOTAL_STEPS ? (
@@ -1308,7 +1308,7 @@ SmartCRM csapat
                 variant="primary"
                 className="ml-auto"
               >
-                Tovább →
+                Tovább 
               </Button>
             ) : (
               <Button

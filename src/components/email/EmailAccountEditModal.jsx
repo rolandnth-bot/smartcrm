@@ -6,10 +6,10 @@ import Button from '../common/Button';
  * Megosztott Email fiók szerkesztés / új fiók modal.
  * @param {boolean} isOpen
  * @param {() => void} onClose
- * @param {{ id, email, password?, imapServer?, imapPort?, smtpServer?, smtpPort? } | null} account – null = új fiók
- * @param {{ imapServer?: string, imapPort?: number, smtpServer?: string, smtpPort?: number }} defaults – alapértelmezések új fióknál / hiányzó mezőknél
- * @param {(data: object) => void} onSave – { email, password, imapServer, imapPort, smtpServer, smtpPort }
- * @param {(id: number) => void} [onDelete] – csak szerkesztésnél; ha megadva, Törlés gomb megjelenik
+ * @param {{ id, email, password?, imapServer?, imapPort?, smtpServer?, smtpPort? } | null} account  null = új fiók
+ * @param {{ imapServer?: string, imapPort?: number, smtpServer?: string, smtpPort?: number }} defaults  alapértelmezések új fióknál / hiányzó mezknél
+ * @param {(data: object) => void} onSave  { email, password, imapServer, imapPort, smtpServer, smtpPort }
+ * @param {(id: number) => void} [onDelete]  csak szerkesztésnél; ha megadva, Törlés gomb megjelenik
  */
 const EmailAccountEditModal = ({
   isOpen,
@@ -66,12 +66,12 @@ const EmailAccountEditModal = ({
 
   const handleSave = () => {
     const err = {};
-    if (!formData.email) err.email = 'Email cím kötelező';
-    if (!formData.password) err.password = 'Jelszó kötelező';
-    if (!formData.imapServer) err.imapServer = 'IMAP szerver kötelező';
-    if (!formData.imapPort) err.imapPort = 'IMAP port kötelező';
-    if (!formData.smtpServer) err.smtpServer = 'SMTP szerver kötelező';
-    if (!formData.smtpPort) err.smtpPort = 'SMTP port kötelező';
+    if (!formData.email) err.email = 'Email cím kötelez';
+    if (!formData.password) err.password = 'Jelszó kötelez';
+    if (!formData.imapServer) err.imapServer = 'IMAP szerver kötelez';
+    if (!formData.imapPort) err.imapPort = 'IMAP port kötelez';
+    if (!formData.smtpServer) err.smtpServer = 'SMTP szerver kötelez';
+    if (!formData.smtpPort) err.smtpPort = 'SMTP port kötelez';
     if (Object.keys(err).length) {
       setFormErrors(err);
       return;

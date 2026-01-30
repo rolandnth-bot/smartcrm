@@ -88,7 +88,7 @@ export function handleApiError(error, options = {}) {
  * Validációs hiba feldolgozása
  * @param {Object} validation - Validációs eredmény objektum
  * @param {boolean} showToast - Toast üzenet megjelenítése (default: true)
- * @returns {string|null} Első hibaüzenet vagy null
+ * @returns {string|null} Els hibaüzenet vagy null
  */
 export function handleValidationError(validation, showToast = true) {
   if (!validation || validation.isValid) {
@@ -133,7 +133,7 @@ export function handleFormError(error, options = {}) {
 }
 
 /**
- * Network hiba ellenőrzése
+ * Network hiba ellenrzése
  * @param {Error} error - A hiba objektum
  * @returns {boolean} True, ha network hiba
  */
@@ -146,7 +146,7 @@ export function isNetworkError(error) {
 }
 
 /**
- * Timeout hiba ellenőrzése
+ * Timeout hiba ellenrzése
  * @param {Error} error - A hiba objektum
  * @returns {boolean} True, ha timeout hiba
  */
@@ -155,7 +155,7 @@ export function isTimeoutError(error) {
 }
 
 /**
- * Retry-álható hiba ellenőrzése
+ * Retry-álható hiba ellenrzése
  * @param {Error} error - A hiba objektum
  * @returns {boolean} True, ha retry-álható
  */

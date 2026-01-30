@@ -77,7 +77,7 @@ describe('objectUtils', () => {
       expect(pick({ a: 1, b: 2, c: 3 }, ['a', 'c'])).toEqual({ a: 1, c: 3 });
     });
 
-    it('nem létező kulcsot kihagy', () => {
+    it('nem létez kulcsot kihagy', () => {
       expect(pick({ a: 1 }, ['a', 'x'])).toEqual({ a: 1 });
     });
 
@@ -129,7 +129,7 @@ describe('objectUtils', () => {
       expect(isEqual({ a: { b: 1 } }, { a: { b: 1 } })).toBe(true);
     });
 
-    it('különböző objektumokra false', () => {
+    it('különböz objektumokra false', () => {
       expect(isEqual({ a: 1 }, { a: 2 })).toBe(false);
       expect(isEqual({ a: 1 }, { a: 1, b: 2 })).toBe(false);
       expect(isEqual({ a: { b: 1 } }, { a: { b: 2 } })).toBe(false);
@@ -142,7 +142,7 @@ describe('objectUtils', () => {
   });
 
   describe('filterObject', () => {
-    it('szűr predikátum alapján', () => {
+    it('szr predikátum alapján', () => {
       const o = { a: 1, b: 2, c: 3 };
       expect(filterObject(o, (k, v) => v > 1)).toEqual({ b: 2, c: 3 });
       expect(filterObject(o, (k) => k !== 'b')).toEqual({ a: 1, c: 3 });
@@ -182,7 +182,7 @@ describe('objectUtils', () => {
       expect(invert({ a: '1', b: '2' })).toEqual({ '1': 'a', '2': 'b' });
     });
 
-    it('object értékű mezőt kihagy', () => {
+    it('object érték mezt kihagy', () => {
       expect(invert({ a: 1, b: { x: 1 } })).toEqual({ '1': 'a' });
     });
   });
@@ -207,7 +207,7 @@ describe('objectUtils', () => {
       expect(get(o, 'a')).toEqual({ b: { c: 42 } });
     });
 
-    it('nem létező útvonalra defaultValue', () => {
+    it('nem létez útvonalra defaultValue', () => {
       expect(get({ a: 1 }, 'b', 'default')).toBe('default');
       expect(get({ a: {} }, 'a.b.c', null)).toBe(null);
     });
@@ -225,7 +225,7 @@ describe('objectUtils', () => {
       expect(o.a.b).toBe(1);
     });
 
-    it('új mezőt hoz létre', () => {
+    it('új mezt hoz létre', () => {
       expect(set({}, 'x.y.z', 1)).toEqual({ x: { y: { z: 1 } } });
     });
   });

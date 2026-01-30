@@ -6,7 +6,7 @@ const ThemeContext = createContext(null);
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
-    // Először ellenőrizzük a localStorage-t
+    // Elször ellenrizzük a localStorage-t
     const savedTheme = storageHelpers.getTheme();
     if (savedTheme === 'dark' || savedTheme === 'light') {
       return savedTheme;

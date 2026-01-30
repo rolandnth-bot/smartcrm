@@ -6,7 +6,7 @@ const ConfirmDialog = memo(({
   isOpen,
   onClose,
   onConfirm,
-  title = 'Megerősítés',
+  title = 'Megersítés',
   message,
   confirmText = 'Igen',
   cancelText = 'Mégse',

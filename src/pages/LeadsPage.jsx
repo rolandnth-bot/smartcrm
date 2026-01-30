@@ -20,7 +20,7 @@ import FormField from '../components/common/FormField';
 import { excelFillToLeadColor } from '../utils/excelRowColorUtils';
 import './LeadsPage.css';
 
-// Státusz színek – Új érdeklődő sárga jelvény és pipeline csempe; Később amber; Nem aktuális szürke
+// Státusz színek  Új érdekld sárga jelvény és pipeline csempe; Késbb amber; Nem aktuális szürke
 const statusColors = {
   new: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300',
   uj_erdeklodo: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300',
@@ -45,7 +45,7 @@ const statusColors = {
 
 const statusLabels = {
   new: 'Új',
-  uj_erdeklodo: 'Új érdeklődő',
+  uj_erdeklodo: 'Új érdekld',
   contacted: 'Kapcsolatfelvétel',
   kapcsolatfelvetel: 'Kapcsolatfelvétel',
   meeting: 'Találkozó egyeztetve',
@@ -56,12 +56,12 @@ const statusLabels = {
   negotiation: 'Tárgyalás',
   targyalas: 'Tárgyalás',
   won: 'Megnyert',
-  szerzodes_kuldve: 'Szerződés elküldve',
+  szerzodes_kuldve: 'Szerzdés elküldve',
   alairva: 'Aláírva',
   aktiv_partner: 'Aktív partner',
   lost: 'Elvesztett',
   elutasitva: 'Elutasítva',
-  kesobb: 'Később',
+  kesobb: 'Késbb',
   nem_aktualis: 'Nem aktuális'
 };
 
@@ -213,9 +213,9 @@ const LeadsPage = () => {
     }));
   }, []);
 
-  // Nem mentett változások ellenőrzése
+  // Nem mentett változások ellenrzése
   const hasUnsavedChanges = useMemo(() => {
-    // Ellenőrizzük, hogy van-e kitöltött új lead form vagy szerkesztett lead
+    // Ellenrizzük, hogy van-e kitöltött új lead form vagy szerkesztett lead
     const hasNewLeadData = showAddLead && (
       newLead.name.trim() !== '' ||
       newLead.email.trim() !== '' ||
@@ -474,7 +474,7 @@ const LeadsPage = () => {
     const file = event.target.files[0];
     if (!file) return;
 
-    // Excel fájl kezelése – ExcelJS-sel sor háttérszín (fill) olvasása
+    // Excel fájl kezelése  ExcelJS-sel sor háttérszín (fill) olvasása
     if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls') || file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || file.type === 'application/vnd.ms-excel') {
       try {
         const ExcelJS = (await import('exceljs')).default;
@@ -570,7 +570,7 @@ const LeadsPage = () => {
   }, [importLeadsFromJSON, importLeadsFromCSV, importLeadsFromExcel, setShowLeadImport]);
 
   const downloadCSVTemplate = useCallback(() => {
-    const sampleCSV = 'name,email,phone,source,notes\nTeszt Elek,teszt@example.com,+36201234567,Weboldal,Érdeklődés 2 szobás lakásról';
+    const sampleCSV = 'name,email,phone,source,notes\nTeszt Elek,teszt@example.com,+36201234567,Weboldal,Érdekldés 2 szobás lakásról';
     const blob = new Blob([sampleCSV], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -689,7 +689,7 @@ const LeadsPage = () => {
   }, [filteredLeads, selectedLeads]);
 
   const handlePrintPDF = useCallback(() => {
-    printToPDF('SmartCRM – Leadek');
+    printToPDF('SmartCRM  Leadek');
   }, []);
 
   return (
@@ -771,9 +771,9 @@ const LeadsPage = () => {
 
       {/* Bal: Sales Pipeline (1/3) | Jobb: Leadek (2/3) */}
       <div className="leads-page-content">
-        {/* Bal: Pipeline – vertikális lista sorokkal */}
+        {/* Bal: Pipeline  vertikális lista sorokkal */}
         <div className="sales-pipeline">
-          {/* Kereső */}
+          {/* Keres */}
           <div className="pipeline-search">
             <label htmlFor="lead-search" className="sr-only">Keresés lead-ek között</label>
             <input
@@ -793,7 +793,7 @@ const LeadsPage = () => {
             onClick={handleFilterAll}
             aria-pressed={filter === 'all'}
           >
-            <span className="total-label">📊 Összesen</span>
+            <span className="total-label"> Összesen</span>
             <span className="total-count">{leads.length}</span>
           </button>
 
@@ -936,21 +936,21 @@ const LeadsPage = () => {
                     <button
                       onClick={() => handleSort('name')}
                       className={`px-3 py-1 text-xs rounded border transition ${sortConfig.field === 'name' ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300' : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'}`}
-                      aria-label={`Rendezés név szerint ${sortConfig.field === 'name' && sortConfig.direction === 'asc' ? 'növekvő' : 'csökkenő'}`}
+                      aria-label={`Rendezés név szerint ${sortConfig.field === 'name' && sortConfig.direction === 'asc' ? 'növekv' : 'csökken'}`}
                     >
                       Név {sortConfig.field === 'name' && (sortConfig.direction === 'asc' ? <ChevronUp /> : <ChevronDown />)}
                     </button>
                     <button
                       onClick={() => handleSort('status')}
                       className={`px-3 py-1 text-xs rounded border transition ${sortConfig.field === 'status' ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300' : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'}`}
-                      aria-label={`Rendezés státusz szerint ${sortConfig.field === 'status' && sortConfig.direction === 'asc' ? 'növekvő' : 'csökkenő'}`}
+                      aria-label={`Rendezés státusz szerint ${sortConfig.field === 'status' && sortConfig.direction === 'asc' ? 'növekv' : 'csökken'}`}
                     >
                       Státusz {sortConfig.field === 'status' && (sortConfig.direction === 'asc' ? <ChevronUp /> : <ChevronDown />)}
                     </button>
                     <button
                       onClick={() => handleSort('createdAt')}
                       className={`px-3 py-1 text-xs rounded border transition ${sortConfig.field === 'createdAt' ? 'bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300' : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'}`}
-                      aria-label={`Rendezés dátum szerint ${sortConfig.field === 'createdAt' && sortConfig.direction === 'asc' ? 'növekvő' : 'csökkenő'}`}
+                      aria-label={`Rendezés dátum szerint ${sortConfig.field === 'createdAt' && sortConfig.direction === 'asc' ? 'növekv' : 'csökken'}`}
                     >
                       Dátum {sortConfig.field === 'createdAt' && (sortConfig.direction === 'asc' ? <ChevronUp /> : <ChevronDown />)}
                     </button>
@@ -1062,11 +1062,11 @@ const LeadsPage = () => {
               {filter !== 'all' || searchQuery ? (
                 <EmptyStateWithFilter
                   title="Nincsenek leadek"
-                  description="A kiválasztott szűrőkkel nem található lead. Próbáld meg módosítani a szűrőket vagy keresési feltételeket."
+                  description="A kiválasztott szrkkel nem található lead. Próbáld meg módosítani a szrket vagy keresési feltételeket."
                   onClearFilter={() => { setFilter('all'); setSearchQuery(''); }}
                 />
               ) : (
-                <EmptyState icon={Plus} title="Még nincsenek leadek" description="Kezdj el leadeket hozzáadni az üzleti lehetőségek követéséhez." actionLabel="Új lead hozzáadása" onAction={canEditLeads('leads') ? () => setShowAddLead(true) : undefined} />
+                <EmptyState icon={Plus} title="Még nincsenek leadek" description="Kezdj el leadeket hozzáadni az üzleti lehetségek követéséhez." actionLabel="Új lead hozzáadása" onAction={canEditLeads('leads') ? () => setShowAddLead(true) : undefined} />
               )}
             </Card>
           )}
@@ -1084,7 +1084,7 @@ const LeadsPage = () => {
             <div className="space-y-4">
               <div className="p-3 bg-white dark:bg-gray-800 rounded border dark:border-gray-700">
                 <div className="font-medium text-sm dark:text-gray-200 mb-1">Excel fájl</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Oszlopok: name, email, phone, source, notes. Szín: Excel sor háttérszíne vagy »szín« oszlop (zöld=meleg, piros=Később, szürke=Nem aktuális, fekete=elveszett) – a kártyák ez alapján színeződnek.</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Oszlopok: name, email, phone, source, notes. Szín: Excel sor háttérszíne vagy »szín« oszlop (zöld=meleg, piros=Késbb, szürke=Nem aktuális, fekete=elveszett)  a kártyák ez alapján színezdnek.</div>
                 <input
                   type="file"
                   accept=".xlsx,.xls"
@@ -1284,7 +1284,7 @@ const LeadsPage = () => {
                 onChange={(e) => handleNewLeadChange('notes', e.target.value)}
                 className="w-full px-3 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 rows="2"
-                placeholder="Részletek az érdeklődésről..."
+                placeholder="Részletek az érdekldésrl..."
                 aria-label="Lead megjegyzése"
               />
             </div>
@@ -1456,7 +1456,7 @@ const LeadsPage = () => {
       </Modal>
       )}
 
-      {/* Törlés megerősítés - csak ha van edit jogosultság */}
+      {/* Törlés megersítés - csak ha van edit jogosultság */}
       {canEditLeads('leads') && (
         <>
           <ConfirmDialog

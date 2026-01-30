@@ -16,7 +16,7 @@ export const truncate = (str, maxLength, suffix = '...') => {
 };
 
 /**
- * Szöveg első betűjének nagybetűssé alakítása
+ * Szöveg els betjének nagybetssé alakítása
  * @param {string} str - Szöveg
  * @returns {string} Formázott szöveg
  */
@@ -26,7 +26,7 @@ export const capitalize = (str) => {
 };
 
 /**
- * Szöveg minden szavának első betűjének nagybetűssé alakítása
+ * Szöveg minden szavának els betjének nagybetssé alakítása
  * @param {string} str - Szöveg
  * @returns {string} Formázott szöveg
  */
@@ -90,8 +90,8 @@ export const toSlug = (str) => {
     .toLowerCase()
     .trim()
     .replace(/[^\w\s-]/g, '') // Speciális karakterek eltávolítása
-    .replace(/[\s_-]+/g, '-') // Szóközök, aláhúzások kötőjelekké
-    .replace(/^-+|-+$/g, ''); // Előző és utolsó kötőjelek eltávolítása
+    .replace(/[\s_-]+/g, '-') // Szóközök, aláhúzások kötjelekké
+    .replace(/^-+|-+$/g, ''); // Elz és utolsó kötjelek eltávolítása
 };
 
 /**
@@ -117,7 +117,7 @@ export const stripWhitespace = (str) => {
 };
 
 /**
- * Szöveg ellenőrzése, hogy üres-e
+ * Szöveg ellenrzése, hogy üres-e
  * @param {string} str - Szöveg
  * @returns {boolean} True, ha üres vagy csak whitespace
  */
@@ -128,10 +128,10 @@ export const isEmpty = (str) => {
 };
 
 /**
- * Szöveg ellenőrzése, hogy tartalmaz-e egy részletet
+ * Szöveg ellenrzése, hogy tartalmaz-e egy részletet
  * @param {string} str - Szöveg
  * @param {string} search - Keresett részlet
- * @param {boolean} caseSensitive - Kis- és nagybetű érzékeny (default: false)
+ * @param {boolean} caseSensitive - Kis- és nagybet érzékeny (default: false)
  * @returns {boolean} True, ha tartalmazza
  */
 export const contains = (str, search, caseSensitive = false) => {
@@ -145,11 +145,11 @@ export const contains = (str, search, caseSensitive = false) => {
 };
 
 /**
- * Szöveg kezdete ellenőrzése
+ * Szöveg kezdete ellenrzése
  * @param {string} str - Szöveg
- * @param {string} prefix - Előtag
- * @param {boolean} caseSensitive - Kis- és nagybetű érzékeny (default: false)
- * @returns {boolean} True, ha ezzel kezdődik
+ * @param {string} prefix - Eltag
+ * @param {boolean} caseSensitive - Kis- és nagybet érzékeny (default: false)
+ * @returns {boolean} True, ha ezzel kezddik
  */
 export const startsWith = (str, prefix, caseSensitive = false) => {
   if (!str || typeof str !== 'string') return false;
@@ -162,11 +162,11 @@ export const startsWith = (str, prefix, caseSensitive = false) => {
 };
 
 /**
- * Szöveg vége ellenőrzése
+ * Szöveg vége ellenrzése
  * @param {string} str - Szöveg
  * @param {string} suffix - Utótag
- * @param {boolean} caseSensitive - Kis- és nagybetű érzékeny (default: false)
- * @returns {boolean} True, ha ezzel végződik
+ * @param {boolean} caseSensitive - Kis- és nagybet érzékeny (default: false)
+ * @returns {boolean} True, ha ezzel végzdik
  */
 export const endsWith = (str, suffix, caseSensitive = false) => {
   if (!str || typeof str !== 'string') return false;

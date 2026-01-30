@@ -19,6 +19,7 @@ const ApartmentsPage = lazy(() => import('./pages/ApartmentsPage'));
 const BookingsPage = lazy(() => import('./pages/BookingsPage'));
 const CleaningPage = lazy(() => import('./pages/CleaningPage'));
 const FinancePage = lazy(() => import('./pages/FinancePage'));
+const SettlementsPage = lazy(() => import('./pages/SettlementsPage'));
 const MaintenancePage = lazy(() => import('./pages/MaintenancePage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const EmailPage = lazy(() => import('./pages/EmailPage'));
@@ -29,7 +30,8 @@ const AIAssistantPage = lazy(() => import('./pages/AIAssistantPage'));
 const SmartChatPage = lazy(() => import('./pages/SmartChatPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const PartnerRegistrationPage = lazy(() => import('./pages/PartnerRegistrationPage'));
-
+const PartnersPage = lazy(() => import('./pages/PartnersPage'));
+const IcalExportPage = lazy(() => import('./pages/IcalExportPage'));
 function App() {
   const { isAuthenticated, isLoading, initAuth, logout } = useAuthStore();
   const isOnline = useOnlineStatus();
@@ -50,7 +52,7 @@ function App() {
       if (isOnline) {
         useToastStore.getState().success('Internetkapcsolat visszaállítva');
       } else {
-        useToastStore.getState().warning('Offline mód. Az alkalmazás korlátozottan működik.');
+        useToastStore.getState().warning('Offline mód. Az alkalmazás korlátozottan mködik.');
       }
       wasOnlineRef.current = isOnline;
     }
@@ -109,6 +111,8 @@ function App() {
                   )
                 }
               />
+              {/* iCal Export - Publikus route foglalások exportálásához */}
+              <Route path="/ical/export/:apartmentId" element={<IcalExportPage />} />
               <Route
                 path="/"
                 element={
@@ -176,15 +180,23 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
-                <Route 
-                  path="finance" 
+                <Route
+                  path="finance"
                   element={
                     <ProtectedRoute permission="finance.view">
                       <FinancePage />
                     </ProtectedRoute>
                   }
                 />
-                <Route 
+                <Route
+                  path="settlements"
+                  element={
+                    <ProtectedRoute permission="finance.view">
+                      <SettlementsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path="maintenance" 
                   element={
                     <ProtectedRoute permission="maintenance.view">
@@ -211,6 +223,14 @@ function App() {
                 <Route
                   path="apps"
                   element={<AppsPage />}
+                />
+                <Route
+                  path="partners"
+                  element={<PartnersPage />}
+                />
+                <Route
+                  path="partner-registration"
+                  element={<PartnerRegistrationPage />}
                 />
                 <Route
                   path="documents"

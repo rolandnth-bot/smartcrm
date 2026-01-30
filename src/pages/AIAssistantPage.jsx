@@ -20,11 +20,11 @@ const AIAssistantPage = () => {
   
   // Folyamatrendszer state
   const [processCategories, setProcessCategories] = useState([
-    { id: 'onboarding', name: 'Onboarding', icon: '🚀', processes: [] },
-    { id: 'operations', name: 'Műveletek', icon: '⚙️', processes: [] },
-    { id: 'sales', name: 'Értékesítés', icon: '💰', processes: [] },
-    { id: 'maintenance', name: 'Karbantartás', icon: '🔧', processes: [] },
-    { id: 'cleaning', name: 'Takarítás', icon: '🧹', processes: [] }
+    { id: 'onboarding', name: 'Onboarding', icon: '', processes: [] },
+    { id: 'operations', name: 'Mveletek', icon: '', processes: [] },
+    { id: 'sales', name: 'Értékesítés', icon: '', processes: [] },
+    { id: 'maintenance', name: 'Karbantartás', icon: '', processes: [] },
+    { id: 'cleaning', name: 'Takarítás', icon: '', processes: [] }
   ]);
   const [selectedProcessCategory, setSelectedProcessCategory] = useState(null);
   const [aiGeneratedTopics, setAiGeneratedTopics] = useState([]);
@@ -58,11 +58,11 @@ const AIAssistantPage = () => {
   const [n8nTestResult, setN8nTestResult] = useState(null);
   
   const categories = [
-    { id: 'inventory', label: 'Leltár', icon: '📦' },
-    { id: 'contracts', label: 'Szerződések', icon: '📄' },
-    { id: 'processes', label: 'Folyamatok', icon: '⚙️' },
-    { id: 'pricing', label: 'Árazás', icon: '💰' },
-    { id: 'partner', label: 'Partneri infók', icon: '🤝' }
+    { id: 'inventory', label: 'Leltár', icon: '' },
+    { id: 'contracts', label: 'Szerzdések', icon: '' },
+    { id: 'processes', label: 'Folyamatok', icon: '' },
+    { id: 'pricing', label: 'Árazás', icon: '' },
+    { id: 'partner', label: 'Partneri infók', icon: '' }
   ];
 
   // n8n beállítások betöltése
@@ -105,7 +105,7 @@ const AIAssistantPage = () => {
           { id: '2', name: 'Lakás aktiválás', category: 'operations', description: 'Új lakás hozzáadása és aktiválása' },
           { id: '3', name: 'Foglalás kezelés', category: 'operations', description: 'Foglalások létrehozása és módosítása' },
           { id: '4', name: 'Takarítás ütemezés', category: 'cleaning', description: 'Takarítási feladatok létrehozása' },
-          { id: '5', name: 'Lead konverzió', category: 'sales', description: 'Lead megnyerése és szerződéskötés' }
+          { id: '5', name: 'Lead konverzió', category: 'sales', description: 'Lead megnyerése és szerzdéskötés' }
         ]);
       } else {
         useToastStore.getState().error('Hiba a topic generálása során');
@@ -119,7 +119,7 @@ const AIAssistantPage = () => {
   const createProcessFromTopic = async (topic) => {
     try {
       const response = await chatWithAI({
-        message: `Hozz létre egy részletes folyamatot a következő témakörhöz: ${topic.name}. ${topic.description || ''} A folyamat tartalmazza a lépéseket, felelősöket és határidőket.`
+        message: `Hozz létre egy részletes folyamatot a következ témakörhöz: ${topic.name}. ${topic.description || ''} A folyamat tartalmazza a lépéseket, felelsöket és határidket.`
       });
       
       const process = {
@@ -164,10 +164,10 @@ const AIAssistantPage = () => {
             setIframeError(false);
             setIframeLoading(true);
             
-            // Timeout ellenőrzés - ha 5 másodperc után sem tölt be, akkor hiba
+            // Timeout ellenrzés - ha 5 másodperc után sem tölt be, akkor hiba
             setTimeout(() => {
               setIframeLoading(false);
-              // Ha még mindig loading, akkor valószínűleg nem tölt be
+              // Ha még mindig loading, akkor valószínleg nem tölt be
               const iframe = document.querySelector('iframe[title="Agent Browser Preview"]');
               if (iframe) {
                 try {
@@ -176,7 +176,7 @@ const AIAssistantPage = () => {
                     setIframeError(true);
                   }
                 } catch (e) {
-                  // CORS hiba - valószínűleg nem tölt be
+                  // CORS hiba - valószínleg nem tölt be
                   setIframeError(true);
                 }
               }
@@ -245,13 +245,13 @@ const AIAssistantPage = () => {
     
     try {
       // Itt valóságban a mikrofon audio stream-et kellene elküldeni
-      // Az API service már kezeli a mock választ, ha az API nem elérhető
+      // Az API service már kezeli a mock választ, ha az API nem elérhet
       const response = await sendVoiceInput({ audio: 'mock-audio-data' });
       
       setVoiceResponse(response.text || response.message || 'Köszönöm a kérdésedet. Segíthetek a SmartCRM rendszer használatában.');
       setIsLive(true);
       
-      // Csendes működés, nem kell toast üzenet (az API service már kezeli a mock választ)
+      // Csendes mködés, nem kell toast üzenet (az API service már kezeli a mock választ)
     } catch (error) {
       // Csak akkor jelenítünk meg hibát, ha valódi hiba történt
       // (pl. 4xx hibák - rossz kérés, nem network/API hiány)
@@ -266,7 +266,7 @@ const AIAssistantPage = () => {
           setIsLive(true);
         } else {
           // Éles környezetben csak akkor jelenítünk hibát, ha valódi probléma van
-          useToastStore.getState().error('A hangfeldolgozás jelenleg nem elérhető. Kérjük, próbálja később.');
+          useToastStore.getState().error('A hangfeldolgozás jelenleg nem elérhet. Kérjük, próbálja késbb.');
         }
       }
     } finally {
@@ -283,12 +283,12 @@ const AIAssistantPage = () => {
     } catch (error) {
       // Csak akkor jelenítünk hibát, ha valódi hiba történt
       if (error.status && error.status >= 400 && error.status < 500) {
-        useToastStore.getState().error('Hiba a hívás indításakor. Kérjük, ellenőrizze a telefonszámot.');
+        useToastStore.getState().error('Hiba a hívás indításakor. Kérjük, ellenrizze a telefonszámot.');
       } else if (import.meta.env.DEV && (error.isNetworkError || error.status === 0)) {
-        // Fejlesztési környezetben csendes működés, ha az API nem elérhető
+        // Fejlesztési környezetben csendes mködés, ha az API nem elérhet
         console.log('Call API not available in development');
       } else {
-        useToastStore.getState().error('A hívás jelenleg nem elérhető. Kérjük, próbálja később.');
+        useToastStore.getState().error('A hívás jelenleg nem elérhet. Kérjük, próbálja késbb.');
       }
       console.error('Call error:', error);
     }
@@ -345,7 +345,7 @@ const AIAssistantPage = () => {
                   <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Agentek</h2>
                   <Button
                     onClick={() => {
-                      useToastStore.getState().info('Új agent hozzáadása hamarosan elérhető lesz');
+                      useToastStore.getState().info('Új agent hozzáadása hamarosan elérhet lesz');
                     }}
                     variant="primary"
                     size="sm"
@@ -455,7 +455,7 @@ const AIAssistantPage = () => {
                                 onClick={() => setSelectedDocument(null)}
                                 className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                               >
-                                ✕
+                                
                               </button>
                             </div>
                             <pre className="whitespace-pre-wrap text-xs text-gray-700 dark:text-gray-300 max-h-32 overflow-y-auto">
@@ -569,7 +569,7 @@ const AIAssistantPage = () => {
                                 onClick={() => setSelectedDocument(null)}
                                 className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                               >
-                                ✕
+                                
                               </button>
                             </div>
                             <pre className="whitespace-pre-wrap text-xs text-gray-700 dark:text-gray-300 max-h-32 overflow-y-auto">
@@ -752,7 +752,7 @@ const AIAssistantPage = () => {
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Az n8n API Key (Settings → n8n API → Create an API key)
+                    Az n8n API Key (Settings  n8n API  Create an API key)
                   </p>
                 </div>
 
@@ -808,7 +808,7 @@ const AIAssistantPage = () => {
                   <Button
                     onClick={async () => {
                       if (!n8nSettings.url || !n8nSettings.apiKey) {
-                        useToastStore.getState().error('n8n URL és API Key megadása kötelező a teszteléshez');
+                        useToastStore.getState().error('n8n URL és API Key megadása kötelez a teszteléshez');
                         return;
                       }
                       setIsTestingN8n(true);
@@ -845,7 +845,7 @@ const AIAssistantPage = () => {
                   <Button
                     onClick={async () => {
                       if (!n8nSettings.url || !n8nSettings.apiKey) {
-                        useToastStore.getState().error('n8n URL és API Key megadása kötelező');
+                        useToastStore.getState().error('n8n URL és API Key megadása kötelez');
                         return;
                       }
                       setIsSavingN8n(true);
@@ -898,9 +898,9 @@ const AIAssistantPage = () => {
               </div>
             </Card>
 
-            {/* Böngésző előnézet */}
+            {/* Böngész elnézet */}
             <Card 
-              title="Böngésző előnézet"
+              title="Böngész elnézet"
               className="ai-fade-in-scale"
             >
               {browserPreview?.url ? (
@@ -928,7 +928,7 @@ const AIAssistantPage = () => {
                           onLoad={() => {
                             setTimeout(() => {
                               setIframeLoading(false);
-                              // Ellenőrizzük, hogy tényleg betöltődött-e
+                              // Ellenrizzük, hogy tényleg betöltdött-e
                               const iframe = document.querySelector('iframe[title="Agent Browser Preview"]');
                               if (iframe) {
                                 try {
@@ -936,11 +936,11 @@ const AIAssistantPage = () => {
                                   if (doc && doc.body && doc.body.innerHTML.trim() !== '' && doc.body.innerHTML !== '<html><head></head><body></body></html>') {
                                     setIframeError(false);
                                   } else {
-                                    // Üres vagy fehér - valószínűleg nem tölt be
+                                    // Üres vagy fehér - valószínleg nem tölt be
                                     setTimeout(() => setIframeError(true), 2000);
                                   }
                                 } catch (e) {
-                                  // CORS - lehet, hogy betöltődött, de nem tudjuk ellenőrizni
+                                  // CORS - lehet, hogy betöltdött, de nem tudjuk ellenrizni
                                   // Várunk egy kicsit, aztán ha még mindig loading, akkor hiba
                                 }
                               }
@@ -959,12 +959,12 @@ const AIAssistantPage = () => {
                     ) : (
                       <div className="absolute inset-0 bg-white dark:bg-gray-900 flex items-center justify-center z-10">
                         <div className="text-center p-6 max-w-md">
-                          <div className="text-5xl mb-4">🌐</div>
+                          <div className="text-5xl mb-4"></div>
                           <p className="text-gray-700 dark:text-gray-300 font-medium mb-2 text-lg">
-                            Böngésző előnézet
+                            Böngész elnézet
                           </p>
                           <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                            Az oldal nem tölthető be közvetlenül az iframe-ben biztonsági korlátozások miatt.
+                            Az oldal nem tölthet be közvetlenül az iframe-ben biztonsági korlátozások miatt.
                           </p>
                           <div className="space-y-2">
                             <button
@@ -998,13 +998,13 @@ const AIAssistantPage = () => {
                     <div className={`w-16 h-16 mb-4 rounded-full bg-blue-500/20 flex items-center justify-center mx-auto transition-all ${
                       agentStatus === 'WORKING' ? 'ai-globe-rotate ai-pulse-glow' : 'opacity-60'
                     }`}>
-                      <span className="text-2xl">🌐</span>
+                      <span className="text-2xl"></span>
                     </div>
                     <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
-                      Böngésző előnézet
+                      Böngész elnézet
                     </p>
                     <p className="text-sm mt-2 text-gray-500 dark:text-gray-400">
-                      Az agent műveletei itt jelennek meg
+                      Az agent mveletei itt jelennek meg
                     </p>
                     {agentStatus === 'WORKING' && (
                       <div className="mt-4 flex justify-center gap-1">
@@ -1026,7 +1026,7 @@ const AIAssistantPage = () => {
                   value={agentInstruction}
                   onChange={(e) => setAgentInstruction(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleAgentStart()}
-                  placeholder="Utasítás küldése... (pl. 'Lépj be a Booking.com-ra és ellenőrizd a mai foglalásokat')"
+                  placeholder="Utasítás küldése... (pl. 'Lépj be a Booking.com-ra és ellenrizd a mai foglalásokat')"
                   className="flex-1 px-4 py-2 border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all duration-200"
                   disabled={agentStatus === 'WORKING'}
                 />
@@ -1045,7 +1045,7 @@ const AIAssistantPage = () => {
             {/* Logs */}
             {agentLogs.length > 0 && (
               <Card className="ai-slide-up">
-                <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Művelet logok</h3>
+                <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Mvelet logok</h3>
                 <div className="space-y-1 max-h-48 overflow-y-auto">
                   {agentLogs.map((log, idx) => (
                     <div
@@ -1108,13 +1108,13 @@ const AIAssistantPage = () => {
                       ? 'bg-green-500 ai-voice-pulse shadow-lg shadow-green-500/30'
                       : 'bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600'
                   }`}>
-                    <span className="text-4xl">🔊</span>
+                    <span className="text-4xl"></span>
                   </div>
                 </div>
                 <p className={`text-lg font-semibold text-gray-700 dark:text-gray-300 mb-8 transition-all duration-300 ${
                   isListening ? 'text-blue-600 dark:text-blue-400' : ''
                 }`}>
-                  {isListening ? 'Hallgatlak...' : isLive ? 'ASSZISZTENS A VONALBAN' : 'A hangvezérlés a BÁZIS tab-ban érhető el'}
+                  {isListening ? 'Hallgatlak...' : isLive ? 'ASSZISZTENS A VONALBAN' : 'A hangvezérlés a BÁZIS tab-ban érhet el'}
                 </p>
               </div>
             </Card>
@@ -1134,7 +1134,7 @@ const AIAssistantPage = () => {
               <Card className="border-2 border-blue-500 ai-fade-in-scale animate-pulse">
                 <div className="text-center">
                   <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-2">
-                    Bejövő hívás
+                    Bejöv hívás
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-4">
                     {incomingCall.phoneNumber}

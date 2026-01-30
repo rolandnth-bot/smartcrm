@@ -13,10 +13,10 @@ const Toast = memo(({ toast }) => {
   }), []);
 
   const iconStyles = useMemo(() => ({
-    success: '✓',
-    error: '✕',
-    warning: '⚠',
-    info: 'ℹ'
+    success: '',
+    error: '',
+    warning: '',
+    info: ''
   }), []);
 
   const handleRemove = useCallback(() => {

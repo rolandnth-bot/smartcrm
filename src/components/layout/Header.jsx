@@ -1,7 +1,7 @@
 import { memo, useMemo, useCallback, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Button from '../common/Button';
-import { ChevronLeft, LogOut, Sun, Moon } from '../common/Icons';
+import { LogOut, Sun, Moon } from '../common/Icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useOnlineStatus } from '../../hooks/useOnlineStatus';
 import AIRoliWidget from '../common/AIRoliWidget';
@@ -29,7 +29,7 @@ const Header = memo(({ onLogout }) => {
     if (path === '/warehouse') return 'Raktárak';
     if (path === '/maintenance') return 'Karbantartás';
     if (path === '/settings') return 'Beállítások';
-    if (path === '/email') return 'Email / Levelező';
+    if (path === '/email') return 'Email / Levelez';
     if (path === '/apps') return 'Apps';
     if (path === '/documents') return 'Dokumentumok';
     if (path === '/ai-assistant') return 'AI Asszisztens';
@@ -37,12 +37,6 @@ const Header = memo(({ onLogout }) => {
     if (path === '/dashboard') return 'Dashboard';
     return 'SmartCRM';
   }, [location.pathname]);
-
-  const canGoBack = useMemo(() => location.pathname !== '/', [location.pathname]);
-
-  const handleGoHome = useCallback(() => {
-    navigate('/');
-  }, [navigate]);
 
   const handleSmartCRMClick = useCallback(() => {
     navigate('/');
@@ -58,40 +52,26 @@ const Header = memo(({ onLogout }) => {
   ];
 
   return (
-    <nav className="no-print bg-gradient-to-r from-cyan-200 via-blue-200 to-emerald-200 dark:from-cyan-300 dark:via-blue-300 dark:to-emerald-300 rounded-xl shadow-2xl p-6 mb-6 text-gray-800 dark:text-gray-900" aria-label="Fő navigáció">
+    <nav className="no-print bg-gradient-to-r from-cyan-200 via-blue-200 to-emerald-200 dark:from-cyan-300 dark:via-blue-300 dark:to-emerald-300 rounded-xl shadow-2xl p-6 mb-6 text-gray-800 dark:text-gray-900" aria-label="F navigáció">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-4">
-          {canGoBack && (
-            <Button
-              onClick={handleGoHome}
-              variant="ghost"
-              size="sm"
-              className="bg-white bg-opacity-50 hover:bg-opacity-70 text-gray-800 dark:text-gray-900 border-0"
-              aria-label="Vissza a főoldalra"
-            >
-              <ChevronLeft />
-            </Button>
-          )}
           <div className="flex items-center gap-3">
             <button
               onClick={handleSmartCRMClick}
               className="text-gray-800 dark:text-gray-900 hover:text-gray-600 dark:hover:text-gray-700 transition-colors cursor-pointer"
-              aria-label="Vissza a főoldalra"
+              aria-label="Vissza a foldalra"
             >
               <h1 className="text-3xl font-bold mb-0">SmartCRM</h1>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-700">Vállalatirányítási rendszer</p>
             </button>
             <AIRoliWidget />
+            {pageTitle !== 'Vállalatirányítási Rendszer' && (
+              <div className="ml-2">
+                <p className="text-2xl font-bold text-gray-800 dark:text-gray-900">{pageTitle}</p>
+                <div className="h-1 w-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mt-1"></div>
+              </div>
+            )}
           </div>
-          {pageTitle !== 'Vállalatirányítási Rendszer' && (
-            <div className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
-              location.pathname !== '/' 
-                ? 'bg-purple-600 text-white shadow-lg ring-2 ring-purple-300 dark:ring-purple-700' 
-                : 'bg-white bg-opacity-70 text-gray-700 dark:text-gray-800 hover:bg-opacity-90'
-            }`}>
-              {pageTitle}
-            </div>
-          )}
         </div>
         <div className="flex items-center gap-3">
           {!isOnline && (

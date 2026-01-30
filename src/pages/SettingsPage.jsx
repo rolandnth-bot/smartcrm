@@ -21,7 +21,7 @@ const DEFAULT_ROLES = [
   { id: 'admin', name: 'Admin', description: 'Teljes hozzáférés minden modulhoz' },
   { id: 'manager', name: 'Manager', description: 'Naptár, pénzügy, takarítás, lakások kezelése' },
   { id: 'housekeeping', name: 'Takarító', description: 'Takarítás modul kezelése' },
-  { id: 'accountant', name: 'Könyvelő', description: 'Pénzügyi adatok megtekintése' },
+  { id: 'accountant', name: 'Könyvel', description: 'Pénzügyi adatok megtekintése' },
   { id: 'readonly', name: 'Csak olvasás', description: 'Minden modul megtekintése, szerkesztés nélkül' }
 ];
 
@@ -125,7 +125,7 @@ const SettingsPage = () => {
   const [isLoadingEmailSettings, setIsLoadingEmailSettings] = useState(false);
   const [isSavingEmailSettings, setIsSavingEmailSettings] = useState(false);
 
-  // Email fiókok (közös store – Email oldal, Beállítások)
+  // Email fiókok (közös store  Email oldal, Beállítások)
   const { success, error: showError } = useToastStore();
   const { accounts: emailAccounts, loadFromStorage: loadEmailAccounts, updateAccount, addAccount, removeAccount } = useEmailAccountsStore();
   const [editingEmailAccount, setEditingEmailAccount] = useState(null);
@@ -422,7 +422,7 @@ const SettingsPage = () => {
       roleId: ['required']
     };
     
-    // Új felhasználó esetén jelszó is kötelező
+    // Új felhasználó esetén jelszó is kötelez
     if (!editingUser.id) {
       validationRules.password = ['required', { type: 'length', min: 8 }];
     }
@@ -532,7 +532,7 @@ const SettingsPage = () => {
       ? currentList.filter((p) => p !== permissionKey)
       : [...currentList, permissionKey];
 
-    // Ha granted-ből töröljük, akkor revoked-ból is töröljük (ha benne van)
+    // Ha granted-bl töröljük, akkor revoked-ból is töröljük (ha benne van)
     // és fordítva
     const otherType = type === 'granted' ? 'revoked' : 'granted';
     const otherList = (customPerms[otherType] || []).filter((p) => p !== permissionKey);
@@ -859,7 +859,7 @@ const SettingsPage = () => {
                   <div className="flex items-center gap-2 mt-1">
                     {user.email && (
                       <div className="flex items-center gap-1">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">📧 {user.email}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400"> {user.email}</span>
                         <button
                           onClick={() => handleCopyToClipboard(user.email, 'Email cím')}
                           className="p-0.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
@@ -872,7 +872,7 @@ const SettingsPage = () => {
                     )}
                     {user.phone && (
                       <div className="flex items-center gap-1">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">📞 {user.phone}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400"> {user.phone}</span>
                         <button
                           onClick={() => handleCopyToClipboard(user.phone, 'Telefonszám')}
                           className="p-0.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
@@ -885,7 +885,7 @@ const SettingsPage = () => {
                     )}
                     {(user.bankAccount || user.bank_account) && (
                       <div className="flex items-center gap-1">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">🏦 {user.bankAccount || user.bank_account}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400"> {user.bankAccount || user.bank_account}</span>
                         <button
                           onClick={() => handleCopyToClipboard(user.bankAccount || user.bank_account, 'Bank számlaszám')}
                           className="p-0.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
@@ -899,7 +899,7 @@ const SettingsPage = () => {
                     {(user.salary || user.monthlySalary || user.hourlyRate || user.hourly_rate) && (
                       <div className="flex items-center gap-1">
                         <span className="text-xs text-gray-500 dark:text-gray-400">
-                          💰 {
+                           {
                             (user.salaryType === 'hourly' || user.salary_type === 'hourly' || user.hourlyRate || user.hourly_rate)
                               ? `${new Intl.NumberFormat('hu-HU').format(user.hourlyRate || user.hourly_rate || 0)} Ft/óra`
                               : `${new Intl.NumberFormat('hu-HU').format(user.salary || user.monthlySalary || 0)} Ft/hó`
@@ -910,7 +910,7 @@ const SettingsPage = () => {
                   </div>
                   {(user.notes || user.comment) && (
                     <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 italic">
-                      📝 {user.notes || user.comment}
+                       {user.notes || user.comment}
                     </div>
                   )}
                   {user.effectivePermissions && (
@@ -1126,7 +1126,7 @@ const SettingsPage = () => {
               {/* Custom Permissions (expandable) */}
               <div className="border-t pt-4">
                 <Tooltip
-                  content="A szerepkörön felüli extra jogosultságok (granted) vagy elvett jogosultságok (revoked) beállítása. Ez lehetővé teszi a finomhangolt jogosultság-kezelést."
+                  content="A szerepkörön felüli extra jogosultságok (granted) vagy elvett jogosultságok (revoked) beállítása. Ez lehetvé teszi a finomhangolt jogosultság-kezelést."
                   position="top"
                 >
                   <button
@@ -1143,7 +1143,7 @@ const SettingsPage = () => {
                     aria-controls="custom-permissions-section"
                   >
                     <span>Egyedi jogosultságok (opcionális)</span>
-                    <span className="text-gray-400 dark:text-gray-500 text-xs" aria-hidden="true">{showCustomPermissions ? '▼' : '▶'}</span>
+                    <span className="text-gray-400 dark:text-gray-500 text-xs" aria-hidden="true">{showCustomPermissions ? '' : ''}</span>
                   </button>
                 </Tooltip>
                 {showCustomPermissions && (
@@ -1204,7 +1204,7 @@ const SettingsPage = () => {
               {/* Effective Permissions Preview */}
               {editingUser && (
                 <div className="border-t dark:border-gray-700 pt-4 mt-4">
-                  <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Effektív jogosultságok (előnézet)</h4>
+                  <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Effektív jogosultságok (elnézet)</h4>
                   <div className="bg-blue-50 dark:bg-blue-900 p-3 rounded-lg">
                     <Tooltip
                       content="Az effektív jogosultságok a szerepkör alapján kapott jogosultságok, plusz a hozzáadott (granted) jogosultságok, mínusz az elvett (revoked) jogosultságok."
@@ -1266,7 +1266,7 @@ const SettingsPage = () => {
         <div className="mb-4">
           <h3 className="text-xl font-bold dark:text-gray-200 mb-2">Email fiókok</h3>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Email fiókok kezelése (levelező portál, Beállítások)
+            Email fiókok kezelése (levelez portál, Beállítások)
           </p>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -1368,7 +1368,7 @@ const SettingsPage = () => {
                   value={emailSettings.smtpPassword}
                   onChange={(e) => setEmailSettings(prev => ({ ...prev, smtpPassword: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="••••••••"
+                  placeholder=""
                 />
               </div>
               <div>
@@ -1492,7 +1492,7 @@ const SettingsPage = () => {
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) {
-                      // Kép méret ellenőrzés
+                      // Kép méret ellenrzés
                       const img = new Image();
                       img.onload = () => {
                         if (img.width > 800 || img.height > 800) {
@@ -1551,7 +1551,7 @@ const SettingsPage = () => {
                 {aszfFile ? aszfFile.name : 'Nincs fájl kiválasztva'}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Csak .PDF formátum tölthető fel.
+                Csak .PDF formátum tölthet fel.
               </p>
             </div>
           </div>
@@ -1584,7 +1584,7 @@ const SettingsPage = () => {
                 {dataProtectionFile ? dataProtectionFile.name : 'Nincs fájl kiválasztva'}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Csak .PDF formátum tölthető fel.
+                Csak .PDF formátum tölthet fel.
               </p>
             </div>
           </div>
@@ -1825,7 +1825,7 @@ const SettingsPage = () => {
                     )}
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    {account.companyName} • Adószám: {account.taxNumber}
+                    {account.companyName}  Adószám: {account.taxNumber}
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     Rendelve: {
@@ -1836,7 +1836,7 @@ const SettingsPage = () => {
                   </div>
                   {account.navLogin && (
                     <div className="text-xs text-green-600 dark:text-green-400 mt-1">
-                      ✓ NAV kapcsolat beállítva
+                       NAV kapcsolat beállítva
                     </div>
                   )}
                 </div>
@@ -1991,7 +1991,7 @@ const SettingsPage = () => {
                 <Button
                 onClick={async () => {
                   if (!editingInvoiceAccount.navLogin || !editingInvoiceAccount.navPassword) {
-                    useToastStore.getState().error('Kérjük, töltse ki a NAV Login és NAV jelszó mezőket!');
+                    useToastStore.getState().error('Kérjük, töltse ki a NAV Login és NAV jelszó mezket!');
                     return;
                   }
 
@@ -2056,7 +2056,7 @@ const SettingsPage = () => {
                     }, 500);
                   } catch (error) {
                     setNavValidation({ isValid: false, companyName: '', isValidating: false });
-                    useToastStore.getState().error(error?.message || 'Hiba a NAV kapcsolat ellenőrzésekor vagy a számla fiók mentésekor.');
+                    useToastStore.getState().error(error?.message || 'Hiba a NAV kapcsolat ellenrzésekor vagy a számla fiók mentésekor.');
                   } finally {
                     setIsSavingInvoiceAccount(false);
                   }

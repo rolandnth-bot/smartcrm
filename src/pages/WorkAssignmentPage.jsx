@@ -63,15 +63,15 @@ const WorkAssignmentPage = () => {
   const getWeekDays = useMemo(() => {
     const today = new Date(selectedYear, selectedMonth, selectedDay);
     const dayOfWeek = today.getDay();
-    // Péntektől kezdődik (5 = péntek, 0 = vasárnap)
-    // Ha péntek vagy később van, akkor az előző péntektől számolunk
-    // Ha hétfő-csütörtök van, akkor az előző péntektől számolunk
+    // Péntektl kezddik (5 = péntek, 0 = vasárnap)
+    // Ha péntek vagy késbb van, akkor az elz péntektl számolunk
+    // Ha hétf-csütörtök van, akkor az elz péntektl számolunk
     let startOffset = 0;
     if (dayOfWeek === 0) { // Vasárnap
       startOffset = -2; // 2 nappal korábban (péntek)
     } else if (dayOfWeek === 6) { // Szombat
       startOffset = -1; // 1 nappal korábban (péntek)
-    } else if (dayOfWeek >= 1 && dayOfWeek <= 4) { // Hétfő-Csütörtök
+    } else if (dayOfWeek >= 1 && dayOfWeek <= 4) { // Hétf-Csütörtök
       startOffset = dayOfWeek - 5; // Péntekig visszaszámolva
     } else { // Péntek (5)
       startOffset = 0;
@@ -96,12 +96,12 @@ const WorkAssignmentPage = () => {
     return days;
   }, [selectedDay, selectedMonth, selectedYear]);
 
-  // Ingatlanok az adott napra (szűrés bookings alapján)
+  // Ingatlanok az adott napra (szrés bookings alapján)
   const propertiesForDay = useMemo(() => {
     const selectedDate = new Date(selectedYear, selectedMonth, selectedDay);
     const dateStr = selectedDate.toISOString().split('T')[0];
     
-    // Szűrjük a bookings-okat, amelyek tartalmazzák ezt a napot
+    // Szrjük a bookings-okat, amelyek tartalmazzák ezt a napot
     const relevantBookings = bookings.filter(booking => {
       if (!booking.dateFrom || !booking.dateTo) return false;
       const from = new Date(booking.dateFrom);
@@ -121,7 +121,7 @@ const WorkAssignmentPage = () => {
     }).filter(Boolean);
   }, [selectedDay, selectedMonth, selectedYear, bookings, apartments]);
 
-  // Távozási/érkezési idő opciók (óránként)
+  // Távozási/érkezési id opciók (óránként)
   const timeOptions = useMemo(() => {
     const times = [];
     for (let hour = 8; hour <= 22; hour++) {
@@ -130,7 +130,7 @@ const WorkAssignmentPage = () => {
     return times;
   }, []);
 
-  // Textil érkezési idő opciók (30 percenként, 1 órás intervallumok)
+  // Textil érkezési id opciók (30 percenként, 1 órás intervallumok)
   const textileTimeOptions = useMemo(() => {
     const intervals = [];
     for (let hour = 8; hour < 18; hour++) {
@@ -375,7 +375,7 @@ const WorkAssignmentPage = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm text-gray-600 mb-1">Érkezési idő:</label>
+                      <label className="block text-sm text-gray-600 mb-1">Érkezési id:</label>
                       <select
                         value={assignment.textileArrivalTime || '14:00-15:00'}
                         onChange={(e) => setAssignments(prev => ({

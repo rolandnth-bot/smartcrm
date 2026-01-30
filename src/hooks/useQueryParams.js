@@ -129,7 +129,7 @@ export function useQueryParams(options = {}) {
     return params[key] ?? defaultValue;
   }, [params]);
 
-  // Paraméter létezésének ellenőrzése
+  // Paraméter létezésének ellenrzése
   const hasParam = useCallback((key) => {
     return key in params && params[key] !== null && params[key] !== undefined;
   }, [params]);

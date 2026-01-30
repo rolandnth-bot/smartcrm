@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 /**
- * Email fiókok – közös store (Email oldal, Beállítások).
+ * Email fiókok  közös store (Email oldal, Beállítások).
  * localStorage perzisztencia: smartcrm_email_accounts
  */
 

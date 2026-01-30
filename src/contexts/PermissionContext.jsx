@@ -75,7 +75,7 @@ export const PermissionProvider = ({ children }) => {
   }, [hasPermission]);
 
   const canEdit = useCallback((module) => {
-    // Development módban minden szerkeszthető
+    // Development módban minden szerkeszthet
     if (import.meta.env.DEV) {
       return true;
     }

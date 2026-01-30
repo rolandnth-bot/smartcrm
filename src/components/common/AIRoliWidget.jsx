@@ -246,8 +246,8 @@ const AIRoliWidget = () => {
 
   return (
     <>
-      {/* Minimized FAB Button */}
-      {!isOpen && (
+      {/* Header Button OR Minimized FAB Button */}
+      {!isOpen ? (
         <motion.button
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -256,12 +256,15 @@ const AIRoliWidget = () => {
             setIsOpen(true);
             setIsMinimized(false);
           }}
-          className="airoli-fab"
+          className="inline-flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-pink-500 via-pink-600 to-rose-500 hover:from-pink-600 hover:via-pink-700 hover:to-rose-600 text-white rounded-lg font-medium transition-all"
+          style={{ boxShadow: '0 0 20px rgba(255, 0, 110, 0.4), 0 10px 25px rgba(0, 0, 0, 0.3)' }}
           aria-label="AI Roli megnyitása"
+          title="AI Roli - Asszisztens"
         >
-          <span className="text-2xl">🤖</span>
+          <span className="text-lg"></span>
+          <span className="hidden sm:inline text-sm">AI Roli</span>
         </motion.button>
-      )}
+      ) : null}
 
       {/* Chat Window */}
       <AnimatePresence>
@@ -289,7 +292,7 @@ const AIRoliWidget = () => {
               style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
             >
               <div className="airoli-avatar">
-                <span className="text-xl">🤖</span>
+                <span className="text-xl"></span>
                 <span className="online-dot" />
               </div>
               <div className="airoli-info">
@@ -302,7 +305,7 @@ const AIRoliWidget = () => {
                   aria-label={isMinimized ? 'Maximalizálás' : 'Minimalizálás'}
                   onMouseDown={(e) => e.stopPropagation()}
                 >
-                  {isMinimized ? '+' : '−'}
+                  {isMinimized ? '+' : ''}
                 </button>
                 <button
                   onClick={handleClose}

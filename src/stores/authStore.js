@@ -190,14 +190,14 @@ const useAuthStore = create((set, get) => ({
 
   // PIN alapú bejelentkezés
   loginWithPin: async (pin) => {
-    const CORRECT_PIN = '0222';
+    const CORRECT_PIN = '0000';
     
     if (!pin || pin.trim() === '') {
       set({ 
-        error: 'PIN kód megadása kötelező',
+        error: 'PIN kód megadása kötelez',
         isLoading: false
       });
-      return { success: false, error: 'PIN kód megadása kötelező' };
+      return { success: false, error: 'PIN kód megadása kötelez' };
     }
 
     if (pin.trim() !== CORRECT_PIN) {
@@ -250,7 +250,7 @@ const useAuthStore = create((set, get) => ({
       localStorage.setItem('smartcrm_user', JSON.stringify({ email }));
       return { success: true };
     }
-    return { success: false, error: 'Email és jelszó megadása kötelező' };
+    return { success: false, error: 'Email és jelszó megadása kötelez' };
   },
 
   mockLogout: () => {
@@ -296,7 +296,7 @@ const useAuthStore = create((set, get) => ({
           get().setUser(user);
           resolve({ authenticated: true, user });
         } else {
-          // Ha nincs Firebase user, ellenőrizzük a localStorage-t (mock mode)
+          // Ha nincs Firebase user, ellenrizzük a localStorage-t (mock mode)
           const storedAuth = localStorage.getItem('smartcrm_auth');
           if (storedAuth) {
             const storedUser = localStorage.getItem('smartcrm_user');
@@ -330,11 +330,24 @@ const useAuthStore = create((set, get) => ({
 
   // Auth state listener inicializálása (Firebase-hez)
   initAuth: () => {
+    // OFFLINE MODE: Automatikusan bejelentkeztetünk mock felhasználóval
+    if (!api.isConfigured()) {
+      const mockUser = {
+        uid: 'mock-user-' + Date.now(),
+        email: 'demo@smartcrm.hu',
+        displayName: 'Demo Felhasználó'
+      };
+      get().setUser(mockUser);
+      localStorage.setItem('smartcrm_auth', JSON.stringify({ mock: true }));
+      localStorage.setItem('smartcrm_user', JSON.stringify({ email: mockUser.email }));
+      return () => {};
+    }
+
     if (api.isConfigured()) {
-      // Backend API esetén csak egyszer ellenőrizzük
+      // Backend API esetén csak egyszer ellenrizzük
       const done = () => {};
       get().checkAuth().then(done).catch(() => get().setUser(null));
-      // DEV: ha a backend nem elérhető (pl. Cursor/localhost), 2.5 mp után mutassuk a login oldalt
+      // DEV: ha a backend nem elérhet (pl. Cursor/localhost), 2.5 mp után mutassuk a login oldalt
       if (import.meta.env.DEV) {
         setTimeout(() => {
           if (get().isLoading) get().setUser(null);
@@ -352,7 +365,7 @@ const useAuthStore = create((set, get) => ({
       if (user) {
         get().setUser(user);
       } else {
-        // Ha nincs Firebase user, ellenőrizzük a localStorage-t (mock mode)
+        // Ha nincs Firebase user, ellenrizzük a localStorage-t (mock mode)
         const storedAuth = localStorage.getItem('smartcrm_auth');
         if (storedAuth) {
           const storedUser = localStorage.getItem('smartcrm_user');

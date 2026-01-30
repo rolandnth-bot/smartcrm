@@ -14,7 +14,7 @@ export function usePerformance(componentName = 'Component') {
       const renderTime = performance.now() - startTime.current;
       
       if (renderCount.current === 1) {
-        console.log(`[Performance] ${componentName} - Első render: ${renderTime.toFixed(2)}ms`);
+        console.log(`[Performance] ${componentName} - Els render: ${renderTime.toFixed(2)}ms`);
       } else {
         console.warn(`[Performance] ${componentName} - Re-render #${renderCount.current}: ${renderTime.toFixed(2)}ms`);
       }

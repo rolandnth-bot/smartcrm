@@ -1,6 +1,6 @@
 /**
- * Alapértelmezett lakások (SabeeApp – Apartment House lista).
- * Ha nincs API / üres a lista, ezek mindig betöltődnek és localStorage-ba mentődnek.
+ * Alapértelmezett lakások (SabeeApp  Apartment House lista).
+ * Ha nincs API / üres a lista, ezek mindig betöltdnek és localStorage-ba mentdnek.
  */
 export const DEFAULT_APARTMENTS = [
   'Akác 57',

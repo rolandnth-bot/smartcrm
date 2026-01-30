@@ -154,7 +154,7 @@ const useMarketingStore = create((set, get) => ({
     };
   },
 
-  // Tartalom naptár műveletek
+  // Tartalom naptár mveletek
   addContentItem: async (content) => {
     const newContent = {
       id: Date.now(),

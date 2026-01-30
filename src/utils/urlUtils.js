@@ -9,7 +9,7 @@ const logger = createLogger('URLUtils');
 
 /**
  * URL validálása
- * @param {string} url - Az ellenőrizendő URL
+ * @param {string} url - Az ellenrizend URL
  * @returns {boolean} Érvényes-e
  */
 export function isValidURL(url) {
@@ -19,7 +19,7 @@ export function isValidURL(url) {
     new URL(url);
     return true;
   } catch {
-    // Relative URL ellenőrzés
+    // Relative URL ellenrzés
     try {
       new URL(url, window.location.origin);
       return true;
@@ -59,7 +59,7 @@ export function parseURL(url) {
 }
 
 /**
- * Query paraméterek parse-olása string-ből
+ * Query paraméterek parse-olása string-bl
  * @param {string} search - Query string (pl. '?foo=bar&baz=qux')
  * @returns {Object} Paraméterek objektuma
  */
@@ -132,7 +132,7 @@ export function buildQueryString(params, options = {}) {
 }
 
 /**
- * URL létrehozása path és paraméterekből
+ * URL létrehozása path és paraméterekbl
  * @param {string} path - Path (pl. '/users' vagy 'users')
  * @param {Object} params - Query paraméterek
  * @param {string} baseURL - Base URL (default: window.location.origin)
@@ -181,7 +181,7 @@ export function addQueryParams(url, params) {
 }
 
 /**
- * Query paraméter eltávolítása URL-ből
+ * Query paraméter eltávolítása URL-bl
  * @param {string} url - Az eredeti URL
  * @param {string|string[]} keys - Eltávolítandó paraméter kulcsok
  * @returns {string} Új URL

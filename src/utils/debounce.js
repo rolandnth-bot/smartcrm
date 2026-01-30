@@ -3,10 +3,10 @@
  */
 
 /**
- * Debounce függvény - késlelteti a függvény végrehajtását, amíg nem telik el egy adott idő
+ * Debounce függvény - késlelteti a függvény végrehajtását, amíg nem telik el egy adott id
  * @param {Function} func - A függvény, amit debounce-olni kell
- * @param {number} wait - Várakozási idő milliszekundumban
- * @param {boolean} immediate - Ha true, azonnal végrehajtja az első hívást
+ * @param {number} wait - Várakozási id milliszekundumban
+ * @param {boolean} immediate - Ha true, azonnal végrehajtja az els hívást
  * @returns {Function} Debounced függvény
  */
 export function debounce(func, wait = 300, immediate = false) {
@@ -30,7 +30,7 @@ export function debounce(func, wait = 300, immediate = false) {
 /**
  * Throttle függvény - korlátozza a függvény végrehajtásának gyakoriságát
  * @param {Function} func - A függvény, amit throttle-olni kell
- * @param {number} limit - Időkorlát milliszekundumban
+ * @param {number} limit - Idkorlát milliszekundumban
  * @returns {Function} Throttled függvény
  */
 export function throttle(func, limit = 300) {

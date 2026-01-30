@@ -3,11 +3,11 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import useAuthStore from '../stores/authStore';
 
 /**
- * Globális billentyűparancsok hook
+ * Globális billentyparancsok hook
  * 
  * Támogatott parancsok:
  * - Ctrl/Cmd + K: Gyors keresés
- * - Ctrl/Cmd + /: Billentyűparancsok megjelenítése
+ * - Ctrl/Cmd + /: Billentyparancsok megjelenítése
  * - Escape: Modal bezárása (ha van nyitva)
  * - Ctrl/Cmd + 1-7: Navigáció az oldalakhoz
  */
@@ -22,7 +22,7 @@ export const useKeyboardShortcuts = () => {
     // Csak ha be van jelentkezve
     if (!isAuthenticated) return;
 
-    // Ne akadályozzuk meg, ha input/textarea/select mezőben van a fókusz
+    // Ne akadályozzuk meg, ha input/textarea/select mezben van a fókusz
     const target = e.target;
     if (
       target.tagName === 'INPUT' ||
@@ -46,7 +46,7 @@ export const useKeyboardShortcuts = () => {
       return;
     }
 
-    // Ctrl/Cmd + /: Billentyűparancsok megjelenítése
+    // Ctrl/Cmd + /: Billentyparancsok megjelenítése
     if ((e.ctrlKey || e.metaKey) && e.key === '/') {
       e.preventDefault();
       setShowKeyboardShortcuts(true);

@@ -11,7 +11,7 @@ export function useFocusTrap(isActive, containerRef) {
   useEffect(() => {
     if (!isActive || !containerRef.current) return;
 
-    // Mentjük az előző focus-t
+    // Mentjük az elz focus-t
     previousFocusRef.current = document.activeElement;
 
     // Fókuszálható elemek lekérése
@@ -33,7 +33,7 @@ export function useFocusTrap(isActive, containerRef) {
     const firstElement = focusableElements[0];
     const lastElement = focusableElements[focusableElements.length - 1];
 
-    // Első elem fókuszálása
+    // Els elem fókuszálása
     if (firstElement) {
       firstElement.focus();
     }
@@ -54,7 +54,7 @@ export function useFocusTrap(isActive, containerRef) {
           lastElement?.focus();
         }
       } else {
-        // Tab (előre)
+        // Tab (elre)
         if (document.activeElement === lastElement) {
           e.preventDefault();
           firstElement?.focus();
@@ -65,7 +65,7 @@ export function useFocusTrap(isActive, containerRef) {
     // Escape kezelés (opcionális, ha van onClose callback)
     const handleEscape = (e) => {
       if (e.key === 'Escape') {
-        // Visszaállítjuk az előző focus-t
+        // Visszaállítjuk az elz focus-t
         if (previousFocusRef.current && previousFocusRef.current.focus) {
           previousFocusRef.current.focus();
         }
@@ -79,7 +79,7 @@ export function useFocusTrap(isActive, containerRef) {
       document.removeEventListener('keydown', handleTab);
       document.removeEventListener('keydown', handleEscape);
       
-      // Visszaállítjuk az előző focus-t
+      // Visszaállítjuk az elz focus-t
       if (previousFocusRef.current && previousFocusRef.current.focus) {
         previousFocusRef.current.focus();
       }

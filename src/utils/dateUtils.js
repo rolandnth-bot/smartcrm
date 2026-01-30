@@ -44,7 +44,7 @@ export const formatDateLong = (date) => {
 };
 
 /**
- * Dátum formázása relatív időben (pl. "2 napja", "tegnap", "ma")
+ * Dátum formázása relatív idben (pl. "2 napja", "tegnap", "ma")
  * @param {Date|string} date - Dátum objektum vagy ISO string
  * @returns {string} Relatív dátum string
  */
@@ -69,7 +69,7 @@ export const formatDateRelative = (date) => {
 
 /**
  * Dátum tartomány formázása (pl. "2024.01.15 - 2024.01.20")
- * @param {Date|string} startDate - Kezdő dátum
+ * @param {Date|string} startDate - Kezd dátum
  * @param {Date|string} endDate - Vég dátum
  * @returns {string} Formázott dátum tartomány
  */
@@ -85,7 +85,7 @@ export const formatDateRange = (startDate, endDate) => {
 };
 
 /**
- * Dátum ellenőrzése, hogy érvényes-e
+ * Dátum ellenrzése, hogy érvényes-e
  * @param {Date|string} date - Dátum objektum vagy ISO string
  * @returns {boolean} True, ha érvényes dátum
  */
@@ -98,7 +98,7 @@ export const isValidDate = (date) => {
 
 /**
  * Két dátum közötti napok száma
- * @param {Date|string} startDate - Kezdő dátum
+ * @param {Date|string} startDate - Kezd dátum
  * @param {Date|string} endDate - Vég dátum
  * @returns {number} Napok száma
  */
@@ -185,9 +185,9 @@ export const addMonths = (date, months) => {
 };
 
 /**
- * Hónap első napja
+ * Hónap els napja
  * @param {Date|string} date - Dátum objektum vagy ISO string
- * @returns {Date} Hónap első napja
+ * @returns {Date} Hónap els napja
  */
 export const getFirstDayOfMonth = (date) => {
   if (!date) return new Date();
@@ -213,9 +213,9 @@ export const getLastDayOfMonth = (date) => {
 };
 
 /**
- * Relatív idő formázása (pl. "5 perce", "2 órája", "3 napja")
+ * Relatív id formázása (pl. "5 perce", "2 órája", "3 napja")
  * @param {Date|string} date - Dátum objektum vagy ISO string
- * @returns {string} Relatív idő string
+ * @returns {string} Relatív id string
  */
 export const formatTimeAgo = (date) => {
   if (!date) return '';

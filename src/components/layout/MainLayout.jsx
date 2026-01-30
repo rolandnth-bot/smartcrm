@@ -8,7 +8,7 @@ import SkipLink from '../common/SkipLink';
 import { useTheme } from '../../contexts/ThemeContext';
 
 const MainLayout = memo(({ onLogout }) => {
-  // Globális billentyűparancsok aktiválása
+  // Globális billentyparancsok aktiválása
   const { 
     showQuickSearch, 
     setShowQuickSearch,
@@ -19,7 +19,7 @@ const MainLayout = memo(({ onLogout }) => {
   const location = useLocation();
   const { backgroundColor } = useTheme();
 
-  // Világos, tiszta megjelenés (mint a 2. screenshot) – fehér/világosszürke háttér
+  // Világos, tiszta megjelenés (mint a 2. screenshot)  fehér/világosszürke háttér
   const getBackgroundClass = () => {
     if (location.pathname === '/') {
       return 'bg-gradient-to-br from-slate-50 via-gray-50 to-slate-50 dark:from-cyan-950 dark:via-teal-950 dark:to-emerald-950';

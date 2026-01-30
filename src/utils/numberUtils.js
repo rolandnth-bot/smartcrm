@@ -9,17 +9,17 @@
  * @returns {string} Formázott összeg string
  */
 export const formatCurrencyEUR = (amount, showSymbol = true) => {
-  if (amount === null || amount === undefined || amount === '') return showSymbol ? '0 €' : '0';
+  if (amount === null || amount === undefined || amount === '') return showSymbol ? '0 ' : '0';
   
   const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-  if (isNaN(num)) return showSymbol ? '0 €' : '0';
+  if (isNaN(num)) return showSymbol ? '0 ' : '0';
   
   const formatted = new Intl.NumberFormat('hu-HU', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2
   }).format(num);
   
-  return showSymbol ? `${formatted} €` : formatted;
+  return showSymbol ? `${formatted} ` : formatted;
 };
 
 /**
@@ -76,7 +76,7 @@ export const formatPercent = (value, decimals = 1) => {
 };
 
 /**
- * Szám ellenőrzése, hogy érvényes-e
+ * Szám ellenrzése, hogy érvényes-e
  * @param {number|string} value - Érték
  * @returns {boolean} True, ha érvényes szám
  */
@@ -192,7 +192,7 @@ export const calculateMax = (values) => {
   if (!Array.isArray(values) || values.length === 0) return 0;
   return Math.max(...values.map(val => toNumber(val, 0)));
 };/**
- * Pénznem konverzió (EUR ↔ HUF)
+ * Pénznem konverzió (EUR  HUF)
  * @param {number|string} amount - Összeg
  * @param {string} fromCurrency - Forrás pénznem ('EUR' vagy 'HUF')
  * @param {string} toCurrency - Cél pénznem ('EUR' vagy 'HUF')
@@ -216,7 +216,7 @@ export const convertCurrency = (amount, fromCurrency, toCurrency, exchangeRate =
 };
 
 /**
- * Szám kompakt formázása (pl. 1000 → 1K, 1000000 → 1M)
+ * Szám kompakt formázása (pl. 1000  1K, 1000000  1M)
  * @param {number|string} value - Érték
  * @param {number} decimals - Tizedesjegyek száma (default: 1)
  * @returns {string} Kompakt formázott szám

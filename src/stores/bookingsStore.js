@@ -282,7 +282,7 @@ const useBookingsStore = create((set, get) => ({
     return get().bookings.find((b) => b.id === id);
   },
 
-  // Ma érkező foglalások (check-in ma)
+  // Ma érkez foglalások (check-in ma)
   getTodayBookings: () => {
     const bookings = get().bookings;
     const today = new Date();
@@ -321,7 +321,7 @@ const useBookingsStore = create((set, get) => ({
     };
   },
 
-  // Preview import functions (validálás előnézet)
+  // Preview import functions (validálás elnézet)
   previewBookingsFromJSON: (jsonData) => {
     try {
       const data = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
@@ -333,7 +333,7 @@ const useBookingsStore = create((set, get) => ({
       bookingsArray.forEach((item, index) => {
         const errors = [];
         
-        // Kötelező mezők ellenőrzése
+        // Kötelez mezk ellenrzése
         if (!item.apartmentId && !item.apartment_id) {
           errors.push('Lakás ID hiányzik');
         }
@@ -366,7 +366,7 @@ const useBookingsStore = create((set, get) => ({
           const checkIn = new Date(dateFrom);
           const checkOut = new Date(dateTo);
           if (!isNaN(checkIn.getTime()) && !isNaN(checkOut.getTime()) && checkOut <= checkIn) {
-            errors.push('Távozás dátum nem lehet korábbi vagy egyenlő az érkezés dátumával');
+            errors.push('Távozás dátum nem lehet korábbi vagy egyenl az érkezés dátumával');
           }
         }
         
@@ -512,7 +512,7 @@ const useBookingsStore = create((set, get) => ({
           const checkIn = new Date(booking.dateFrom);
           const checkOut = new Date(booking.dateTo);
           if (!isNaN(checkIn.getTime()) && !isNaN(checkOut.getTime()) && checkOut <= checkIn) {
-            errors.push('Távozás dátum nem lehet korábbi vagy egyenlő az érkezés dátumával');
+            errors.push('Távozás dátum nem lehet korábbi vagy egyenl az érkezés dátumával');
           }
         }
         if (booking.guestEmail) {

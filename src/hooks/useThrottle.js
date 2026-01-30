@@ -3,7 +3,7 @@ import { useRef, useCallback } from 'react';
 /**
  * React hook throttle callback-hez
  * @param {Function} callback - A callback függvény
- * @param {number} limit - Időkorlát milliszekundumban
+ * @param {number} limit - Idkorlát milliszekundumban
  * @param {Array} deps - Dependency array
  * @returns {Function} Throttled callback
  */

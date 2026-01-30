@@ -49,7 +49,7 @@ export async function testN8nConnection(url, apiKey, apiVersion = 'v1') {
   if (!url || !apiKey) {
     return {
       success: false,
-      message: 'n8n URL és API Key megadása kötelező'
+      message: 'n8n URL és API Key megadása kötelez'
     };
   }
 
@@ -78,7 +78,7 @@ export async function testN8nConnection(url, apiKey, apiVersion = 'v1') {
     if (response.status === 401 || response.status === 403) {
       return {
         success: false,
-        message: 'Érvénytelen API Key. Ellenőrizd az API kulcsot az n8n beállításokban.'
+        message: 'Érvénytelen API Key. Ellenrizd az API kulcsot az n8n beállításokban.'
       };
     }
 
@@ -101,14 +101,14 @@ export async function testN8nConnection(url, apiKey, apiVersion = 'v1') {
     if (error.name === 'AbortError') {
       return {
         success: false,
-        message: 'Időtúllépés: Az n8n szerver nem válaszol. Ellenőrizd az URL-t és a hálózati kapcsolatot.'
+        message: 'Idtúllépés: Az n8n szerver nem válaszol. Ellenrizd az URL-t és a hálózati kapcsolatot.'
       };
     }
     
     if (error instanceof TypeError && error.message.includes('fetch')) {
       return {
         success: false,
-        message: 'Hálózati hiba: Nem lehet elérni az n8n szervert. Ellenőrizd az URL-t és a hálózati kapcsolatot.'
+        message: 'Hálózati hiba: Nem lehet elérni az n8n szervert. Ellenrizd az URL-t és a hálózati kapcsolatot.'
       };
     }
 
@@ -174,7 +174,7 @@ export async function triggerN8nWorkflow(workflowId, data = {}) {
     if (error.name === 'AbortError') {
       return {
         success: false,
-        message: 'Időtúllépés: A workflow indítása túl sokáig tartott.'
+        message: 'Idtúllépés: A workflow indítása túl sokáig tartott.'
       };
     }
 

@@ -1,5 +1,5 @@
 /**
- * Felszereltségek (Amenities) – Airbnb és Booking.com listák
+ * Felszereltségek (Amenities)  Airbnb és Booking.com listák
  * Lakás felszereltség kezeléshez (ApartmentsPage, stb.)
  */
 
@@ -7,9 +7,9 @@
 export const AIRBNB_AMENITIES = [
   'Ablakrácsok',
   'Ajánlat bébiszitterekre',
-  'Alapvető kellékek',
+  'Alapvet kellékek',
   'Bababiztonsági kapuk',
-  'Babafigyelő',
+  'Babafigyel',
   'Babakád',
   'Babaágy',
   'Beltéri kandalló',
@@ -17,26 +17,26 @@ export const AIRBNB_AMENITIES = [
   'Biliárdasztal',
   'Borospoharak',
   'Bowlingpálya',
-  'Csomagmegőrzés',
-  'Csónakkikötő',
+  'Csomagmegrzés',
+  'Csónakkiköt',
   'Daráló',
-  'Edzőfelszerelés',
-  'Edzőterem',
+  'Edzfelszerelés',
+  'Edzterem',
   'Egyszintes otthon',
-  'Elektromosjármű-töltő',
-  'Elsősegélykészlet',
-  'Etetőszék',
+  'Elektromosjárm-tölt',
+  'Elssegélykészlet',
+  'Etetszék',
   'Ethernet kapcsolat',
   'Fagyasztó',
-  'Fizetős parkolás a helyszínen',
-  'Fizetős parkolás más helyszínen',
-  'Függőágy',
-  'Fürdőkád',
-  'Fürdőszappan',
-  'Füstérzékelő',
-  'Fűtés',
-  'Grillező',
-  'Grillező eszközök',
+  'Fizets parkolás a helyszínen',
+  'Fizets parkolás más helyszínen',
+  'Függágy',
+  'Fürdkád',
+  'Fürdszappan',
+  'Füstérzékel',
+  'Ftés',
+  'Grillez',
+  'Grillez eszközök',
   'Gyerekbicikli',
   'Gyerekkönyvek és játékok',
   'Gördeszkás rámpa',
@@ -47,7 +47,7 @@ export const AIRBNB_AMENITIES = [
   'Hordozható ventilátorok',
   'Hosszú távú foglalás megengedett',
   'Hátsó udvar',
-  'Hűtő',
+  'Ht',
   'Ingyenes parkolás a helyszínen',
   'Ingyenes utcai parkolás',
   'Játszószoba gyerekeknek',
@@ -55,13 +55,13 @@ export const AIRBNB_AMENITIES = [
   'Játékkonzol',
   'Kajak',
   'Kandallórács',
-  'Kenyérkészítő',
+  'Kenyérkészít',
   'Kenyérpirító',
   'Kerékpárok',
-  'Konnektorvédők',
+  'Konnektorvédk',
   'Konyha',
   'Konyhai alapkellékek',
-  'Kávéfőző',
+  'Kávéfz',
   'Kávézók',
   'Könyvek és olvasnivalók',
   'Kültéri bútorzat',
@@ -74,9 +74,9 @@ export const AIRBNB_AMENITIES = [
   'Medence',
   'Meleg víz',
   'Mennyezeti ventilátor',
-  'Mikrohullámú sütő',
+  'Mikrohullámú süt',
   'Minigolf',
-  'Minihűtő',
+  'Miniht',
   'Mosoda a közelben',
   'Mosogatógép',
   'Mosógép',
@@ -84,45 +84,45 @@ export const AIRBNB_AMENITIES = [
   'Mászófal',
   'Nyugágyak',
   'Pelenkázóasztal',
-  'Pezsgőfürdő',
+  'Pezsgfürd',
   'Pingpongasztal',
   'Plusz párnák és takarók',
   'Pályaszállás',
   'Reggeli',
   'Resort access',
-  'Rizsfőző',
+  'Rizsfz',
   'Ruhaszárító állvány',
   'Ruhatároló',
   'Saját bejárat',
   'Saját nappali',
   'Saját partszakasz',
   'Sampon',
-  'Sarokvédő az asztalokon',
+  'Sarokvéd az asztalokon',
   'Strandkellékek',
   'Szabadtéri játszótér',
   'Szabadtéri konyha',
-  'Szabadtéri étkezőterület',
+  'Szabadtéri étkezterület',
   'Szauna',
   'Szemétprés',
   'Szárítógép',
   'Széf',
-  'Szén-monoxid-érzékelő',
+  'Szén-monoxid-érzékel',
   'Szúnyogháló',
-  'Sötétítők/árnyékolók',
-  'Sütő',
-  'Takarítás igényelhető',
+  'Sötétítk/árnyékolók',
+  'Süt',
+  'Takarítás igényelhet',
   'Teakonyha',
   'Tematikus szoba',
   'Tepsi',
   'Terasz vagy erkély',
   'Tisztítószerek',
-  'Tusfürdő',
+  'Tusfürd',
   'TV',
   'Táblajátékok',
   'Tóparti kijárás',
-  'Tűzhely',
-  'Tűzoltó készülék',
-  'Tűzrakóhely',
+  'Tzhely',
+  'Tzoltó készülék',
+  'Tzrakóhely',
   'Utazóágy',
   'Vasaló',
   'Vállfák',
@@ -131,17 +131,17 @@ export const AIRBNB_AMENITIES = [
   'Wifi',
   'Zongora',
   'Zsebwifi',
-  'Ágynemű',
+  'Ágynem',
   'Életnagyságú játékok',
-  'Étkezőasztal',
+  'Étkezasztal',
   'Étkészlet gyermekeknek',
-  'Étkészlet és evőeszközök',
-  'Ütőketrec'
+  'Étkészlet és eveszközök',
+  'Ütketrec'
 ];
 
 /** Booking felszereltségek kategóriák szerint (teljes lista) */
 export const BOOKING_FELSZERELTSEG = {
-  'Legnépszerűbb szolgáltatások': {
+  'Legnépszerbb szolgáltatások': {
     color: 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300',
     items: [
       'Úszómedence',
@@ -151,7 +151,7 @@ export const BOOKING_FELSZERELTSEG = {
       'Terasz',
       'Nemdohányzó szobák',
       'Családi szobák',
-      'Pezsgőfürdő | masszázsmedence',
+      'Pezsgfürd | masszázsmedence',
       'Légkondicionálás'
     ]
   },
@@ -174,7 +174,7 @@ export const BOOKING_FELSZERELTSEG = {
       'Spanyol'
     ]
   },
-  'Információk az épületről': {
+  'Információk az épületrl': {
     color: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300',
     items: [
       'Épület szintjeinek száma',
@@ -184,13 +184,13 @@ export const BOOKING_FELSZERELTSEG = {
   'Biztonsági intézkedések': {
     color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
     items: [
-      'Személyzet biztonsági előírásokat betart',
+      'Személyzet biztonsági elírásokat betart',
       'Nincsenek közös írószerek/magazinok',
-      'Kézfertőtlenítő a szálláson',
-      'Vendégek egészségi állapotának ellenőrzése',
-      'Elsősegélydoboz',
-      'Egészségügyi szakértők elérhetőek',
-      'Lázmérő vendégeknek',
+      'Kézferttlenít a szálláson',
+      'Vendégek egészségi állapotának ellenrzése',
+      'Elssegélydoboz',
+      'Egészségügyi szakértk elérhetek',
+      'Lázmér vendégeknek',
       'Arcmaszkok vendégeknek',
       'Érintkezés nélküli be/kijelentkezés',
       'Készpénzmentes fizetés',
@@ -199,12 +199,12 @@ export const BOOKING_FELSZERELTSEG = {
       'Térelválasztók személyzet és vendégek között'
     ]
   },
-  'Tisztaság és fertőtlenítés': {
+  'Tisztaság és ferttlenítés': {
     color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
     items: [
       'Koronavírus ellen hatásos tisztítószerek',
-      'Ágynemű mosás előírás szerint',
-      'Fertőtlenítés vendégváltáskor',
+      'Ágynem mosás elírás szerint',
+      'Ferttlenítés vendégváltáskor',
       'Szállás lezárása takarítás után',
       'Hivatásos takarító cégek',
       'Takarítás kihagyható kérésre'
@@ -213,9 +213,9 @@ export const BOOKING_FELSZERELTSEG = {
   'Ital- és ételbiztonság': {
     color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
     items: [
-      'Távolságtartás étkezőkben',
+      'Távolságtartás étkezkben',
       'Étel szállítás szállásegységbe',
-      'Fertőtlenített étkészlet',
+      'Ferttlenített étkészlet',
       'Reggeli elviteles dobozok',
       'Biztonságosan lezárt kiszállított étel'
     ]
@@ -224,9 +224,9 @@ export const BOOKING_FELSZERELTSEG = {
     color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
     items: [
       'Online útlevél/személyi beküldés',
-      'Bejelentkezési automata előtérben',
-      'Zárható kulcsmegőrző szálláson',
-      'Zárható kulcsmegőrző másik helyszínen',
+      'Bejelentkezési automata eltérben',
+      'Zárható kulcsmegrz szálláson',
+      'Zárható kulcsmegrz másik helyszínen',
       'Szobaajtó bluetooth zárnyitás',
       'Szobaajtó internet zárnyitás',
       'PIN-kód zárnyitás',
@@ -234,24 +234,24 @@ export const BOOKING_FELSZERELTSEG = {
       'Bejelentkezési app'
     ]
   },
-  'Szabadidős lehetőségek': {
+  'Szabadids lehetségek': {
     color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
     items: [
       'Teniszfelszerelés',
       'Tollaslabda-kellékek',
       'Strand',
-      'Időszaki képkiállítások',
+      'Idszaki képkiállítások',
       'Kocsmatúrák',
-      'Stand-up előadások',
+      'Stand-up eladások',
       'Filmestek',
-      'Városnéző séta',
+      'Városnéz séta',
       'Kerékpártúrák',
       'Tematikus vacsorák',
       'Happy hour',
       'Túra helyi kultúráról',
-      'Főzőiskola',
-      'Élőzene/előadás',
-      'Élő sportközvetítés',
+      'Fziskola',
+      'Élzene/eladás',
+      'Él sportközvetítés',
       'Íjászat',
       'Aerobik',
       'Bingó',
@@ -281,14 +281,14 @@ export const BOOKING_FELSZERELTSEG = {
     items: [
       'Gyermekmenü',
       'Gyermekbarát étterem',
-      'Bor | pezsgő',
+      'Bor | pezsg',
       'Gyümölcs a szobában',
       'Kávézó helyben',
       'Étterem',
       'Büfé',
       'Élelmiszer-házhozszállítás',
       'Csomagolt ebéd',
-      'Grillezési lehetőség',
+      'Grillezési lehetség',
       'Italautomata',
       'Ételautomata',
       'Speciális diétás étel',
@@ -301,12 +301,12 @@ export const BOOKING_FELSZERELTSEG = {
     items: [
       'Vízicsúszda',
       'Napozóágyak/székek',
-      'Napernyők',
+      'Napernyk',
       'Szépészeti szolgáltatások',
       'Wellness szolgáltatások',
-      'Gőzkamra',
-      'Wellness pihenőterület',
-      'Lábfürdő',
+      'Gzkamra',
+      'Wellness pihenterület',
+      'Lábfürd',
       'Wellnesscsomagok',
       'Masszázsszék'
     ]
@@ -316,17 +316,17 @@ export const BOOKING_FELSZERELTSEG = {
     items: [
       'Jógaórák',
       'Fitneszórák',
-      'Személyi edző',
-      'Fitnesz öltözőszekrények',
+      'Személyi edz',
+      'Fitnesz öltözszekrények',
       'Gyerekmedence',
       'Wellnessközpont',
-      'Törökfürdő | gőzfürdő',
+      'Törökfürd | gzfürd',
       'Fitneszközpont',
       'Szolárium',
       'Termálvizes medence',
       'Masszázs',
-      'Szabadtéri fürdő',
-      'Nyilvános fürdő'
+      'Szabadtéri fürd',
+      'Nyilvános fürd'
     ]
   },
   'Közlekedés': {
@@ -336,7 +336,7 @@ export const BOOKING_FELSZERELTSEG = {
       'Transzferszolgáltatás',
       'Kerékpártároló',
       'Kerékpárkölcsönzés',
-      'Autókölcsönző',
+      'Autókölcsönz',
       'Reptéri transzfer',
       'Parkolás'
     ]
@@ -344,7 +344,7 @@ export const BOOKING_FELSZERELTSEG = {
   'Recepció': {
     color: 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300',
     items: [
-      'Számla kérhető',
+      'Számla kérhet',
       'Éjjel-nappali recepció',
       'Egyedi be/kijelentkezés',
       'Soron kívüli be/kijelentkezés',
@@ -352,7 +352,7 @@ export const BOOKING_FELSZERELTSEG = {
       'Utazásszervezés',
       'Pénzváltó',
       'Pénzkiadó automata',
-      'Poggyászmegőrzés',
+      'Poggyászmegrzés',
       'Zárható szekrények'
     ]
   },
@@ -360,9 +360,9 @@ export const BOOKING_FELSZERELTSEG = {
     color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
     items: [
       'Kerti bútorok',
-      'Piknikezőhely',
+      'Piknikezhely',
       'Kandalló',
-      'Tűzrakóhely',
+      'Tzrakóhely',
       'Napozóterasz',
       'Közös konyha',
       'Közös társalgó | tévészoba',
@@ -417,17 +417,17 @@ export const BOOKING_FELSZERELTSEG = {
     color: 'bg-neutral-100 text-neutral-800 dark:bg-neutral-900/30 dark:text-neutral-300',
     items: [
       'Kisállat fekhely',
-      'Kisállat etetőtál',
+      'Kisállat etettál',
       'Bejutás kulccsal',
       'Bejutás kulcskártyával',
-      'Csak felnőtteket fogadó szállás',
+      'Csak felntteket fogadó szállás',
       'Antiallergén szoba',
       'Nemdohányzó épület',
       'Kijelölt dohányzóhely',
       'Akadálymentesített',
       'Lift',
       'Hangszigetelt szobák',
-      'Fűtés'
+      'Ftés'
     ]
   },
   'Biztonság': {
@@ -435,53 +435,53 @@ export const BOOKING_FELSZERELTSEG = {
     items: [
       'Éjjel-nappali biztonsági szolgálat',
       'Riasztórendszer',
-      'Füstjelzők',
+      'Füstjelzk',
       'Biztonsági kamera közös helyiségekben',
-      'Térfigyelő kamera',
-      'Tűzoltókészülékek',
-      'Szén-monoxid érzékelő',
+      'Térfigyel kamera',
+      'Tzoltókészülékek',
+      'Szén-monoxid érzékel',
       'Széf'
     ]
   },
-  // Szoba szintű felszereltségek (részletes lista)
+  // Szoba szint felszereltségek (részletes lista)
   'Szobafelszereltség': {
     color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
     items: [
-      'Kiságy | bölcső',
+      'Kiságy | bölcs',
       'Ruhatartó állvány',
       'Ruhaszárító állvány',
       'Kihajtható ágy',
       'Kanapéágy',
       'Szemetes',
-      'Fűtött medence',
+      'Ftött medence',
       'Végtelenített medence',
-      'Merülőmedence',
+      'Merülmedence',
       'Medencetakaró',
-      'Strandtörölközők',
+      'Strandtörölközk',
       'Medencére nyíló kilátás',
-      'Medence a tetőn',
+      'Medence a tetn',
       'Sós vizes medence',
       'Sekély rész',
       'Légkondicionálás',
       'Privát medence',
       'Szárítógép',
       'Ruhásszekrény',
-      'Szőnyegpadló',
-      'Öltöző',
+      'Sznyegpadló',
+      'Öltöz',
       '2 méternél hosszabb ágyak',
       'Ventilátor',
       'Kandalló',
-      'Fűtés',
+      'Ftés',
       'Egymásba nyíló szoba',
       'Vasaló',
-      'Vasalási lehetőség',
-      'Pezsgőfürdő',
+      'Vasalási lehetség',
+      'Pezsgfürd',
       'Szúnyogháló',
       'Saját bejárat',
       'Széf',
       'Kanapé',
       'Hangszigetelés',
-      'Ülősarok',
+      'Ülsarok',
       'Járólap | márványpadló',
       'Nadrágvasaló',
       'Mosógép',
@@ -489,7 +489,7 @@ export const BOOKING_FELSZERELTSEG = {
       'Íróasztal',
       'Antiallergén',
       'Takarítószerek',
-      'Elektromosan fűthető takaró',
+      'Elektromosan fthet takaró',
       'Pizsama',
       'Nyári kimonó',
       'Konnektor az ágy közelében',
@@ -499,14 +499,14 @@ export const BOOKING_FELSZERELTSEG = {
       'Hipoallergén párna'
     ]
   },
-  'Fürdőszoba': {
+  'Fürdszoba': {
     color: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300',
     items: [
       'Vécépapír',
-      'Fürdőkád',
+      'Fürdkád',
       'Bidé',
-      'Fürdőkád vagy zuhanykabin',
-      'Fürdőköpeny',
+      'Fürdkád vagy zuhanykabin',
+      'Fürdköpeny',
       'Ingyen pipereholmi',
       'Vendég vécé',
       'Hajszárító',
@@ -519,7 +519,7 @@ export const BOOKING_FELSZERELTSEG = {
       'Fogkefe',
       'Sampon',
       'Hajbalzsam',
-      'Tusfürdő',
+      'Tusfürd',
       'Zuhanysapka'
     ]
   },
@@ -543,10 +543,10 @@ export const BOOKING_FELSZERELTSEG = {
       'Fax',
       'iPod-dokkoló állomás',
       'Laptopszéf',
-      'Síkképernyős tévé',
-      'Fizetős csatornák',
+      'Síkképernys tévé',
+      'Fizets csatornák',
       'Rádió',
-      'Műholdas csatornák',
+      'Mholdas csatornák',
       'Telefon',
       'Tévé',
       'Videólejátszó',
@@ -560,30 +560,30 @@ export const BOOKING_FELSZERELTSEG = {
   'Étkezés': {
     color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
     items: [
-      'Étkező',
-      'Étkezőasztal',
+      'Étkez',
+      'Étkezasztal',
       'Borospohár',
       'Palackozott víz',
       'Csokoládé vagy keksz',
       'Gyümölcsök',
-      'Bor/pezsgő',
-      'Grillsütő',
-      'Sütő',
-      'Főzőlap',
+      'Bor/pezsg',
+      'Grillsüt',
+      'Süt',
+      'Fzlap',
       'Kenyérpirító',
       'Mosogatógép',
       'Vízforraló',
-      'Kültéri étkező',
+      'Kültéri étkez',
       'Kültéri bútorok',
       'Minibár',
       'Konyha',
       'Konyhasarok',
       'Konyhai felszerelés',
-      'Mikrohullámú sütő',
-      'Hűtőszekrény',
-      'Tea- és kávéfőző',
-      'Kávéfőző',
-      'Etetőszék'
+      'Mikrohullámú süt',
+      'Htszekrény',
+      'Tea- és kávéfz',
+      'Kávéfz',
+      'Etetszék'
     ]
   },
   'Szolgáltatások/extrák': {
@@ -593,19 +593,19 @@ export const BOOKING_FELSZERELTSEG = {
       'Zárható szekrény',
       'Kulccsal zárható',
       'Belépés az executive lounge-ba',
-      'Ébresztőóra',
+      'Ébresztóra',
       'Ébresztés',
-      'Ébresztő-szolgáltatás',
-      'Ágynemű',
-      'Törölközők',
-      'Törölköző | ágynemű felár ellenében'
+      'Ébreszt-szolgáltatás',
+      'Ágynem',
+      'Törölközk',
+      'Törölköz | ágynem felár ellenében'
     ]
   },
   'Szabadtéri/kilátás': {
     color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
     items: [
       'Erkély',
-      'Kültéri pihenősarok',
+      'Kültéri pihensarok',
       'Kilátás',
       'Terasz',
       'Városra nyíló kilátás',
@@ -616,21 +616,21 @@ export const BOOKING_FELSZERELTSEG = {
       'Medencére nyíló kilátás',
       'Folyóra nyíló kilátás',
       'Tengerre nyíló kilátás',
-      'Belső udvarra nyíló kilátás',
+      'Bels udvarra nyíló kilátás',
       'Csendes utcára nyíló kilátás'
     ]
   },
   'Akadálymentesség': {
     color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
     items: [
-      'Lifttel megközelíthető',
+      'Lifttel megközelíthet',
       'Teljes szállásegység a földszinten',
       'Akadálymentesített (kerekesszék)',
       'Vizuális segítség hallássérülteknek',
-      'Felső szintek lifttel érhetőek el',
-      'Felső szintek csak lépcsőn',
+      'Fels szintek lifttel érhetek el',
+      'Fels szintek csak lépcsn',
       'Akadálymentesített kád',
-      'Vészjelző a fürdőszobában',
+      'Vészjelz a fürdszobában',
       'Magasított vécécsésze',
       'Alacsony mosdó',
       'Akadálymentesített zuhanyzó',
@@ -653,16 +653,16 @@ export const BOOKING_FELSZERELTSEG = {
       'Babarács',
       'Társasjátékok/kirakós játékok',
       'Könyv, DVD vagy zene gyerekeknek',
-      'Gyermekbiztonsági konnektorvédő'
+      'Gyermekbiztonsági konnektorvéd'
     ]
   },
   'Biztonság': {
     color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
     items: [
-      'Szén-monoxid érzékelő',
+      'Szén-monoxid érzékel',
       'Szén-monoxid források',
-      'Füstjelző',
-      'Tűzoltókészülék'
+      'Füstjelz',
+      'Tzoltókészülék'
     ]
   },
   'Biztonsági intézkedések': {
@@ -673,31 +673,31 @@ export const BOOKING_FELSZERELTSEG = {
       'Szobánkénti légkondicionáló'
     ]
   },
-  'Tisztaság és fertőtlenítés': {
+  'Tisztaság és ferttlenítés': {
     color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
     items: [
-      'Kézfertőtlenítő'
+      'Kézferttlenít'
     ]
   }
 };
 
 /**
- * Booking.com – 2 külön lista a kérésetek szerint:
- * - Booking beállítások: "Legnépszerűbb szolgáltatások", "Étkezések", stb. (extranet-szintű opciók)
- * - Booking felszereltségek: "Szobafelszereltség", "Fürdőszoba", stb. (szoba szintű felszereltségek)
+ * Booking.com  2 külön lista a kérésetek szerint:
+ * - Booking beállítások: "Legnépszerbb szolgáltatások", "Étkezések", stb. (extranet-szint opciók)
+ * - Booking felszereltségek: "Szobafelszereltség", "Fürdszoba", stb. (szoba szint felszereltségek)
  *
  * A `BOOKING_FELSZERELTSEG` marad a teljes (union) lista kompatibilitás miatt.
  */
 const BOOKING_SETTINGS_KEYS = [
-  'Legnépszerűbb szolgáltatások',
+  'Legnépszerbb szolgáltatások',
   'Étkezések',
   'Beszélt nyelvek',
-  'Információk az épületről',
+  'Információk az épületrl',
   'Biztonsági intézkedések',
-  'Tisztaság és fertőtlenítés',
+  'Tisztaság és ferttlenítés',
   'Ital- és ételbiztonság',
   'Önkiszolgáló bejelentkezés',
-  'Szabadidős lehetőségek',
+  'Szabadids lehetségek',
   'Étkezés',
   'Medence és wellness',
   'Fitnesz',
@@ -714,7 +714,7 @@ const BOOKING_SETTINGS_KEYS = [
 
 const BOOKING_ROOM_AMENITIES_KEYS = [
   'Szobafelszereltség',
-  'Fürdőszoba',
+  'Fürdszoba',
   'Média/technológia',
   'Étkezés',
   'Szolgáltatások/extrák',
@@ -724,7 +724,7 @@ const BOOKING_ROOM_AMENITIES_KEYS = [
   'Szórakozás és családok',
   'Biztonság',
   'Biztonsági intézkedések',
-  'Tisztaság és fertőtlenítés'
+  'Tisztaság és ferttlenítés'
 ];
 
 const pickCategories = (keys) =>

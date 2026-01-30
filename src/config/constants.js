@@ -62,10 +62,10 @@ export const RATING_COLORS = {
 
 // Toast ikonok
 export const TOAST_ICONS = {
-  success: '✓',
-  error: '✕',
-  warning: '⚠',
-  info: 'ℹ'
+  success: '',
+  error: '',
+  warning: '',
+  info: ''
 };
 
 // Button variant színek (inline styles helyett Tailwind classes)
@@ -113,12 +113,12 @@ export const REGEX_PATTERNS = {
 
 // Error messages (központi hibaüzenetek)
 export const ERROR_MESSAGES = {
-  network: 'Hálózati hiba. Ellenőrizze az internetkapcsolatot.',
-  timeout: 'A kérés túllépte az időkorlátot. Kérjük, próbálja újra.',
-  unauthorized: 'Nincs jogosultsága ehhez a művelethez.',
-  notFound: 'A kért erőforrás nem található.',
-  serverError: 'Szerver hiba történt. Kérjük, próbálja újra később.',
-  validation: 'Érvénytelen adatok. Kérjük, ellenőrizze a mezőket.',
+  network: 'Hálózati hiba. Ellenrizze az internetkapcsolatot.',
+  timeout: 'A kérés túllépte az idkorlátot. Kérjük, próbálja újra.',
+  unauthorized: 'Nincs jogosultsága ehhez a mvelethez.',
+  notFound: 'A kért erforrás nem található.',
+  serverError: 'Szerver hiba történt. Kérjük, próbálja újra késbb.',
+  validation: 'Érvénytelen adatok. Kérjük, ellenrizze a mezket.',
   unknown: 'Ismeretlen hiba történt.'
 };
 

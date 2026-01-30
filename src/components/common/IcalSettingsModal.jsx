@@ -2,13 +2,15 @@ import { useState, useEffect, useCallback } from 'react';
 import Modal from './Modal';
 import Button from './Button';
 import Card from './Card';
-import { Calendar, Copy, Sync } from './Icons';
+import { Calendar, Copy, Sync, Download } from './Icons';
 import useApartmentsStore from '../../stores/apartmentsStore';
 import useIcalSyncStore from '../../stores/icalSyncStore';
 import useToastStore from '../../stores/toastStore';
+import useBookingsStore from '../../stores/bookingsStore';
 import { usePermissions } from '../../contexts/PermissionContext';
 import { validateIcalURL } from '../../utils/validation';
 import { formatTimeAgo } from '../../utils/dateUtils';
+import { generateIcalExportUrl, downloadIcalFile } from '../../utils/icalGenerator';
 
 const FEEDS = [
   { key: 'icalAirbnb', label: 'Airbnb' },
@@ -20,6 +22,7 @@ const FEEDS = [
 export default function IcalSettingsModal({ apartment, isOpen, onClose }) {
   const { apartments, updateApartment } = useApartmentsStore();
   const { syncApartment, getSyncStatus } = useIcalSyncStore();
+  const { bookings } = useBookingsStore();
   const { canEdit: canEditModule } = usePermissions();
   const canEditApartments = useCallback((m) => canEditModule(m), [canEditModule]);
 
@@ -54,6 +57,23 @@ export default function IcalSettingsModal({ apartment, isOpen, onClose }) {
       useToastStore.getState().error('Hiba a másolás során');
     }
   }, []);
+
+  const handleDownloadIcal = useCallback(() => {
+    if (!apartment) return;
+
+    // Az adott lakáshoz tartozó foglalások szűrése
+    const apartmentBookings = bookings.filter(
+      (b) => String(b.apartmentId) === String(apartment.id)
+    );
+
+    if (apartmentBookings.length === 0) {
+      useToastStore.getState().info('Nincs foglalás ehhez a lakáshoz.');
+      return;
+    }
+
+    downloadIcalFile(apartmentBookings, apartment);
+    useToastStore.getState().success('iCal fájl letöltve!');
+  }, [apartment, bookings]);
 
   const handleIcalSync = useCallback(
     async (aptId, feedId) => {
@@ -114,6 +134,10 @@ export default function IcalSettingsModal({ apartment, isOpen, onClose }) {
   const feedsWithUrl = FEEDS.filter((f) => form[f.key]);
   const syncStatus = getSyncStatus(apartment.id);
   const isSyncing = syncStatus?.status === 'syncing';
+  const ownIcalExportUrl = generateIcalExportUrl(apartment.id);
+  const apartmentBookingsCount = bookings.filter(
+    (b) => String(b.apartmentId) === String(apartment.id)
+  ).length;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={`iCal beállítások - ${apartment.name}`} size="lg">
@@ -121,6 +145,55 @@ export default function IcalSettingsModal({ apartment, isOpen, onClose }) {
         <p className="text-sm text-gray-600 dark:text-gray-400">
           Add meg a platformok iCal URL-jeit. A foglalások automatikusan szinkronizálódnak.
         </p>
+
+        {/* Saját iCal Export URL */}
+        <Card className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-2 border-green-200 dark:border-green-700">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Download size={18} className="text-green-600 dark:text-green-400" />
+              <h4 className="text-sm font-bold text-green-800 dark:text-green-200">
+                Saját iCal Export URL
+              </h4>
+            </div>
+            <p className="text-xs text-gray-600 dark:text-gray-400">
+              Ezt az URL-t használd más platformokon (Airbnb, Booking, Google Calendar) a foglalások importálásához.
+              {apartmentBookingsCount > 0 ? ` Jelenleg ${apartmentBookingsCount} foglalás elérhető.` : ' Még nincs foglalás.'}
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={ownIcalExportUrl}
+                readOnly
+                className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 border border-green-300 dark:border-green-600 rounded-lg text-sm font-mono text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-green-500"
+                onClick={(e) => e.target.select()}
+              />
+              <Button
+                variant="success"
+                size="sm"
+                onClick={() => handleCopyIcalUrl(ownIcalExportUrl)}
+                aria-label="Saját iCal URL másolása"
+                title="URL másolása"
+              >
+                <Copy size={16} />
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleDownloadIcal}
+                disabled={apartmentBookingsCount === 0}
+                aria-label="iCal fájl letöltése"
+                title="Letöltés .ics fájlként"
+              >
+                <Download size={16} />
+              </Button>
+            </div>
+            {apartmentBookingsCount === 0 && (
+              <p className="text-xs text-amber-600 dark:text-amber-400">
+                ⚠️ Még nincs foglalás ehhez a lakáshoz. Az iCal fájl üres lesz.
+              </p>
+            )}
+          </div>
+        </Card>
 
         {feedsWithUrl.length > 0 && (
           <div className="space-y-2">
@@ -225,7 +298,7 @@ export default function IcalSettingsModal({ apartment, isOpen, onClose }) {
                 <div className="mt-1 space-y-1">
                   {!validateIcalURL(form[feed.key]) && (
                     <p className="text-xs text-red-600 dark:text-red-400">
-                      ⚠️ Érvénytelen iCal URL. Használj HTTPS-t és .ics fájlt vagy ical/calendar URL-t.
+                       Érvénytelen iCal URL. Használj HTTPS-t és .ics fájlt vagy ical/calendar URL-t.
                     </p>
                   )}
                   {syncStatus?.lastSync && (

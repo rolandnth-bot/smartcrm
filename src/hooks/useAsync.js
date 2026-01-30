@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 /**
- * Hook aszinkron műveletek kezeléséhez (API hívások, stb.)
+ * Hook aszinkron mveletek kezeléséhez (API hívások, stb.)
  * @param {Function} asyncFunction - Az aszinkron függvény
  * @param {Array} deps - Dependency array (opcionális)
  * @param {Object} options - Opciók

@@ -105,12 +105,12 @@ const MaintenanceCalendar = ({ onAddForDate }) => {
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
       <h3 className="font-bold text-amber-800 dark:text-amber-300 mb-3">Karbantartás naptár</h3>
       <div className="flex items-center justify-between mb-3">
-        <Button onClick={prevMonth} variant="ghost" size="sm" aria-label="Előző hónap">
-          ←
+        <Button onClick={prevMonth} variant="ghost" size="sm" aria-label="Elz hónap">
+          
         </Button>
         <span className="text-lg font-semibold dark:text-gray-200">{monthLabel}</span>
-        <Button onClick={nextMonth} variant="ghost" size="sm" aria-label="Következő hónap">
-          →
+        <Button onClick={nextMonth} variant="ghost" size="sm" aria-label="Következ hónap">
+          
         </Button>
       </div>
 
@@ -169,7 +169,7 @@ const MaintenanceCalendar = ({ onAddForDate }) => {
       <Modal
         isOpen={showDayModal}
         onClose={handleCloseModal}
-        title={selectedDate ? `Karbantartás – ${formatDisplayDate(selectedDate)}` : 'Karbantartás'}
+        title={selectedDate ? `Karbantartás  ${formatDisplayDate(selectedDate)}` : 'Karbantartás'}
         size="md"
       >
         {selectedDate && (
@@ -188,7 +188,7 @@ const MaintenanceCalendar = ({ onAddForDate }) => {
                       <div>
                         <div className="font-medium dark:text-gray-200">{m.description}</div>
                         <div className="text-xs text-gray-600 dark:text-gray-400">
-                          {m.apartmentName ? `📌 ${m.apartmentName}` : '—'} · {formatCurrencyHUF(m.amount)}
+                          {m.apartmentName ? ` ${m.apartmentName}` : ''} · {formatCurrencyHUF(m.amount)}
                         </div>
                       </div>
                       <Button

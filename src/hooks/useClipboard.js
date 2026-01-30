@@ -14,7 +14,7 @@ export function useClipboard(options = {}) {
   const [isSupported, setIsSupported] = useState(() => isClipboardSupported());
   const [permission, setPermission] = useState('prompt');
 
-  // Permission ellenőrzés
+  // Permission ellenrzés
   const checkPermission = useCallback(async () => {
     const perm = await checkClipboardPermission();
     setPermission(perm);

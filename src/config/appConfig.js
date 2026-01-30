@@ -12,7 +12,7 @@ export const APP_CONFIG = {
   // Toast/Notification beállítások
   toast: {
     maxVisible: 3, // Maximum látható toast egyszerre
-    defaultDuration: 5000, // Alapértelmezett időtartam (ms)
+    defaultDuration: 5000, // Alapértelmezett idtartam (ms)
     successDuration: 3000,
     errorDuration: 6000,
     warningDuration: 5000,
@@ -30,7 +30,7 @@ export const APP_CONFIG = {
   // Debounce/Throttle beállítások
   debounce: {
     search: 300, // Keresés debounce (ms)
-    input: 500, // Input mezők debounce (ms)
+    input: 500, // Input mezk debounce (ms)
     scroll: 100 // Scroll események throttle (ms)
   },
   
@@ -51,7 +51,7 @@ export const APP_CONFIG = {
     }
   },
   
-  // Dátum/idő beállítások
+  // Dátum/id beállítások
   dateTime: {
     locale: 'hu-HU',
     timezone: 'Europe/Budapest',
