@@ -238,8 +238,8 @@ const DashboardPage = () => {
       })
       .reduce((sum, b) => sum + (b.netRevenue || b.totalAmount || 0), 0);
 
-    // Költség terv (becsült, bevétel %-a vagy fix összeg)
-    const costPlan = planRevenue * 0.3; // 30% költség arány (módosítható)
+    // Költség terv (bevétel 65%-a = működési költség arány)
+    const costPlan = planRevenue * 0.65; // 65% költség arány (profit: 35%)
 
     // Költség tény (financialStats alapján, ha elérhető)
     let costFact = 0;
