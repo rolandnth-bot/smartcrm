@@ -1,4 +1,4 @@
-import { useEffect, lazy, Suspense, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './components/layout/MainLayout';
 import ToastContainer from './components/common/Toast';
@@ -11,27 +11,28 @@ import useAuthStore from './stores/authStore';
 import useToastStore from './stores/toastStore';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
 
-const DashboardPage = lazy(() => import('./pages/DashboardPage'));
-const LeadsPage = lazy(() => import('./pages/LeadsPage'));
-const MarketingPage = lazy(() => import('./pages/MarketingPage'));
-const SalesPage = lazy(() => import('./pages/SalesPage'));
-const ApartmentsPage = lazy(() => import('./pages/ApartmentsPage'));
-const BookingsPage = lazy(() => import('./pages/BookingsPage'));
-const CleaningPage = lazy(() => import('./pages/CleaningPage'));
-const FinancePage = lazy(() => import('./pages/FinancePage'));
-const SettlementsPage = lazy(() => import('./pages/SettlementsPage'));
-const MaintenancePage = lazy(() => import('./pages/MaintenancePage'));
-const SettingsPage = lazy(() => import('./pages/SettingsPage'));
-const EmailPage = lazy(() => import('./pages/EmailPage'));
-const AppsPage = lazy(() => import('./pages/AppsPage'));
-const ProjectsPage = lazy(() => import('./pages/ProjectsPage'));
-const DocumentsPage = lazy(() => import('./pages/DocumentsPage'));
-const AIAssistantPage = lazy(() => import('./pages/AIAssistantPage'));
-const SmartChatPage = lazy(() => import('./pages/SmartChatPage'));
-const LoginPage = lazy(() => import('./pages/LoginPage'));
-const PartnerRegistrationPage = lazy(() => import('./pages/PartnerRegistrationPage'));
-const PartnersPage = lazy(() => import('./pages/PartnersPage'));
-const IcalExportPage = lazy(() => import('./pages/IcalExportPage'));
+// Direct imports - NO lazy loading to fix Vercel deployment
+import DashboardPage from './pages/DashboardPage';
+import LeadsPage from './pages/LeadsPage';
+import MarketingPage from './pages/MarketingPage';
+import SalesPage from './pages/SalesPage';
+import ApartmentsPage from './pages/ApartmentsPage';
+import BookingsPage from './pages/BookingsPage';
+import CleaningPage from './pages/CleaningPage';
+import FinancePage from './pages/FinancePage';
+import SettlementsPage from './pages/SettlementsPage';
+import MaintenancePage from './pages/MaintenancePage';
+import SettingsPage from './pages/SettingsPage';
+import EmailPage from './pages/EmailPage';
+import AppsPage from './pages/AppsPage';
+import ProjectsPage from './pages/ProjectsPage';
+import DocumentsPage from './pages/DocumentsPage';
+import AIAssistantPage from './pages/AIAssistantPage';
+import SmartChatPage from './pages/SmartChatPage';
+import LoginPage from './pages/LoginPage';
+import PartnerRegistrationPage from './pages/PartnerRegistrationPage';
+import PartnersPage from './pages/PartnersPage';
+import IcalExportPage from './pages/IcalExportPage';
 function App() {
   const { isAuthenticated, isLoading, initAuth, logout } = useAuthStore();
   const isOnline = useOnlineStatus();
@@ -89,7 +90,6 @@ function App() {
       <ThemeProvider>
         <HashRouter>
           <PermissionProvider>
-            <Suspense fallback={fallback}>
             <Routes>
               <Route
                 path="/login"
@@ -248,7 +248,6 @@ function App() {
               </Route>
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-            </Suspense>
             <ToastContainer />
           </PermissionProvider>
         </HashRouter>
