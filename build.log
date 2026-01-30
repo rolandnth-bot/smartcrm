@@ -1,0 +1,53 @@
+
+> smartcrm@1.1.0 build
+> vite build
+
+vite v5.4.21 building for production...
+transforming...
+✓ 561 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                    0.74 kB │ gzip:   0.43 kB
+dist/assets/BookingsPage-BTbkKRd9.css              1.87 kB │ gzip:   0.63 kB
+dist/assets/SalesPage-D3gu_exJ.css                 4.10 kB │ gzip:   1.10 kB
+dist/assets/LeadsPage-DBycTqXl.css                 6.43 kB │ gzip:   1.76 kB
+dist/assets/index-CAQnQysX.css                   111.01 kB │ gzip:  16.51 kB
+dist/assets/excelRowColorUtils-CPiPKeIb.js         0.61 kB │ gzip:   0.37 kB
+dist/assets/ConfirmDialog-xCT6u2Zm.js              0.70 kB │ gzip:   0.42 kB
+dist/assets/FormField-BnTT3Fx5.js                  0.78 kB │ gzip:   0.44 kB
+dist/assets/numberUtils-CL0cOrcD.js                0.85 kB │ gzip:   0.29 kB
+dist/assets/exportUtils-D3KiLexr.js                1.19 kB │ gzip:   0.53 kB
+dist/assets/EmptyState-bTgrFRoR.js                 1.35 kB │ gzip:   0.52 kB
+dist/assets/LoginPage-Bxm55--2.js                  2.04 kB │ gzip:   1.02 kB
+dist/assets/emailService-DONiDNiw.js               2.18 kB │ gzip:   1.06 kB
+dist/assets/Tooltip-DR5DN3vI.js                    2.25 kB │ gzip:   0.99 kB
+dist/assets/icalGenerator-C7uzQ40H.js              2.25 kB │ gzip:   1.17 kB
+dist/assets/salesStore-BBZUQfPT.js                 2.57 kB │ gzip:   0.78 kB
+dist/assets/maintenanceStore-DytPxlcs.js           2.59 kB │ gzip:   1.10 kB
+dist/assets/validation-Be28VKzU.js                 2.71 kB │ gzip:   1.07 kB
+dist/assets/importUtils-Cf0-F51_.js                3.38 kB │ gzip:   1.46 kB
+dist/assets/DocumentsPage-DfJS_N2j.js              3.61 kB │ gzip:   1.36 kB
+dist/assets/IcalExportPage-Cf0nGepe.js             4.46 kB │ gzip:   1.66 kB
+dist/assets/PartnersPage-BMTt3VvF.js               5.36 kB │ gzip:   1.91 kB
+dist/assets/EmailAccountEditModal-Vf05P1Mr.js      6.44 kB │ gzip:   1.83 kB
+dist/assets/ProjectsPage-DYsg2WoL.js              11.73 kB │ gzip:   3.51 kB
+dist/assets/SettlementsPage-Dqjaz4Gh.js           12.32 kB │ gzip:   3.23 kB
+dist/assets/SmartChatPage-BCm17t_m.js             12.51 kB │ gzip:   3.70 kB
+dist/assets/MaintenancePage-C_ABT3gE.js           16.33 kB │ gzip:   4.37 kB
+dist/assets/AppsPage-06aOYLLX.js                  16.92 kB │ gzip:   3.76 kB
+dist/assets/EmailPage-BoFodwJN.js                 20.87 kB │ gzip:   4.60 kB
+dist/assets/AIAssistantPage-DN-ZmXsk.js           28.10 kB │ gzip:   6.71 kB
+dist/assets/LeadsPage-BloXhVFR.js                 33.83 kB │ gzip:   8.65 kB
+dist/assets/PartnerRegistrationPage-DC8IZWFS.js   36.72 kB │ gzip:   6.29 kB
+dist/assets/MarketingPage-CNCa28oo.js             36.99 kB │ gzip:   9.21 kB
+dist/assets/CleaningPage-G1eVVZLT.js              44.18 kB │ gzip:   8.71 kB
+dist/assets/DashboardPage-Cq_kizsM.js             44.37 kB │ gzip:   8.04 kB
+dist/assets/SettingsPage-Byf2votu.js              49.05 kB │ gzip:  10.01 kB
+dist/assets/ApartmentsPage-DOvANhbH.js            49.46 kB │ gzip:  12.21 kB
+dist/assets/FinancePage-CQDk-cnD.js               59.02 kB │ gzip:  12.01 kB
+dist/assets/BookingsPage-DVwJU_wI.js              76.60 kB │ gzip:  16.49 kB
+dist/assets/SalesPage-CAqPfdkd.js                128.49 kB │ gzip:  27.99 kB
+dist/assets/xlsx-D_0l8YDs.js                     429.03 kB │ gzip: 143.08 kB
+dist/assets/index-BdKzaXug.js                    608.78 kB │ gzip: 176.08 kB
+dist/assets/exceljs.min-Bhh920b4.js              938.56 kB │ gzip: 271.04 kB
+✓ built in 6.51s
