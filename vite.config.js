@@ -2,7 +2,9 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
-// Force rebuild: 2026-01-30
+// BUILD VERSION: Force new hashes on every build
+const BUILD_ID = Date.now().toString(36);
+
 export default defineConfig({
   // Vercel deployment: base path must be / (root)
   base: '/',
@@ -17,18 +19,11 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        // Force complete cache invalidation with timestamp-based hashing
+        // Simplified asset structure with build ID for cache busting
         manualChunks: undefined,
-        chunkFileNames: 'assets/js/[name]-[hash].js',
-        entryFileNames: 'assets/js/[name]-[hash].js',
-        assetFileNames: (assetInfo) => {
-          const info = assetInfo.name.split('.');
-          const ext = info[info.length - 1];
-          if (/\.(css)$/.test(assetInfo.name)) {
-            return `assets/css/[name]-[hash].${ext}`;
-          }
-          return `assets/[name]-[hash].${ext}`;
-        }
+        chunkFileNames: `assets/[name]-[hash]-${BUILD_ID}.js`,
+        entryFileNames: `assets/[name]-[hash]-${BUILD_ID}.js`,
+        assetFileNames: `assets/[name]-[hash]-${BUILD_ID}.[ext]`
       }
     },
     cssCodeSplit: true
